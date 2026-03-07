@@ -1,0 +1,48 @@
+/* src/index.css */
+:root {
+  /* 核心配色 */
+  --color-primary: #57c2c0; /* 石绿：主色调，用于品牌露出、主要按钮、成功状态 */
+  --color-primary-hover: #46a3a1;
+  --color-accent: #fd4569;  /* 山茶红：强调色，用于注销、取消预订、报错、高亮金额 */
+  --color-accent-hover: #e03a58;
+
+  /* 中性色阶 (保证高对比度和现代感) */
+  --color-bg: #f8fafc;      /* 极浅灰背景 */
+  --color-surface: #ffffff; /* 卡片白 */
+  --color-text-main: #1e293b; /* 深灰正文 */
+  --color-text-muted: #64748b; /* 浅灰辅助文字 */
+  --color-border: #e2e8f0;
+
+  /* 阴影与圆角 (提升设计感) */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-text-main);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 简单的全局按钮重置，方便后续组件化 */
+button {
+  cursor: pointer;
+  font-family: inherit;
+  border: none;
+  outline: none;
+}
+
+input:focus {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 3px rgba(87, 194, 192, 0.2) !important;
+}
