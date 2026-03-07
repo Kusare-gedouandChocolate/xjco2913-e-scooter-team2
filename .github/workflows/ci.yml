@@ -1,0 +1,145 @@
+name: CI
+
+on:
+  # 对 PR 做质量检查，保证合并前可见问题
+  pull_request:
+  # 保留 push 触发，便于分支自检
+  push:
+
+permissions:
+  contents: read
+
+jobs:
+  workflow-sanity:
+    name: Workflow Sanity Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 校验 GitHub Actions 工作流语法，避免 workflow 本身写错
+      - name: Validate workflow files
+        uses: rhysd/actionlint@v1
+
+  docs-lint:
+    name: Docs Markdown Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 先对 Markdown 做基础规范检查，当前仓库主要是文档内容
+      - name: Lint markdown files
+        uses: DavidAnson/markdownlint-cli2-action@v17
+        with:
+          globs: |
+            **/*.md
+
+  frontend-ci:
+    name: Frontend Lint/Test/Build
+    runs-on: ubuntu-latest
+    # 只有存在 frontend/package.json 才执行，避免空仓库阶段误报失败
+    if: ${{ hashFiles('frontend/package.json') != '' }}
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      # 使用 --if-present，允许早期阶段某些脚本暂未提供
+      - name: Run frontend lint
+        run: npm run lint --if-present
+
+      - name: Run frontend tests
+        run: npm run test --if-present
+
+      - name: Build frontend
+        run: npm run build --if-present
+
+  backend-node-ci:
+    name: Backend(Node) Lint/Test/Build
+    runs-on: ubuntu-latest
+    # 若后端使用 Node 技术栈，且存在 backend/package.json 则执行
+    if: ${{ hashFiles('backend/package.json') != '' }}
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Run backend lint
+        run: npm run lint --if-present
+
+      - name: Run backend tests
+        run: npm run test --if-present
+
+      - name: Build backend
+        run: npm run build --if-present
+
+  backend-python-ci:
+    name: Backend(Python) Test
+    runs-on: ubuntu-latest
+    # 若后端是 Python 项目，则在 pyproject/requirements 存在时执行
+    if: ${{ hashFiles('backend/pyproject.toml', 'backend/requirements.txt') != '' }}
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
+          if [ -f pyproject.toml ]; then
+            pip install .
+          fi
+          pip install pytest
+
+      - name: Run backend tests
+        run: |
+          if [ -d tests ]; then
+            pytest -q
+          else
+            echo "No tests directory found in backend/. Skip pytest."
+          fi
