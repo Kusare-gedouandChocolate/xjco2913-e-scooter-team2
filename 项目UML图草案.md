@@ -206,4 +206,3 @@ stateDiagram-v2
 - 先把上述图放进 Wiki 的 `Initial Design` 页面。
 - 组会讨论后，只改“名称和边界”，不要一开始追求特别复杂。
 - 如果实现时有变化，在 `Sprint 1 Outcomes` 里补充“设计变更说明”。
-
