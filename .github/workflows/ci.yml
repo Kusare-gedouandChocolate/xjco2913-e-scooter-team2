@@ -19,7 +19,7 @@ jobs:
 
       # 校验 GitHub Actions 工作流语法，避免 workflow 本身写错
       - name: Validate workflow files
-        uses: rhysd/actionlint@v1
+        uses: rhysd/actionlint@v1.7.7
 
   docs-lint:
     name: Docs Markdown Lint
