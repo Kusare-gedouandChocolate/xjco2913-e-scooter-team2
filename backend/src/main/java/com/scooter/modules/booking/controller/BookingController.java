@@ -33,4 +33,9 @@ public class BookingController {
         Booking newBooking = bookingService.createBooking(currentUserId, request);
         return Result.success(newBooking);
     }
+
+    @PostMapping("/pay")
+    public Result<BookingConfirmation> pay(@RequestBody PaymentRequest request) {
+        return Result.success(bookingService.processPayment(request));
+    }
 }
