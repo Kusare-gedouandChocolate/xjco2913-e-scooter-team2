@@ -1,6 +1,6 @@
 package com.scooter.modules.scooter.controller;
 
-import com.scooter.modules.common.Result; // 请确保路径与你之前的 common 包一致
+import com.scooter.modules.common.Result;
 import com.scooter.modules.scooter.dto.ScooterResponse;
 import com.scooter.modules.scooter.entity.RentalOption;
 import com.scooter.modules.scooter.service.ScooterService;
@@ -35,5 +35,10 @@ public class ScooterController {
     @GetMapping("/pricing")
     public Result<List<RentalOption>> listPricing() {
         return Result.success(scooterService.getPricingOptions());
+    }
+
+    @PostMapping("/pay")
+    public Result<BookingConfirmation> pay(@RequestBody PaymentRequest request) {
+        return Result.success(bookingService.processPayment(request));
     }
 }
