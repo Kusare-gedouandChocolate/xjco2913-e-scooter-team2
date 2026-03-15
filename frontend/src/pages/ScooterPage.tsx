@@ -31,7 +31,8 @@ export const ScooterPage: React.FC = () => {
       setScooters(scootersRes.data || []);
       setRules(rulesRes.data || []);
     } catch (err: unknown) {
-      setError(err.message || '获取车辆数据失败');
+      const error = err as { message?: string };
+      setError(error.message || '获取车辆数据失败');
     } finally {
       setLoading(false);
     }
@@ -73,8 +74,9 @@ export const ScooterPage: React.FC = () => {
       // 刷新列表，将被租用的车过滤掉或更新状态
       fetchData();
     } catch (err: unknown) {
+      const error = err as { message?: string };
       // 业务错误码，如 409 Conflict 车辆被抢占 [cite: 463]
-      setActionError(err.message || '操作失败，请重试');
+      setActionError(error.message || '操作失败，请重试');
       setBookingStep('idle');
     }
   };
@@ -227,7 +229,7 @@ const styles = {
     padding: '20px',
     boxShadow: 'var(--shadow-md)',
     display: 'flex',
-    flexDirection: 'column',
+    flexDirection: 'column' as const,
     transition: 'transform 0.2s',
   },
   cardHeader: {
@@ -295,7 +297,7 @@ const styles = {
   }),
   // 模态框相关样式
   modalOverlay: {
-    position: 'fixed',
+    position: 'fixed' as const,
     top: 0, left: 0, right: 0, bottom: 0,
     backgroundColor: 'rgba(15, 23, 42, 0.6)',
     display: 'flex',
@@ -320,7 +322,7 @@ const styles = {
   },
   radioGroup: {
     display: 'flex',
-    flexDirection: 'column',
+    flexDirection: 'column' as const,
     gap: '12px',
   },
   radioOption: (isSelected: boolean) => ({

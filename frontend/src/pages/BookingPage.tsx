@@ -20,7 +20,8 @@ export const BookingPage: React.FC = () => {
       const res = await bookingsApi.getMyBookings();
       setBookings(res.data || []);
     } catch (err: unknown) {
-      setError(err.message || '获取预订记录失败');
+      const error = err as { message?: string };
+      setError(error.message || '获取预订记录失败');
     } finally {
       setLoading(false);
     }
@@ -40,7 +41,8 @@ export const BookingPage: React.FC = () => {
       // 取消成功后刷新列表
       await fetchBookings();
     } catch (err: unknown) {
-      alert(err.message || '取消失败，当前状态可能不允许取消'); // [cite: 473]
+      const error = err as { message?: string };
+      alert(error.message || '取消失败，当前状态可能不允许取消'); // [cite: 473]
     } finally {
       setCancellingId(null);
     }
@@ -161,7 +163,7 @@ const styles = {
   },
   list: {
     display: 'flex',
-    flexDirection: 'column',
+    flexDirection: 'column' as const,
     gap: '20px',
   },
   card: {
@@ -203,7 +205,7 @@ const styles = {
   }),
   cardBody: {
     display: 'flex',
-    flexDirection: 'column',
+    flexDirection: 'column' as const,
     gap: '12px',
   },
   infoRow: {

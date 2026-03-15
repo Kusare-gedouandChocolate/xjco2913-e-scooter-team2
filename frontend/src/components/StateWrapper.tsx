@@ -1,5 +1,5 @@
 // src/components/StateWrapper.tsx
-import React, { ReactNode } from 'react';
+import React, { type ReactNode } from 'react';
 
 // 定义组件的 Props 契约
 interface StateWrapperProps {

@@ -111,7 +111,7 @@ const styles = {
     backgroundColor: 'var(--color-surface)',
     borderBottom: '1px solid var(--color-border)',
     boxShadow: 'var(--shadow-sm)',
-    position: 'sticky',
+    position: 'sticky' as const,
     top: 0,
     zIndex: 100, // 确保导航栏在最上层
   },

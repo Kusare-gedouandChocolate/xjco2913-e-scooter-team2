@@ -42,8 +42,9 @@ export const AuthPage: React.FC = () => {
         window.location.href = '/scooters';
       }
     } catch (err: unknown) {
-      // 捕获 API 拦截器抛出的标准错误结构 
-      setErrorMsg(err.message || '网络或服务器错误，请稍后再试');
+        const error = err as { message?: string };
+        // 捕获 API 拦截器抛出的标准错误结构 
+        setErrorMsg(error.message || '网络或服务器错误，请稍后再试');
     } finally {
       setLoading(false);
     }
@@ -175,7 +176,7 @@ const styles = {
     transition: 'all 0.3s ease',
   },
   header: {
-    textAlign: 'center',
+    textAlign: 'center' as const,
     marginBottom: '32px',
   },
   logo: {
@@ -211,12 +212,12 @@ const styles = {
   },
   form: {
     display: 'flex',
-    flexDirection: 'column',
+    flexDirection: 'column' as const,
     gap: '20px',
   },
   inputGroup: {
     display: 'flex',
-    flexDirection: 'column',
+    flexDirection: 'column' as const,
     gap: '6px',
   },
   label: {
@@ -247,7 +248,7 @@ const styles = {
   }),
   footer: {
     marginTop: '32px',
-    textAlign: 'center',
+    textAlign: 'center' as const,
     fontSize: '0.9rem',
   },
   switchBtn: {
