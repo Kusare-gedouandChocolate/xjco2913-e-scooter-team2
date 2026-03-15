@@ -1,3 +1,8 @@
+package com.scooter.modules.scooter.entity;
+
+import jakarta.persistence.*;
+import lombok.Data;
+
 @Entity
 @Data
 public class Scooter {
@@ -5,12 +10,10 @@ public class Scooter {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String modelName;
-    private String serialNumber;
+    private String model;
 
     @Enumerated(EnumType.STRING)
-    private ScooterStatus status; // AVAILABLE, IN_USE, MAINTENANCE
+    private ScooterStatus status;
 
-    private Double batteryLevel;
-    private String location;
+    private Integer batteryLevel;
 }

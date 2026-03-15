@@ -1,13 +1,11 @@
 package com.scooter.modules.scooter.controller;
 
-import com.scooter.modules.common.Result;
-import com.scooter.modules.scooter.dto.ScooterResponse;
-import com.scooter.modules.scooter.entity.RentalOption;
+import com.scooter.common.response.Result;
+import com.scooter.modules.scooter.entity.Scooter;
+import com.scooter.modules.scooter.entity.ScooterStatus;
 import com.scooter.modules.scooter.service.ScooterService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
@@ -17,28 +15,16 @@ public class ScooterController {
     @Autowired
     private ScooterService scooterService;
 
-    /**
-     * Endpoint for fetching available scooters list with pagination.
-     * Usage: GET /api/v1/scooters/available?page=0&size=10
-     */
-    @GetMapping("/available")
-    public Result<Page<ScooterResponse>> listAvailable(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        return Result.success(scooterService.getAvailableScooters(page, size));
+    @GetMapping
+    public Result<List<Scooter>> getScooters(@RequestParam(required = false) ScooterStatus status) {
+        if (status != null) {
+            return Result.success(scooterService.findScootersByStatus(status));
+        }
+        return Result.success(scooterService.findAllScooters());
     }
 
-    /**
-     * Endpoint for fetching all pricing plans.
-     * Usage: GET /api/v1/scooters/pricing
-     */
-    @GetMapping("/pricing")
-    public Result<List<RentalOption>> listPricing() {
-        return Result.success(scooterService.getPricingOptions());
-    }
-
-    @PostMapping("/pay")
-    public Result<BookingConfirmation> pay(@RequestBody PaymentRequest request) {
-        return Result.success(bookingService.processPayment(request));
+    @GetMapping("/{scooterId}")
+    public Result<Scooter> getById(@PathVariable Long scooterId) {
+        return Result.success(scooterService.getById(scooterId));
     }
 }
