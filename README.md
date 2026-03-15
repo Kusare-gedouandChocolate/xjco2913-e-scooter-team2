@@ -101,7 +101,6 @@ Wiki 至少应包含以下页面并持续更新：
 5. `Testing Strategy`  
 6. `Backlog Status`
 
-
 ## 8. 当前仓库文档索引
 
 1. [项目完成建议与大致规划.md](./项目完成建议与大致规划.md)  
@@ -125,7 +124,6 @@ Wiki 至少应包含以下页面并持续更新：
 1. 在 GitHub 创建/完善 Sprint 1 Issues，并完成负责人分配。   (已完成)
 2. 在 Wiki 发布本 README 对应的核心页面（Plan、Design、Meetings、Outcomes）。   (已完成)
 3. 依据 API 规范启动前后端联调，优先打通“注册 -> 预订 -> 支付 -> 记录查询”主链路。   (已完成)
-4. 。
 ---
 
 如需调整本 README，请通过 PR 提交并说明修改原因，确保团队信息一致。
