@@ -1,17 +1,13 @@
 package com.scooter.modules.scooter.dto;
 
+import com.scooter.modules.scooter.entity.ScooterStatus;
 import lombok.Data;
-import java.math.BigDecimal;
 
-/**
- * DTO for Scooter information.
- * Excludes sensitive internal fields to meet security requirements.
- */
 @Data
 public class ScooterResponse {
-    private Long id;
-    private String modelName;
-    private Double batteryLevel;
-    private String location;
-    private String status;
+    private String id;
+    private String model;
+    private ScooterStatus status;
+    private Integer batteryLevel;
+    private Integer pricePerMinuteInCents;
 }

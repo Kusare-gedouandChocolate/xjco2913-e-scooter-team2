@@ -1,44 +1,34 @@
 package com.scooter.common.exception;
 
 import com.scooter.common.response.Result;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-/**
- * Global exception handler to ensure all errors follow the unified response
- * format.
- */
-@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    /**
-     * Handle custom business exceptions (e.g., Email already exists).
-     */
     @ExceptionHandler(BusinessException.class)
-    public Result<?> handleBusinessException(BusinessException e) {
-        return Result.error(e.getCode(), e.getMessage());
+    public ResponseEntity<Result<Void>> handleBusinessException(BusinessException e) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+
+        if (e.getCode().contains("NOT_FOUND"))
+            status = HttpStatus.NOT_FOUND;
+        if (e.getCode().contains("CONFLICT"))
+            status = HttpStatus.CONFLICT;
+        if (e.getCode().contains("AUTH"))
+            status = HttpStatus.UNAUTHORIZED;
+
+        return ResponseEntity
+                .status(status)
+                .body(Result.error(e.getCode(), e.getMessage()));
     }
 
-    /**
-     * Handle validation errors from @Valid (e.g., Invalid email format).
-     * This fulfills the requirement for "Clear error codes and messages for invalid
-     * input".
-     */
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public Result<?> handleValidationException(MethodArgumentNotValidException e) {
-        String message = e.getBindingResult().getFieldError().getDefaultMessage();
-        return Result.error("VALIDATION_ERROR", message);
-    }
-
-    /**
-     * Catch-all handler for unexpected internal server errors.
-     */
     @ExceptionHandler(Exception.class)
-    public Result<?> handleGeneralException(Exception e) {
-        log.error("Unexpected error occurred: ", e);
-        return Result.error("INTERNAL_SERVER_ERROR", "An unexpected error occurred on the server.");
+    public ResponseEntity<Result<Void>> handleGeneralException(Exception e) {
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Result.error("INTERNAL_ERROR", "An unexpected error occurred"));
     }
 }
