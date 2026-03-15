@@ -1,7 +1,7 @@
 // src/types.ts
 
 // API 基础响应结构
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   code: string;
   message: string;

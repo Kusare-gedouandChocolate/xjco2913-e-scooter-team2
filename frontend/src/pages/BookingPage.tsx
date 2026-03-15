@@ -19,7 +19,7 @@ export const BookingPage: React.FC = () => {
     try {
       const res = await bookingsApi.getMyBookings();
       setBookings(res.data || []);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message || '获取预订记录失败');
     } finally {
       setLoading(false);
@@ -39,7 +39,7 @@ export const BookingPage: React.FC = () => {
       await bookingsApi.cancelBooking(bookingId);
       // 取消成功后刷新列表
       await fetchBookings();
-    } catch (err: any) {
+    } catch (err: unknown) {
       alert(err.message || '取消失败，当前状态可能不允许取消'); // [cite: 473]
     } finally {
       setCancellingId(null);
@@ -140,7 +140,7 @@ export const BookingPage: React.FC = () => {
 };
 
 // --- 内联样式字典 ---
-const styles: { [key: string]: React.CSSProperties | any } = {
+const styles = {
   container: {
     padding: '24px',
     maxWidth: '800px', // 记录页不需要铺太宽，窄一点更聚光

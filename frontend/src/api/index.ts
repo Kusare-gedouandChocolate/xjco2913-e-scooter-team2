@@ -46,9 +46,9 @@ export const bookingsApi = {
   },
   
   // 模拟支付
-  payBooking: (data: { bookingId: string }): Promise<ApiResponse<any>> => {
+  payBooking: (data: { bookingId: string }): Promise<ApiResponse<null>> => {
     return apiClient.post('/payments', data);
-  }, // <--- 之前可能就是这里漏了逗号！
+  },
 
   // 查询我的预订记录
   getMyBookings: (): Promise<ApiResponse<Booking[]>> => {
@@ -56,7 +56,7 @@ export const bookingsApi = {
   },
 
   // 取消预订
-  cancelBooking: (bookingId: string): Promise<ApiResponse<any>> => {
+  cancelBooking: (bookingId: string): Promise<ApiResponse<null>> => {
     return apiClient.post(`/bookings/${bookingId}/cancel`);
   }
 };

@@ -16,7 +16,6 @@ export const ScooterPage: React.FC = () => {
   const [selectedScooter, setSelectedScooter] = useState<Scooter | null>(null);
   const [selectedHireType, setSelectedHireType] = useState<string>('');
   const [bookingStep, setBookingStep] = useState<'idle' | 'booking' | 'paying' | 'success'>('idle');
-  const [currentBookingId, setCurrentBookingId] = useState<string>('');
   const [actionError, setActionError] = useState<string>('');
 
   // 初始加载数据
@@ -31,7 +30,7 @@ export const ScooterPage: React.FC = () => {
       ]);
       setScooters(scootersRes.data || []);
       setRules(rulesRes.data || []);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message || '获取车辆数据失败');
     } finally {
       setLoading(false);
@@ -65,7 +64,6 @@ export const ScooterPage: React.FC = () => {
       });
       
       const bId = bookingRes.data.bookingId;
-      setCurrentBookingId(bId);
       setBookingStep('paying');
 
       // 2. 发起模拟支付
@@ -74,7 +72,7 @@ export const ScooterPage: React.FC = () => {
       setBookingStep('success');
       // 刷新列表，将被租用的车过滤掉或更新状态
       fetchData();
-    } catch (err: any) {
+    } catch (err: unknown) {
       // 业务错误码，如 409 Conflict 车辆被抢占 [cite: 463]
       setActionError(err.message || '操作失败，请重试');
       setBookingStep('idle');
@@ -209,7 +207,7 @@ export const ScooterPage: React.FC = () => {
 };
 
 // --- 内联样式字典 ---
-const styles: { [key: string]: React.CSSProperties | any } = {
+const styles = {
   container: {
     padding: '24px',
     maxWidth: '1200px',

@@ -1,6 +1,6 @@
 // src/pages/AuthPage.tsx
 import React, { useState } from 'react';
-import { authApi, type LoginPayload, type RegisterPayload } from '../api';
+import { authApi, type RegisterPayload } from '../api';
 
 export const AuthPage: React.FC = () => {
   const [isLoginMode, setIsLoginMode] = useState(true);
@@ -41,7 +41,7 @@ export const AuthPage: React.FC = () => {
         localStorage.setItem('authToken', res.data.token);
         window.location.href = '/scooters';
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       // 捕获 API 拦截器抛出的标准错误结构 
       setErrorMsg(err.message || '网络或服务器错误，请稍后再试');
     } finally {
@@ -156,7 +156,7 @@ export const AuthPage: React.FC = () => {
 };
 
 // --- 内联样式字典 (利用全局 CSS 变量) ---
-const styles: { [key: string]: React.CSSProperties | any } = {
+const styles = {
   pageContainer: {
     minHeight: '100vh',
     display: 'flex',

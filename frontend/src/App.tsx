@@ -106,7 +106,7 @@ export const App: React.FC = () => {
 export default App;
 
 // --- 内联样式字典 ---
-const styles: { [key: string]: React.CSSProperties | any } = {
+const styles = {
   navbar: {
     backgroundColor: 'var(--color-surface)',
     borderBottom: '1px solid var(--color-border)',
