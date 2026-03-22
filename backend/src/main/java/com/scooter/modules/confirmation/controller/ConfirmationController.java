@@ -1,6 +1,6 @@
 package com.scooter.modules.confirmation.controller;
 
-import com.scooter.modules.common.Result;
+import com.scooter.common.response.Result;
 import com.scooter.modules.confirmation.entity.BookingConfirmation;
 import com.scooter.modules.confirmation.service.ConfirmationService;
 import org.springframework.beans.factory.annotation.Autowired;

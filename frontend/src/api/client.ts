@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 // 满足规范 2.1: Base URL 为 /api/v1
 const apiClient = axios.create({
-  baseURL: '/api/v1',
+  baseURL: 'http://localhost:8081/api/v1',
   timeout: 10000, // 10秒超时
   headers: {
     'Content-Type': 'application/json; charset=utf-8', // 满足规范 2.2

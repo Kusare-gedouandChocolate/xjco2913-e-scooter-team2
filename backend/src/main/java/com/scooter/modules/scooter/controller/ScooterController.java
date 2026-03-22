@@ -1,11 +1,13 @@
 package com.scooter.modules.scooter.controller;
 
 import com.scooter.common.response.Result;
-import com.scooter.modules.scooter.entity.Scooter;
+import com.scooter.modules.scooter.dto.PricingRuleResponse;
+import com.scooter.modules.scooter.dto.ScooterResponse;
 import com.scooter.modules.scooter.entity.ScooterStatus;
 import com.scooter.modules.scooter.service.ScooterService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
@@ -16,7 +18,7 @@ public class ScooterController {
     private ScooterService scooterService;
 
     @GetMapping
-    public Result<List<Scooter>> getScooters(@RequestParam(required = false) ScooterStatus status) {
+    public Result<List<ScooterResponse>> getScooters(@RequestParam(required = false) ScooterStatus status) {
         if (status != null) {
             return Result.success(scooterService.findScootersByStatus(status));
         }
@@ -24,7 +26,12 @@ public class ScooterController {
     }
 
     @GetMapping("/{scooterId}")
-    public Result<Scooter> getById(@PathVariable Long scooterId) {
+    public Result<ScooterResponse> getById(@PathVariable Long scooterId) {
         return Result.success(scooterService.getById(scooterId));
+    }
+
+    @GetMapping("/pricing-rules")
+    public Result<List<PricingRuleResponse>> getPricingRules() {
+        return Result.success(scooterService.getPricingRules());
     }
 }

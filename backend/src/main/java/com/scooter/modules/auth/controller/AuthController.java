@@ -2,6 +2,7 @@ package com.scooter.modules.auth.controller;
 
 import com.scooter.common.response.Result;
 import com.scooter.modules.auth.dto.LoginRequest;
+import com.scooter.modules.auth.dto.LoginResponse;
 import com.scooter.modules.auth.dto.RegisterRequest;
 import com.scooter.modules.auth.dto.UserResponse;
 import com.scooter.modules.auth.service.AuthService;
@@ -27,10 +28,10 @@ public class AuthController {
      * @return Unified result with user details.
      */
     @PostMapping("/register")
-    public Result<UserResponse> register(@Valid @RequestBody RegisterRequest request) {
-        // Business logic is handled in the Service layer
-        UserResponse response = authService.register(request);
-        return Result.success(response);
+    public Result<LoginResponse> register(@Valid @RequestBody RegisterRequest request) {
+        UserResponse user = authService.register(request);
+        String token = authService.generateToken(user.getUserId());
+        return Result.success(new LoginResponse(token, user));
     }
 
     /**
@@ -40,9 +41,9 @@ public class AuthController {
      * @return Unified result with session token.
      */
     @PostMapping("/login")
-    public Result<String> login(@Valid @RequestBody LoginRequest request) {
-        // In a real scenario, this would return a JWT or session ID
+    public Result<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         String token = authService.login(request);
-        return Result.success(token);
+        UserResponse user = authService.getUserByEmail(request.getEmail());
+        return Result.success(new LoginResponse(token, user));
     }
 }

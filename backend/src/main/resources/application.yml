@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/scooter_db
+    username: postgres
+    password: 123456
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  web:
+    cors:
+      allowed-origins: http://localhost:5173
+      allowed-methods: GET,POST,PUT,DELETE,OPTIONS
+      allowed-headers: "*"
+      allow-credentials: true
+
+server:
+  port: 8081
+
+jwt:
+  secret: mySecretKeyForJwtTokenGeneration1234567890
+  expiration: 86400000
