@@ -1,6 +1,5 @@
 package com.scooter.modules.scooter.dto;
 
-import com.scooter.modules.scooter.entity.ScooterStatus;
 import lombok.Data;
 
 @Data

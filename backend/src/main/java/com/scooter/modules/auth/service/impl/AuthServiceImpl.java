@@ -2,7 +2,6 @@ package com.scooter.modules.auth.service.impl;
 
 import com.scooter.common.security.JwtUtils;
 import com.scooter.modules.auth.dto.LoginRequest;
-import com.scooter.modules.auth.dto.LoginResponse;
 import com.scooter.modules.auth.dto.RegisterRequest;
 import com.scooter.modules.auth.dto.UserResponse;
 import com.scooter.modules.auth.entity.User;
