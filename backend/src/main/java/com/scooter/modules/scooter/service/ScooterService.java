@@ -1,5 +1,6 @@
 package com.scooter.modules.scooter.service;
 
+import com.scooter.modules.scooter.dto.PricingRuleResponse;
 import com.scooter.modules.scooter.dto.ScooterResponse;
 import com.scooter.modules.scooter.entity.RentalOption;
 import com.scooter.modules.scooter.entity.Scooter;
@@ -7,11 +8,10 @@ import com.scooter.modules.scooter.entity.ScooterStatus;
 import com.scooter.modules.scooter.repository.RentalOptionRepository;
 import com.scooter.modules.scooter.repository.ScooterRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ScooterService {
@@ -22,31 +22,46 @@ public class ScooterService {
     @Autowired
     private RentalOptionRepository rentalOptionRepository;
 
-    /**
-     * Get available scooters with pagination.
-     */
-    public Page<ScooterResponse> getAvailableScooters(int page, int size) {
-        PageRequest pageRequest = PageRequest.of(page, size);
-        Page<Scooter> scooterPage = scooterRepository.findByStatus(ScooterStatus.AVAILABLE, pageRequest);
-
-        // Convert Entity to DTO (ScooterResponse)
-        return scooterPage.map(this::convertToResponse);
+    public List<ScooterResponse> findAllScooters() {
+        return scooterRepository.findAll().stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
     }
 
-    /**
-     * Get all pre-defined pricing options.
-     */
-    public List<RentalOption> getPricingOptions() {
-        return rentalOptionRepository.findAll();
+    public List<ScooterResponse> findScootersByStatus(ScooterStatus status) {
+        return scooterRepository.findByStatus(status, null).getContent().stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
+    }
+
+    public ScooterResponse getById(Long scooterId) {
+        Scooter scooter = scooterRepository.findById(scooterId)
+                .orElseThrow(() -> new RuntimeException("Scooter not found"));
+        return convertToResponse(scooter);
+    }
+
+    public List<PricingRuleResponse> getPricingRules() {
+        return rentalOptionRepository.findAll().stream()
+                .map(this::convertToPricingRule)
+                .collect(Collectors.toList());
     }
 
     private ScooterResponse convertToResponse(Scooter scooter) {
-        ScooterResponse response = new ScooterResponse();
-        response.setId(scooter.getId());
-        response.setModelName(scooter.getModelName());
-        response.setBatteryLevel(scooter.getBatteryLevel());
-        response.setLocation(scooter.getLocation());
-        response.setStatus(scooter.getStatus().name());
-        return response;
+        ScooterResponse resp = new ScooterResponse();
+        resp.setScooterId(scooter.getId().toString());
+        resp.setCode(scooter.getModel());
+        resp.setStatus(scooter.getStatus().name().toLowerCase());
+        resp.setLocation("default location");
+        resp.setBasePrice(500);
+        return resp;
+    }
+
+    private PricingRuleResponse convertToPricingRule(RentalOption option) {
+        PricingRuleResponse resp = new PricingRuleResponse();
+        resp.setRuleId(option.getId().toString());
+        resp.setHireType(option.getDurationLabel());
+        resp.setPrice(option.getPrice().intValue());
+        resp.setDiscountEnabled(false);
+        return resp;
     }
 }

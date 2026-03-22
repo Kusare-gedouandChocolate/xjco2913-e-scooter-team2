@@ -1,6 +1,8 @@
 package com.scooter.modules.auth.service.impl;
 
+import com.scooter.common.security.JwtUtils;
 import com.scooter.modules.auth.dto.LoginRequest;
+import com.scooter.modules.auth.dto.LoginResponse;
 import com.scooter.modules.auth.dto.RegisterRequest;
 import com.scooter.modules.auth.dto.UserResponse;
 import com.scooter.modules.auth.entity.User;
@@ -9,6 +11,8 @@ import com.scooter.modules.auth.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -19,17 +23,16 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private JwtUtils jwtUtils;
+
     @Override
     public UserResponse register(RegisterRequest request) {
-        // 1. Check if email already exists
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new RuntimeException("Email already registered");
         }
 
-        // 2. Encrypt password using BCrypt
         String encodedPassword = passwordEncoder.encode(request.getPassword());
-
-        // 3. Create and save user
         User user = User.builder()
                 .email(request.getEmail())
                 .passwordHash(encodedPassword)
@@ -38,7 +41,6 @@ public class AuthServiceImpl implements AuthService {
 
         User savedUser = userRepository.save(user);
 
-        // 4. Return formatted response
         return UserResponse.builder()
                 .userId(savedUser.getUserId())
                 .email(savedUser.getEmail())
@@ -48,7 +50,6 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public String login(LoginRequest request) {
-        // Find user, check password, and generate a simple token (placeholder for now)
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -56,6 +57,24 @@ public class AuthServiceImpl implements AuthService {
             throw new RuntimeException("Invalid credentials");
         }
 
-        return "mock-jwt-token-for-" + user.getUserId();
+        return jwtUtils.generateToken(user.getUserId(), user.getEmail(), user.getRole());
+    }
+
+    @Override
+    public UserResponse getUserByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return UserResponse.builder()
+                .userId(user.getUserId())
+                .email(user.getEmail())
+                .role(user.getRole())
+                .build();
+    }
+
+    @Override
+    public String generateToken(UUID userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return jwtUtils.generateToken(user.getUserId(), user.getEmail(), user.getRole());
     }
 }

@@ -5,9 +5,9 @@ import lombok.Data;
 
 @Data
 public class ScooterResponse {
-    private String id;
-    private String model;
-    private ScooterStatus status;
-    private Integer batteryLevel;
-    private Integer pricePerMinuteInCents;
+    private String scooterId;
+    private String code;
+    private String status;
+    private String location;
+    private Integer basePrice;
 }

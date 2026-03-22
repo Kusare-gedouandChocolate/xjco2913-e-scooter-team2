@@ -1,4 +1,4 @@
-package com.scooter.modules.booking.dto;
+package com.scooter.modules.payment.dto;
 
 import lombok.Data;
 
