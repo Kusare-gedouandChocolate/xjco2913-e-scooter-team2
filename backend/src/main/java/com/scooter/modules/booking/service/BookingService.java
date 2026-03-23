@@ -39,7 +39,7 @@ public class BookingService {
      * Issue #6: Create a new booking
      */
     @Transactional
-    public BookingCreateResponse createBooking(Long userId, BookingRequest request) {
+    public BookingCreateResponse createBooking(String userId, BookingRequest request) {
         Scooter scooter = scooterRepository.findById(request.getScooterId())
                 .orElseThrow(() -> new RuntimeException("Scooter not found"));
 
@@ -103,7 +103,7 @@ public class BookingService {
         return confirmationRepository.save(confirmation);
     }
 
-    public List<BookingResponse> findByUserId(Long userId, String sortBy, String sortOrder) {
+    public List<BookingResponse> findByUserId(String userId, String sortBy, String sortOrder) {
         Sort sort = Sort.by(Sort.Direction.fromString(sortOrder), sortBy);
         List<Booking> bookings = bookingRepository.findByUserId(userId, sort);
         return bookings.stream().map(this::convertToResponse).collect(Collectors.toList());

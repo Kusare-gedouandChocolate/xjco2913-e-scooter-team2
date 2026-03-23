@@ -14,5 +14,5 @@ import java.util.List;
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
     // Basic CRUD operations like save() and findById() are already provided.
-    List<Booking> findByUserId(Long userId, Sort sort);
+    List<Booking> findByUserId(String userId, Sort sort);
 }
