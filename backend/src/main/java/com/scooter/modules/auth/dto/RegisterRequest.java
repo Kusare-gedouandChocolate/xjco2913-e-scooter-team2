@@ -1,5 +1,7 @@
 package com.scooter.modules.auth.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -24,7 +26,11 @@ public class RegisterRequest {
 
     @NotBlank(message = "Password is required")
     @Size(min = 8, message = "Password must be at least 8 characters long")
+    @JsonProperty("passwordHash")
     private String password;
+
+    private String fullName;
+    private String phone;
 
     /**
      * Default role is 'customer'.

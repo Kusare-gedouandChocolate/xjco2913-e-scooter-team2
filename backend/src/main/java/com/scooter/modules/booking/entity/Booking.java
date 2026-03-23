@@ -12,7 +12,7 @@ public class Booking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long userId; // Link to the user who made the booking
+    private String userId; // Link to the user who made the booking
     private Long scooterId;
     private Long rentalOptionId;
 

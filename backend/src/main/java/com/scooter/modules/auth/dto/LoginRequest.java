@@ -1,5 +1,7 @@
 package com.scooter.modules.auth.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -11,5 +13,6 @@ public class LoginRequest {
     private String email;
 
     @NotBlank(message = "Password is required")
+    @JsonProperty("passwordHash")
     private String password;
 }

@@ -7,13 +7,9 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
-
-  web:
-    cors:
-      allowed-origins: http://localhost:5173
-      allowed-methods: GET,POST,PUT,DELETE,OPTIONS
-      allowed-headers: "*"
-      allow-credentials: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
 
 server:
   port: 8081
@@ -21,3 +17,10 @@ server:
 jwt:
   secret: mySecretKeyForJwtTokenGeneration1234567890
   expiration: 86400000
+
+logging:
+  level:
+    root: INFO
+    org.springframework.web: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE

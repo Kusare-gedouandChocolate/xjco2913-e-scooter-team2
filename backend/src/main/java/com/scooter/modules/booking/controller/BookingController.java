@@ -10,7 +10,7 @@ import com.scooter.modules.booking.service.BookingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List; // 新增导入
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/bookings")
@@ -21,7 +21,7 @@ public class BookingController {
 
     @PostMapping
     public Result<BookingCreateResponse> create(@RequestBody BookingRequest request) {
-        Long userId = SecurityUtils.getCurrentUserId();
+        String userId = SecurityUtils.getCurrentUserId();
         return Result.success(bookingService.createBooking(userId, request));
     }
 
@@ -32,8 +32,8 @@ public class BookingController {
 
     @GetMapping
     public Result<List<BookingResponse>> getUserBookings(@RequestParam(defaultValue = "startTime") String sortBy,
-                                                         @RequestParam(defaultValue = "desc") String sortOrder) {
-        Long userId = SecurityUtils.getCurrentUserId();
+            @RequestParam(defaultValue = "desc") String sortOrder) {
+        String userId = SecurityUtils.getCurrentUserId();
         List<BookingResponse> bookings = bookingService.findByUserId(userId, sortBy, sortOrder);
         return Result.success(bookings);
     }
