@@ -6,6 +6,9 @@ import { BrowserRouter, Routes, Route, Navigate, Link, useNavigate } from 'react
 import { AuthPage } from './pages/AuthPage';
 import { ScooterPage } from './pages/ScooterPage';
 import { BookingPage } from './pages/BookingPage';
+import { ReportPage } from './pages/ReportPage';
+import { FeedbackPage } from './pages/FeedbackPage';
+import { AdminPage } from './pages/AdminPage';
 
 // --- 简单的路由守卫组件 ---
 // 作用：如果没有 Token，就拦截并重定向到登录页
@@ -42,11 +45,14 @@ const Navbar = () => {
 
         {/* 导航链接 */}
         <div style={styles.navLinks}>
-          <Link to="/scooters" style={styles.link}>附近车辆</Link>
-          <Link to="/bookings" style={styles.link}>我的行程</Link>
+          <Link to="/scooters" style={styles.link}>Nearby vehicles</Link>
+          <Link to="/bookings" style={styles.link}>My journey</Link>
+          <Link to="/reports" style={styles.link}>统计报表</Link>
+          <Link to="/feedback" style={styles.link}>客服反馈</Link>
+          <Link to="/admin" style={styles.link}>系统配置</Link>
           {/* 退出按钮：带有悬浮交互的石绿按钮 */}
           <button style={styles.logoutBtn} onClick={handleLogout}>
-            退出登录
+            Log out
           </button>
         </div>
       </div>
@@ -87,6 +93,33 @@ export const App: React.FC = () => {
             } 
           />
 
+          <Route 
+            path="/reports" 
+            element={
+              <ProtectedRoute>
+              <ReportPage />
+              </ProtectedRoute>
+            }        
+          />
+
+          <Route
+            path="/feedback"
+            element={
+              <ProtectedRoute>
+                <FeedbackPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <AdminPage />
+              </ProtectedRoute>
+            }
+          />
+
           {/* 默认重定向：访问根目录时，自动去车辆页（守卫会判断是否需要去登录） */}
           <Route path="/" element={<Navigate to="/scooters" replace />} />
           
@@ -97,6 +130,7 @@ export const App: React.FC = () => {
               <Link to="/" style={{ color: 'var(--color-primary)', textDecoration: 'none' }}>返回首页</Link>
             </div>
           } />
+          
         </Routes>
       </main>
     </BrowserRouter>

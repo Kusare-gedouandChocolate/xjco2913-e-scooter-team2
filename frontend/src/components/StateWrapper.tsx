@@ -15,7 +15,7 @@ export const StateWrapper: React.FC<StateWrapperProps> = ({
   loading,
   error,
   empty,
-  emptyMessage = '暂无数据',
+  emptyMessage = 'No data available.',
   onRetry,
   children,
 }) => {
@@ -43,7 +43,7 @@ export const StateWrapper: React.FC<StateWrapperProps> = ({
           ></path>
         </svg>
         <p style={{ color: 'var(--color-primary)', fontWeight: 500, marginTop: '12px' }}>
-          正在加载中...
+          now loading...
         </p>
       </div>
     );
@@ -58,13 +58,13 @@ export const StateWrapper: React.FC<StateWrapperProps> = ({
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </div>
-        <h3 style={{ color: 'var(--color-accent)', marginBottom: '8px' }}>加载失败</h3>
+        <h3 style={{ color: 'var(--color-accent)', marginBottom: '8px' }}>Loading failed</h3>
         <p style={{ color: 'var(--color-text-muted)', marginBottom: '16px', maxWidth: '300px' }}>
           {error}
         </p>
         {onRetry && (
           <button style={styles.retryBtn} onClick={onRetry}>
-            重新尝试
+            Try again
           </button>
         )}
       </div>

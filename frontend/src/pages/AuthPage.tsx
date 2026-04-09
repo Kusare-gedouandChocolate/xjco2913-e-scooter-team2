@@ -44,7 +44,7 @@ export const AuthPage: React.FC = () => {
     } catch (err: unknown) {
         const error = err as { message?: string };
         // 捕获 API 拦截器抛出的标准错误结构 
-        setErrorMsg(error.message || '网络或服务器错误，请稍后再试');
+        setErrorMsg(error.message || 'Network or server error. Please try again later.');
     } finally {
       setLoading(false);
     }
@@ -56,9 +56,9 @@ export const AuthPage: React.FC = () => {
         {/* 顶部品牌与标题区 */}
         <div style={styles.header}>
           <div style={styles.logo}>🛴 E-Scooter</div>
-          <h2 style={styles.title}>{isLoginMode ? '欢迎回来' : '创建新账号'}</h2>
+          <h2 style={styles.title}>{isLoginMode ? 'welcome back' : 'Create a new account'}</h2>
           <p style={styles.subtitle}>
-            {isLoginMode ? '登录以继续您的骑行之旅' : '加入我们，开启绿色出行'}
+            {isLoginMode ? 'Log in to continue your cycling journey' : 'Join us and embark on a green journey!'}
           </p>
         </div>
 
@@ -82,19 +82,19 @@ export const AuthPage: React.FC = () => {
                   required
                   name="fullName"
                   type="text"
-                  placeholder="请输入您的真实姓名"
+                  placeholder="Please provide your real name."
                   value={formData.fullName}
                   onChange={handleChange}
                   style={styles.input}
                 />
               </div>
               <div style={styles.inputGroup}>
-                <label style={styles.label}>手机号码</label>
+                <label style={styles.label}>phone number</label>
                 <input
                   required
                   name="phone"
                   type="tel"
-                  placeholder="请输入手机号码"
+                  placeholder="Please enter your mobile phone number."
                   value={formData.phone}
                   onChange={handleChange}
                   style={styles.input}
@@ -104,7 +104,7 @@ export const AuthPage: React.FC = () => {
           )}
 
           <div style={styles.inputGroup}>
-            <label style={styles.label}>电子邮箱</label>
+            <label style={styles.label}>email address</label>
             <input
               required
               name="email"
@@ -117,12 +117,12 @@ export const AuthPage: React.FC = () => {
           </div>
 
           <div style={styles.inputGroup}>
-            <label style={styles.label}>密码</label>
+            <label style={styles.label}>passwords</label>
             <input
               required
               name="passwordHash"
               type="password"
-              placeholder="请输入密码"
+              placeholder="enter your PIN"
               value={formData.passwordHash}
               onChange={handleChange}
               style={styles.input}
@@ -131,14 +131,14 @@ export const AuthPage: React.FC = () => {
 
           {/* 提交按钮 (使用石绿主色调，自带加载态) */}
           <button type="submit" disabled={loading} style={styles.submitBtn(loading)}>
-            {loading ? '处理中...' : (isLoginMode ? '立即登录' : '注册账号')}
+            {loading ? 'Processing...' : (isLoginMode ? 'Log in' : 'register')}
           </button>
         </form>
 
         {/* 模式切换区 */}
         <div style={styles.footer}>
           <span style={{ color: 'var(--color-text-muted)' }}>
-            {isLoginMode ? '还没有账号？' : '已经有账号了？'}
+            {isLoginMode ? 'No account?' : 'already have an account?'}
           </span>
           <button 
             type="button" 
@@ -148,7 +148,7 @@ export const AuthPage: React.FC = () => {
             }} 
             style={styles.switchBtn}
           >
-            {isLoginMode ? '免费注册' : '直接登录'}
+            {isLoginMode ? 'registration' : 'login'}
           </button>
         </div>
       </div>
