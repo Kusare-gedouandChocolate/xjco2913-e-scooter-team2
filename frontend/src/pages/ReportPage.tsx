@@ -35,6 +35,7 @@ export const ReportPage: React.FC = () => {
 
   useEffect(() => {
     fetchReport();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [weekStart]);
 
   // 将后端返回的“分”转换为“元”，方便图表展示
@@ -44,7 +45,7 @@ export const ReportPage: React.FC = () => {
   })) || [];
 
   // 图表自定义提示框 (Tooltip)
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number }>; label?: string }) => {
     if (active && payload && payload.length) {
       return (
         <div style={styles.tooltipBox}>

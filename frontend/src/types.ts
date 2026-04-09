@@ -29,7 +29,7 @@ export interface CustomerProfile {
 export interface Scooter {
   scooterId: string;
   code: string;
-  status: 'available' | 'in_use' | 'maintenance';
+  status: 'available' | 'reserved' | 'unavailable' | 'maintenance';
   location: string;
   basePrice: number;
 }

@@ -77,6 +77,7 @@ export const ScooterPage: React.FC = () => {
 
   useEffect(() => {
     fetchData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onlyAvailable]); // 筛选条件变化时重新获取
 
   // 列表点击：联动地图居中
