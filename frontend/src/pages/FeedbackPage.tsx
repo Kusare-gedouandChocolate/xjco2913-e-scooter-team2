@@ -70,6 +70,7 @@ export const FeedbackPage: React.FC = () => {
     if (viewMode === 'admin') {
       fetchFeedbacks();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [viewMode, filterPriority]);
 
   // --- 3. 管理端：更新优先级逻辑 ---

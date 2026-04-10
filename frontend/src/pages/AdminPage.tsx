@@ -44,6 +44,7 @@ export const AdminPage: React.FC = () => {
 
   useEffect(() => {
     fetchData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
   // --- 提交车辆更新 ---
@@ -189,7 +190,7 @@ export const AdminPage: React.FC = () => {
                 <select 
                   style={styles.input}
                   value={editingScooter.status}
-                  onChange={(e) => setEditingScooter({ ...editingScooter, status: e.target.value as any })}
+                  onChange={(e) => setEditingScooter({ ...editingScooter, status: e.target.value as 'available' | 'reserved' | 'unavailable' | 'maintenance' })}
                 >
                   <option value="available">可用 (Available)</option>
                   <option value="maintenance">维护中 (Maintenance)</option>
