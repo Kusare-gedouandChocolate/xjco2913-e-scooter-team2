@@ -1,0 +1,8 @@
+# 1. 安装图表库 (用于 Task 3: 收入统计)
+npm install recharts
+
+# 2. 安装地图库 (用于 Task 2: 车辆位置分布)
+npm install leaflet react-leaflet
+
+# 3. 安装地图库的 TS 类型声明，防止 CI 报错
+npm install -D @types/leaflet
