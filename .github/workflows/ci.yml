@@ -1,13 +1,22 @@
 name: CI
 
 on:
-  # 对 PR 做质量检查，保证合并前可见问题
+  # PR 合并前质量门禁
   pull_request:
-  # 保留 push 触发，便于分支自检
+    branches: [main]
+  # 分支提交自检（覆盖 feature/fix 开发分支）
   push:
+    branches: [main, "feature/**", "fix/**"]
+  # 允许手动触发（演示前可临时跑一次）
+  workflow_dispatch:
 
 permissions:
   contents: read
+
+# 同一分支重复推送时自动取消旧任务，节省 CI 资源
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   workflow-sanity:
@@ -17,7 +26,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 校验 GitHub Actions 工作流语法，避免 workflow 本身写错
+      # 校验 workflow 语法，避免 CI 文件本身出错
       - name: Validate workflow files
         uses: rhysd/actionlint@v1.7.7
 
@@ -28,7 +37,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 先对 Markdown 做基础规范检查，当前仓库主要是文档内容
       - name: Lint markdown files
         uses: DavidAnson/markdownlint-cli2-action@v17
         with:
@@ -38,155 +46,55 @@ jobs:
   frontend-ci:
     name: Frontend Lint/Test/Build
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Detect frontend project
-        id: detect_frontend
-        run: |
-          if [ -f frontend/package.json ]; then
-            echo "enabled=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "enabled=false" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Setup Node.js
-        if: ${{ steps.detect_frontend.outputs.enabled == 'true' }}
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          # 与 Vite/React-Router 的 engine 要求对齐（>=20.19）
+          node-version: "20.19.0"
           cache: npm
           cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
-        if: ${{ steps.detect_frontend.outputs.enabled == 'true' }}
-        working-directory: frontend
-        run: |
-          if [ -f package-lock.json ]; then
-            npm ci
-          else
-            npm install
-          fi
+        run: npm ci
 
-      # 使用 --if-present，允许早期阶段某些脚本暂未提供
       - name: Run frontend lint
-        if: ${{ steps.detect_frontend.outputs.enabled == 'true' }}
-        working-directory: frontend
-        run: npm run lint --if-present
+        run: npm run lint
 
+      # 当前项目暂未强制前端 test 脚本，存在则执行
       - name: Run frontend tests
-        if: ${{ steps.detect_frontend.outputs.enabled == 'true' }}
-        working-directory: frontend
         run: npm run test --if-present
 
       - name: Build frontend
-        if: ${{ steps.detect_frontend.outputs.enabled == 'true' }}
-        working-directory: frontend
-        run: npm run build --if-present
+        run: npm run build
 
-      - name: Skip frontend CI
-        if: ${{ steps.detect_frontend.outputs.enabled != 'true' }}
-        run: echo "frontend/package.json not found. Skip frontend CI."
-
-  backend-node-ci:
-    name: Backend(Node) Lint/Test/Build
+  backend-java-ci:
+    name: Backend(Java) Build/Test
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Detect backend node project
-        id: detect_backend_node
-        run: |
-          if [ -f backend/package.json ]; then
-            echo "enabled=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "enabled=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Setup Node.js
-        if: ${{ steps.detect_backend_node.outputs.enabled == 'true' }}
-        uses: actions/setup-node@v4
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
         with:
-          node-version: 20
-          cache: npm
-          cache-dependency-path: backend/package-lock.json
+          distribution: temurin
+          java-version: "17"
+          cache: maven
 
-      - name: Install dependencies
-        if: ${{ steps.detect_backend_node.outputs.enabled == 'true' }}
-        working-directory: backend
-        run: |
-          if [ -f package-lock.json ]; then
-            npm ci
-          else
-            npm install
-          fi
-
-      - name: Run backend lint
-        if: ${{ steps.detect_backend_node.outputs.enabled == 'true' }}
-        working-directory: backend
-        run: npm run lint --if-present
-
+      # 先跑单元测试（若后续添加测试会自动纳入）
       - name: Run backend tests
-        if: ${{ steps.detect_backend_node.outputs.enabled == 'true' }}
-        working-directory: backend
-        run: npm run test --if-present
+        run: mvn -B -ntp test
 
-      - name: Build backend
-        if: ${{ steps.detect_backend_node.outputs.enabled == 'true' }}
-        working-directory: backend
-        run: npm run build --if-present
-
-      - name: Skip backend node CI
-        if: ${{ steps.detect_backend_node.outputs.enabled != 'true' }}
-        run: echo "backend/package.json not found. Skip backend node CI."
-
-  backend-python-ci:
-    name: Backend(Python) Test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Detect backend python project
-        id: detect_backend_python
-        run: |
-          if [ -f backend/pyproject.toml ] || [ -f backend/requirements.txt ]; then
-            echo "enabled=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "enabled=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Setup Python
-        if: ${{ steps.detect_backend_python.outputs.enabled == 'true' }}
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Install dependencies
-        if: ${{ steps.detect_backend_python.outputs.enabled == 'true' }}
-        working-directory: backend
-        run: |
-          python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then
-            pip install -r requirements.txt
-          fi
-          if [ -f pyproject.toml ]; then
-            pip install .
-          fi
-          pip install pytest
-
-      - name: Run backend tests
-        if: ${{ steps.detect_backend_python.outputs.enabled == 'true' }}
-        working-directory: backend
-        run: |
-          if [ -d tests ]; then
-            pytest -q
-          else
-            echo "No tests directory found in backend/. Skip pytest."
-          fi
-
-      - name: Skip backend python CI
-        if: ${{ steps.detect_backend_python.outputs.enabled != 'true' }}
-        run: echo "backend/pyproject.toml and backend/requirements.txt not found. Skip backend python CI."
+      # 再验证可打包，保证主分支可构建
+      - name: Build backend package
+        run: mvn -B -ntp -DskipTests package
