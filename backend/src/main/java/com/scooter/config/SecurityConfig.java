@@ -11,12 +11,15 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.Arrays;
 import java.util.List;
 
@@ -58,19 +61,39 @@ public class SecurityConfig {
                 // Set session management to stateless
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint(authenticationEntryPoint())
+                        .accessDeniedHandler(accessDeniedHandler()))
+
                 // Define authorization rules
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints: login, register, and scooter browsing
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/api/v1/scooters", "/api/v1/scooters/**").permitAll()
                         .requestMatchers("/api/v1/pricing-rules", "/api/v1/pricing-rules/**").permitAll()
+                        .requestMatchers("/api/v1/discount-rules", "/api/v1/discount-rules/**").permitAll()
                         // All other requests must be authenticated
                         .anyRequest().authenticated())
+
+                // Disable anonymous authentication to avoid anonymousUser hitting controllers
+                .anonymous(anonymous -> anonymous.disable())
 
                 // Add JWT filter before the standard UsernamePassword filter
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    @Bean
+    public AuthenticationEntryPoint authenticationEntryPoint() {
+        return (request, response, authException) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
+                "Unauthorized");
+    }
+
+    @Bean
+    public AccessDeniedHandler accessDeniedHandler() {
+        return (request, response, accessDeniedException) -> response.sendError(HttpServletResponse.SC_FORBIDDEN,
+                "Forbidden");
     }
 
     /**

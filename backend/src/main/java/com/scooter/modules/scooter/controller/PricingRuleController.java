@@ -2,29 +2,29 @@ package com.scooter.modules.scooter.controller;
 
 import com.scooter.common.response.Result;
 import com.scooter.modules.scooter.dto.PricingRuleResponse;
+import com.scooter.modules.scooter.service.ScooterService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/pricing-rules")
 public class PricingRuleController {
 
+    @Autowired
+    private ScooterService scooterService;
+
     @GetMapping
     public Result<List<PricingRuleResponse>> getPricingRules() {
-        List<PricingRuleResponse> rules = new ArrayList<>();
+        return Result.success(scooterService.getPricingRules());
+    }
 
-        PricingRuleResponse standardRule = new PricingRuleResponse();
-        standardRule.setRuleId("rule-001");
-        standardRule.setHireType("STANDARD");
-        standardRule.setPrice(100);
-        standardRule.setDiscountEnabled(false);
-
-        rules.add(standardRule);
-
-        return Result.success(rules);
+    @GetMapping("/{ruleId}")
+    public Result<PricingRuleResponse> getPricingRuleById(@PathVariable Long ruleId) {
+        return Result.success(scooterService.getPricingRuleById(ruleId));
     }
 }

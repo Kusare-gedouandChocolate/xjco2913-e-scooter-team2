@@ -10,7 +10,7 @@ export const AuthPage: React.FC = () => {
   // 表单状态
   const [formData, setFormData] = useState<RegisterPayload>({
     email: '',
-    passwordHash: '',
+    password: '',
     fullName: '',
     phone: '',
   });
@@ -30,7 +30,7 @@ export const AuthPage: React.FC = () => {
         // 调用登录 API [cite: 391]
         const res = await authApi.login({
           email: formData.email,
-          passwordHash: formData.passwordHash,
+          password: formData.password,
         });
         localStorage.setItem('authToken', res.data.token);
         // TODO: 跳转到车辆浏览页面
@@ -120,10 +120,10 @@ export const AuthPage: React.FC = () => {
             <label style={styles.label}>passwords</label>
             <input
               required
-              name="passwordHash"
+              name="password"
               type="password"
-              placeholder="enter your PIN"
-              value={formData.passwordHash}
+              placeholder="请输入密码"
+              value={formData.password}
               onChange={handleChange}
               style={styles.input}
             />

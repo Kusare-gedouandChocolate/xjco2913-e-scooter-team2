@@ -7,7 +7,7 @@ import type { ApiResponse, User, Scooter, PricingRule, Booking, ScooterLocation,
 // ==========================================
 export interface LoginPayload {
   email: string;
-  passwordHash: string;
+  password: string;
 }
 
 export interface RegisterPayload extends LoginPayload {
@@ -41,13 +41,21 @@ export const scootersApi = {
 // ==========================================
 export const bookingsApi = {
   // 创建预订
-  createBooking: (data: { scooterId: string; hireType: string; startTime: string }): Promise<ApiResponse<{ bookingId: string; status: string }>> => {
-    return apiClient.post('/bookings', data);
+  createBooking: (data: { scooterId: string; rentalOptionId: string; startTime: string }): Promise<ApiResponse<{ bookingId: string; status: string }>> => {
+    return apiClient.post('/bookings', {
+      scooterId: data.scooterId,
+      rentalOptionId: data.rentalOptionId,
+      startTime: data.startTime
+    });
   },
   
   // 模拟支付
-  payBooking: (data: { bookingId: string }): Promise<ApiResponse<null>> => {
-    return apiClient.post('/payments', data);
+  payBooking: (data: { bookingId: string; paymentMethod?: string; simulateSuccess?: boolean }): Promise<ApiResponse<null>> => {
+    return apiClient.post('/payments', {
+      bookingId: data.bookingId,
+      paymentMethod: data.paymentMethod || 'CREDIT_CARD',
+      simulateSuccess: data.simulateSuccess !== false
+    });
   },
 
   // 查询我的预订记录

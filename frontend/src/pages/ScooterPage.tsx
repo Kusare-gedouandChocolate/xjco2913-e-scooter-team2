@@ -45,7 +45,7 @@ export const ScooterPage: React.FC = () => {
 
   // --- 预订交互状态 ---
   const [selectedScooter, setSelectedScooter] = useState<Scooter | null>(null);
-  const [selectedHireType, setSelectedHireType] = useState<string>('');
+  const [selectedRentalOptionId, setSelectedRentalOptionId] = useState<string>('');
   const [bookingStep, setBookingStep] = useState<'idle' | 'booking' | 'paying' | 'success'>('idle');
   const [actionError, setActionError] = useState<string>('');
 
@@ -92,19 +92,19 @@ export const ScooterPage: React.FC = () => {
 
   const handleOpenBooking = (scooter: Scooter) => {
     setSelectedScooter(scooter);
-    setSelectedHireType(rules[0]?.hireType || '');
+    setSelectedRentalOptionId(rules[0]?.ruleId || ''); // 默认选中第一个套餐
     setBookingStep('idle');
     setActionError('');
   };
 
   const handleConfirmBooking = async () => {
-    if (!selectedScooter || !selectedHireType) return;
+    if (!selectedScooter || !selectedRentalOptionId) return;
     setBookingStep('booking');
     setActionError('');
     try {
       const bookingRes = await bookingsApi.createBooking({
         scooterId: selectedScooter.scooterId,
-        hireType: selectedHireType,
+        rentalOptionId: selectedRentalOptionId,
         startTime: getUTCTimeString(),
       });
       const bId = bookingRes.data.bookingId;
@@ -273,13 +273,16 @@ export const ScooterPage: React.FC = () => {
                   <label style={styles.label}>请选择租赁时长套餐：</label>
                   <div style={styles.radioGroup}>
                     {rules.map((rule) => (
-                      <label key={rule.ruleId} style={styles.radioOption(selectedHireType === rule.hireType)}>
+                      <label 
+                        key={rule.ruleId} 
+                        style={styles.radioOption(selectedRentalOptionId === rule.ruleId)}
+                      >
                         <input 
                           type="radio" 
-                          name="hireType" 
-                          value={rule.hireType}
-                          checked={selectedHireType === rule.hireType}
-                          onChange={(e) => setSelectedHireType(e.target.value)}
+                          name="rentalOption" 
+                          value={rule.ruleId}
+                          checked={selectedRentalOptionId === rule.ruleId}
+                          onChange={(e) => setSelectedRentalOptionId(e.target.value)}
                           style={{ display: 'none' }} 
                         />
                         <span style={{ fontWeight: 600 }}>{rule.hireType} 套餐</span>
