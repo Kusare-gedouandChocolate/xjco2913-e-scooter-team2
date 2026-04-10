@@ -12,8 +12,7 @@
 [INFO] Copying 2 resources from src\main\resources to target\classes
 [INFO] 
 [INFO] --- compiler:3.11.0:compile (default-compile) @ xjco2913-backend ---
-[INFO] Changes detected - recompiling the module! :input tree
-[INFO] Compiling 68 source files with javac [debug release 17] to target\classes
+[INFO] Nothing to compile - all classes are up to date
 [INFO] 
 [INFO] --- resources:3.3.1:testResources (default-testResources) @ xjco2913-backend ---
 [INFO] skip non existing resourceDirectory D:\Documents\3.2\Soft Engineering Project\新建文件夹\xjco2913-e-scooter-team2-merge\backend\src\test\resources
@@ -35,33 +34,55 @@
  =========|_|==============|___/=/_/_/_/
  :: Spring Boot ::                (v3.2.0)
 
-2026-04-10T20:11:12.451+08:00  INFO 50552 --- [           main] com.scooter.BackendApplication           : Starting BackendApplication using Java 17.0.14 with PID 50552 (D:\Documents\3.2\Soft Engineering Project\新建文件夹\xjco2913-e-scooter-team2-merge\backend\target\classes started by zhang in D:\Documents\3.2\Soft Engineering Project\新建文件夹\xjco2913-e-scooter-team2-merge\backend)
-2026-04-10T20:11:12.453+08:00  INFO 50552 --- [           main] com.scooter.BackendApplication           : No active profile set, falling back to 1 default profile: "default"
-2026-04-10T20:11:12.868+08:00  INFO 50552 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2026-04-10T20:11:12.934+08:00  INFO 50552 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 59 ms. Found 7 JPA repository interfaces.
-2026-04-10T20:11:13.286+08:00  INFO 50552 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8081 (http)
-2026-04-10T20:11:13.296+08:00  INFO 50552 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2026-04-10T20:11:13.297+08:00  INFO 50552 --- [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.16]
-2026-04-10T20:11:13.363+08:00  INFO 50552 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2026-04-10T20:11:13.364+08:00  INFO 50552 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 884 ms
-2026-04-10T20:11:13.434+08:00  INFO 50552 --- [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
-2026-04-10T20:11:13.467+08:00  INFO 50552 --- [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.3.1.Final
-2026-04-10T20:11:13.493+08:00  INFO 50552 --- [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
-2026-04-10T20:11:13.657+08:00  INFO 50552 --- [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
-2026-04-10T20:11:13.677+08:00  INFO 50552 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2026-04-10T20:11:13.844+08:00  INFO 50552 --- [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@15b4202
-2026-04-10T20:11:13.846+08:00  INFO 50552 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2026-04-10T20:11:13.870+08:00  WARN 50552 --- [           main] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
-2026-04-10T20:11:14.433+08:00  INFO 50552 --- [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
-2026-04-10T20:11:14.501+08:00  INFO 50552 --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
-2026-04-10T20:11:15.139+08:00  INFO 50552 --- [           main] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@a0f75b, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@1569858, org.springframework.security.web.context.SecurityContextHolderFilter@101b3f8, org.springframework.security.web.header.HeaderWriterFilter@1d68a50, org.springframework.web.filter.CorsFilter@184d03d, org.springframework.security.web.authentication.logout.LogoutFilter@1da311, com.scooter.common.security.JwtAuthenticationFilter@b6fa98, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@1efdfd9, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@149539, org.springframework.security.web.session.SessionManagementFilter@cf1ec2, org.springframework.security.web.access.ExceptionTranslationFilter@4bf55b, org.springframework.security.web.access.intercept.AuthorizationFilter@18ac1e6]
-2026-04-10T20:11:15.316+08:00  INFO 50552 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8081 (http) with context path ''
-2026-04-10T20:11:15.324+08:00  INFO 50552 --- [           main] com.scooter.BackendApplication           : Started BackendApplication in 3.126 seconds (process running for 3.369)
-2026-04-10T20:11:31.511+08:00  INFO 50552 --- [nio-8081-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2026-04-10T20:11:31.512+08:00  INFO 50552 --- [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2026-04-10T20:11:31.513+08:00  INFO 50552 --- [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
-2026-04-10T20:11:31.529+08:00  WARN 50552 --- [nio-8081-exec-1] o.s.w.s.h.HandlerMappingIntrospector     : Cache miss for REQUEST dispatch to '/api/v1/auth/login' (previous null). Performing MatchableHandlerMapping lookup. This is logged once only at WARN level, and every time at TRACE.
-2026-04-10T20:11:31.820+08:00 DEBUG 50552 --- [nio-8081-exec-1] org.hibernate.SQL                        : 
+2026-04-10T20:18:17.254+08:00  INFO 50064 --- [           main] com.scooter.BackendApplication           : Starting BackendApplication using Java 17.0.14 with PID 50064 (D:\Documents\3.2\Soft Engineering Project\新建文件夹\xjco2913-e-scooter-team2-merge\backend\target\classes started by zhang in D:\Documents\3.2\Soft Engineering Project\新建文件夹\xjco2913-e-scooter-team2-merge\backend)
+2026-04-10T20:18:17.257+08:00  INFO 50064 --- [           main] com.scooter.BackendApplication           : No active profile set, falling back to 1 default profile: "default"
+2026-04-10T20:18:17.764+08:00  INFO 50064 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-04-10T20:18:17.838+08:00  INFO 50064 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 67 ms. Found 8 JPA repository interfaces.
+2026-04-10T20:18:18.258+08:00  INFO 50064 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8081 (http)
+2026-04-10T20:18:18.266+08:00  INFO 50064 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-04-10T20:18:18.267+08:00  INFO 50064 --- [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.16]
+2026-04-10T20:18:18.314+08:00  INFO 50064 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-04-10T20:18:18.315+08:00  INFO 50064 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1025 ms
+2026-04-10T20:18:18.421+08:00  INFO 50064 --- [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-04-10T20:18:18.462+08:00  INFO 50064 --- [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.3.1.Final
+2026-04-10T20:18:18.490+08:00  INFO 50064 --- [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-04-10T20:18:18.654+08:00  INFO 50064 --- [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-04-10T20:18:18.678+08:00  INFO 50064 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-04-10T20:18:18.860+08:00  INFO 50064 --- [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@51ae7c
+2026-04-10T20:18:18.862+08:00  INFO 50064 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-04-10T20:18:18.888+08:00  WARN 50064 --- [           main] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-04-10T20:18:19.648+08:00  INFO 50064 --- [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-04-10T20:18:19.696+08:00 DEBUG 50064 --- [           main] org.hibernate.SQL                        : 
+    create table feedback (
+        id bigserial not null,
+        booking_id bigint,
+        category varchar(255) not null check (category in ('BUG_REPORT','COMPLAINT','SUGGESTION','OTHER')),
+        content varchar(2000) not null,
+        created_at timestamp(6),
+        scooter_id bigint,
+        user_id uuid not null,
+        primary key (id)
+    )
+Hibernate: 
+    create table feedback (
+        id bigserial not null,
+        booking_id bigint,
+        category varchar(255) not null check (category in ('BUG_REPORT','COMPLAINT','SUGGESTION','OTHER')),
+        content varchar(2000) not null,
+        created_at timestamp(6),
+        scooter_id bigint,
+        user_id uuid not null,
+        primary key (id)
+    )
+2026-04-10T20:18:19.755+08:00  INFO 50064 --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-04-10T20:18:20.733+08:00  INFO 50064 --- [           main] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@f1bf5a, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@177d9c6, org.springframework.security.web.context.SecurityContextHolderFilter@e13abd, org.springframework.security.web.header.HeaderWriterFilter@1fc2b8f, org.springframework.web.filter.CorsFilter@5b4b91, org.springframework.security.web.authentication.logout.LogoutFilter@bb5c2a, com.scooter.common.security.JwtAuthenticationFilter@12531a3, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@dec27, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@57c5d5, org.springframework.security.web.session.SessionManagementFilter@4c0fbe, org.springframework.security.web.access.ExceptionTranslationFilter@3a4ae, org.springframework.security.web.access.intercept.AuthorizationFilter@1a1c200]
+2026-04-10T20:18:20.952+08:00  INFO 50064 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8081 (http) with context path ''
+2026-04-10T20:18:20.961+08:00  INFO 50064 --- [           main] com.scooter.BackendApplication           : Started BackendApplication in 4.017 seconds (process running for 4.334)
+2026-04-10T20:18:48.343+08:00  INFO 50064 --- [nio-8081-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-04-10T20:18:48.344+08:00  INFO 50064 --- [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-04-10T20:18:48.346+08:00  INFO 50064 --- [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2026-04-10T20:18:48.361+08:00  WARN 50064 --- [nio-8081-exec-1] o.s.w.s.h.HandlerMappingIntrospector     : Cache miss for REQUEST dispatch to '/api/v1/auth/login' (previous null). Performing MatchableHandlerMapping lookup. This is logged once only at WARN level, and every time at TRACE.
+2026-04-10T20:18:48.634+08:00 DEBUG 50064 --- [nio-8081-exec-1] org.hibernate.SQL                        : 
     select
         u1_0.user_id,
         u1_0.created_at,
@@ -87,7 +108,7 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-04-10T20:11:32.148+08:00 DEBUG 50552 --- [nio-8081-exec-1] org.hibernate.SQL                        : 
+2026-04-10T20:18:48.940+08:00 DEBUG 50064 --- [nio-8081-exec-1] org.hibernate.SQL                        : 
     select
         u1_0.user_id,
         u1_0.created_at,
@@ -113,7 +134,59 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-04-10T20:11:32.244+08:00 DEBUG 50552 --- [nio-8081-exec-3] org.hibernate.SQL                        : 
+2026-04-10T20:18:49.004+08:00 DEBUG 50064 --- [nio-8081-exec-4] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+2026-04-10T20:18:49.284+08:00 DEBUG 50064 --- [nio-8081-exec-4] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+2026-04-10T20:18:49.337+08:00 DEBUG 50064 --- [nio-8081-exec-3] org.hibernate.SQL                        : 
     select
         u1_0.user_id,
         u1_0.created_at,
@@ -139,99 +212,127 @@ Hibernate:
         users u1_0 
     where
         u1_0.user_id=?
-2026-04-10T20:11:32.262+08:00 DEBUG 50552 --- [nio-8081-exec-3] org.hibernate.SQL                        : 
+2026-04-10T20:18:49.360+08:00 DEBUG 50064 --- [nio-8081-exec-3] org.hibernate.SQL                        : 
     select
-        p1_0.id,
-        p1_0.amount,
-        p1_0.booking_id,
-        p1_0.created_at,
-        p1_0.paid_at,
-        p1_0.payment_method,
-        p1_0.payment_status,
-        p1_0.transaction_no,
-        p1_0.user_id 
+        b1_0.id,
+        b1_0.applied_discount_rate,
+        b1_0.applied_discount_type,
+        b1_0.created_at,
+        b1_0.discount_amount,
+        b1_0.original_price,
+        b1_0.rental_option_id,
+        b1_0.scooter_id,
+        b1_0.start_time,
+        b1_0.status,
+        b1_0.total_price,
+        b1_0.user_id 
     from
-        payment p1_0 
+        booking b1_0 
     where
-        p1_0.payment_status=? 
-        and p1_0.paid_at between ? and ? 
+        b1_0.id=?
+Hibernate: 
+    select
+        b1_0.id,
+        b1_0.applied_discount_rate,
+        b1_0.applied_discount_type,
+        b1_0.created_at,
+        b1_0.discount_amount,
+        b1_0.original_price,
+        b1_0.rental_option_id,
+        b1_0.scooter_id,
+        b1_0.start_time,
+        b1_0.status,
+        b1_0.total_price,
+        b1_0.user_id 
+    from
+        booking b1_0 
+    where
+        b1_0.id=?
+2026-04-10T20:18:49.545+08:00 DEBUG 50064 --- [nio-8081-exec-3] org.hibernate.SQL                        : 
+    select
+        count(*) 
+    from
+        scooter s1_0 
+    where
+        s1_0.id=?
+Hibernate: 
+    select
+        count(*) 
+    from
+        scooter s1_0 
+    where
+        s1_0.id=?
+2026-04-10T20:18:49.567+08:00 DEBUG 50064 --- [nio-8081-exec-3] org.hibernate.SQL                        : 
+    insert 
+    into
+        feedback
+        (booking_id, category, content, created_at, scooter_id, user_id) 
+    values
+        (?, ?, ?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        feedback
+        (booking_id, category, content, created_at, scooter_id, user_id) 
+    values
+        (?, ?, ?, ?, ?, ?)
+2026-04-10T20:18:49.595+08:00 DEBUG 50064 --- [nio-8081-exec-8] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+Hibernate: 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+2026-04-10T20:18:49.602+08:00 DEBUG 50064 --- [nio-8081-exec-8] org.hibernate.SQL                        : 
+    select
+        f1_0.id,
+        f1_0.booking_id,
+        f1_0.category,
+        f1_0.content,
+        f1_0.created_at,
+        f1_0.scooter_id,
+        f1_0.user_id 
+    from
+        feedback f1_0 
+    where
+        f1_0.user_id=? 
     order by
-        p1_0.paid_at
+        f1_0.created_at desc
 Hibernate: 
     select
-        p1_0.id,
-        p1_0.amount,
-        p1_0.booking_id,
-        p1_0.created_at,
-        p1_0.paid_at,
-        p1_0.payment_method,
-        p1_0.payment_status,
-        p1_0.transaction_no,
-        p1_0.user_id 
+        f1_0.id,
+        f1_0.booking_id,
+        f1_0.category,
+        f1_0.content,
+        f1_0.created_at,
+        f1_0.scooter_id,
+        f1_0.user_id 
     from
-        payment p1_0 
+        feedback f1_0 
     where
-        p1_0.payment_status=? 
-        and p1_0.paid_at between ? and ? 
+        f1_0.user_id=? 
     order by
-        p1_0.paid_at
-2026-04-10T20:11:32.273+08:00 DEBUG 50552 --- [nio-8081-exec-3] org.hibernate.SQL                        : 
-    select
-        b1_0.id,
-        b1_0.applied_discount_rate,
-        b1_0.applied_discount_type,
-        b1_0.created_at,
-        b1_0.discount_amount,
-        b1_0.original_price,
-        b1_0.rental_option_id,
-        b1_0.scooter_id,
-        b1_0.start_time,
-        b1_0.status,
-        b1_0.total_price,
-        b1_0.user_id 
-    from
-        booking b1_0 
-    where
-        b1_0.id=?
-Hibernate: 
-    select
-        b1_0.id,
-        b1_0.applied_discount_rate,
-        b1_0.applied_discount_type,
-        b1_0.created_at,
-        b1_0.discount_amount,
-        b1_0.original_price,
-        b1_0.rental_option_id,
-        b1_0.scooter_id,
-        b1_0.start_time,
-        b1_0.status,
-        b1_0.total_price,
-        b1_0.user_id 
-    from
-        booking b1_0 
-    where
-        b1_0.id=?
-2026-04-10T20:11:32.276+08:00 DEBUG 50552 --- [nio-8081-exec-3] org.hibernate.SQL                        : 
-    select
-        ro1_0.id,
-        ro1_0.duration_hours,
-        ro1_0.duration_label,
-        ro1_0.price 
-    from
-        rental_option ro1_0 
-    where
-        ro1_0.id=?
-Hibernate: 
-    select
-        ro1_0.id,
-        ro1_0.duration_hours,
-        ro1_0.duration_label,
-        ro1_0.price 
-    from
-        rental_option ro1_0 
-    where
-        ro1_0.id=?
-2026-04-10T20:11:32.300+08:00 DEBUG 50552 --- [nio-8081-exec-7] org.hibernate.SQL                        : 
+        f1_0.created_at desc
+2026-04-10T20:18:49.618+08:00 DEBUG 50064 --- [nio-8081-exec-2] org.hibernate.SQL                        : 
     select
         u1_0.user_id,
         u1_0.created_at,
@@ -257,155 +358,35 @@ Hibernate:
         users u1_0 
     where
         u1_0.user_id=?
-2026-04-10T20:11:32.310+08:00 DEBUG 50552 --- [nio-8081-exec-7] org.hibernate.SQL                        : 
+2026-04-10T20:18:49.629+08:00 DEBUG 50064 --- [nio-8081-exec-2] org.hibernate.SQL                        : 
     select
-        p1_0.id,
-        p1_0.amount,
-        p1_0.booking_id,
-        p1_0.created_at,
-        p1_0.paid_at,
-        p1_0.payment_method,
-        p1_0.payment_status,
-        p1_0.transaction_no,
-        p1_0.user_id 
+        f1_0.id,
+        f1_0.booking_id,
+        f1_0.category,
+        f1_0.content,
+        f1_0.created_at,
+        f1_0.scooter_id,
+        f1_0.user_id 
     from
-        payment p1_0 
+        feedback f1_0 
     where
-        p1_0.payment_status=? 
-        and p1_0.paid_at between ? and ? 
-    order by
-        p1_0.paid_at
+        f1_0.id=? 
+        and f1_0.user_id=?
 Hibernate: 
     select
-        p1_0.id,
-        p1_0.amount,
-        p1_0.booking_id,
-        p1_0.created_at,
-        p1_0.paid_at,
-        p1_0.payment_method,
-        p1_0.payment_status,
-        p1_0.transaction_no,
-        p1_0.user_id 
+        f1_0.id,
+        f1_0.booking_id,
+        f1_0.category,
+        f1_0.content,
+        f1_0.created_at,
+        f1_0.scooter_id,
+        f1_0.user_id 
     from
-        payment p1_0 
+        feedback f1_0 
     where
-        p1_0.payment_status=? 
-        and p1_0.paid_at between ? and ? 
-    order by
-        p1_0.paid_at
-2026-04-10T20:11:32.329+08:00 DEBUG 50552 --- [nio-8081-exec-7] org.hibernate.SQL                        : 
-    select
-        b1_0.id,
-        b1_0.applied_discount_rate,
-        b1_0.applied_discount_type,
-        b1_0.created_at,
-        b1_0.discount_amount,
-        b1_0.original_price,
-        b1_0.rental_option_id,
-        b1_0.scooter_id,
-        b1_0.start_time,
-        b1_0.status,
-        b1_0.total_price,
-        b1_0.user_id 
-    from
-        booking b1_0 
-    where
-        b1_0.id=?
-Hibernate: 
-    select
-        b1_0.id,
-        b1_0.applied_discount_rate,
-        b1_0.applied_discount_type,
-        b1_0.created_at,
-        b1_0.discount_amount,
-        b1_0.original_price,
-        b1_0.rental_option_id,
-        b1_0.scooter_id,
-        b1_0.start_time,
-        b1_0.status,
-        b1_0.total_price,
-        b1_0.user_id 
-    from
-        booking b1_0 
-    where
-        b1_0.id=?
-2026-04-10T20:11:32.331+08:00 DEBUG 50552 --- [nio-8081-exec-7] org.hibernate.SQL                        : 
-    select
-        ro1_0.id,
-        ro1_0.duration_hours,
-        ro1_0.duration_label,
-        ro1_0.price 
-    from
-        rental_option ro1_0 
-    where
-        ro1_0.id=?
-Hibernate: 
-    select
-        ro1_0.id,
-        ro1_0.duration_hours,
-        ro1_0.duration_label,
-        ro1_0.price 
-    from
-        rental_option ro1_0 
-    where
-        ro1_0.id=?
-2026-04-10T20:11:32.333+08:00 DEBUG 50552 --- [nio-8081-exec-7] org.hibernate.SQL                        : 
-    select
-        b1_0.id,
-        b1_0.applied_discount_rate,
-        b1_0.applied_discount_type,
-        b1_0.created_at,
-        b1_0.discount_amount,
-        b1_0.original_price,
-        b1_0.rental_option_id,
-        b1_0.scooter_id,
-        b1_0.start_time,
-        b1_0.status,
-        b1_0.total_price,
-        b1_0.user_id 
-    from
-        booking b1_0 
-    where
-        b1_0.id=?
-Hibernate: 
-    select
-        b1_0.id,
-        b1_0.applied_discount_rate,
-        b1_0.applied_discount_type,
-        b1_0.created_at,
-        b1_0.discount_amount,
-        b1_0.original_price,
-        b1_0.rental_option_id,
-        b1_0.scooter_id,
-        b1_0.start_time,
-        b1_0.status,
-        b1_0.total_price,
-        b1_0.user_id 
-    from
-        booking b1_0 
-    where
-        b1_0.id=?
-2026-04-10T20:11:32.335+08:00 DEBUG 50552 --- [nio-8081-exec-7] org.hibernate.SQL                        : 
-    select
-        ro1_0.id,
-        ro1_0.duration_hours,
-        ro1_0.duration_label,
-        ro1_0.price 
-    from
-        rental_option ro1_0 
-    where
-        ro1_0.id=?
-Hibernate: 
-    select
-        ro1_0.id,
-        ro1_0.duration_hours,
-        ro1_0.duration_label,
-        ro1_0.price 
-    from
-        rental_option ro1_0 
-    where
-        ro1_0.id=?
-2026-04-10T20:11:32.344+08:00 DEBUG 50552 --- [nio-8081-exec-4] org.hibernate.SQL                        : 
+        f1_0.id=? 
+        and f1_0.user_id=?
+2026-04-10T20:18:49.638+08:00 DEBUG 50064 --- [nio-8081-exec-6] org.hibernate.SQL                        : 
     select
         u1_0.user_id,
         u1_0.created_at,
@@ -431,11 +412,127 @@ Hibernate:
         users u1_0 
     where
         u1_0.user_id=?
+2026-04-10T20:18:49.669+08:00 DEBUG 50064 --- [nio-8081-exec-7] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+Hibernate: 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+2026-04-10T20:18:49.675+08:00 DEBUG 50064 --- [nio-8081-exec-7] org.hibernate.SQL                        : 
+    select
+        b1_0.id,
+        b1_0.applied_discount_rate,
+        b1_0.applied_discount_type,
+        b1_0.created_at,
+        b1_0.discount_amount,
+        b1_0.original_price,
+        b1_0.rental_option_id,
+        b1_0.scooter_id,
+        b1_0.start_time,
+        b1_0.status,
+        b1_0.total_price,
+        b1_0.user_id 
+    from
+        booking b1_0 
+    where
+        b1_0.id=?
+Hibernate: 
+    select
+        b1_0.id,
+        b1_0.applied_discount_rate,
+        b1_0.applied_discount_type,
+        b1_0.created_at,
+        b1_0.discount_amount,
+        b1_0.original_price,
+        b1_0.rental_option_id,
+        b1_0.scooter_id,
+        b1_0.start_time,
+        b1_0.status,
+        b1_0.total_price,
+        b1_0.user_id 
+    from
+        booking b1_0 
+    where
+        b1_0.id=?
+2026-04-10T20:18:49.685+08:00 DEBUG 50064 --- [nio-8081-exec-5] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+Hibernate: 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+2026-04-10T20:18:49.691+08:00 DEBUG 50064 --- [nio-8081-exec-5] org.hibernate.SQL                        : 
+    select
+        f1_0.id,
+        f1_0.booking_id,
+        f1_0.category,
+        f1_0.content,
+        f1_0.created_at,
+        f1_0.scooter_id,
+        f1_0.user_id 
+    from
+        feedback f1_0 
+    where
+        f1_0.id=? 
+        and f1_0.user_id=?
+Hibernate: 
+    select
+        f1_0.id,
+        f1_0.booking_id,
+        f1_0.category,
+        f1_0.content,
+        f1_0.created_at,
+        f1_0.scooter_id,
+        f1_0.user_id 
+    from
+        feedback f1_0 
+    where
+        f1_0.id=? 
+        and f1_0.user_id=?
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD FAILURE
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time:  36.589 s
-[INFO] Finished at: 2026-04-10T20:11:43+08:00
+[INFO] Total time:  48.814 s
+[INFO] Finished at: 2026-04-10T20:19:03+08:00
 [INFO] ------------------------------------------------------------------------
 [ERROR] Failed to execute goal org.springframework.boot:spring-boot-maven-plugin:3.2.0:run (default-cli) on project xjco2913-backend: Process terminated with exit code: -1 -> [Help 1]
 [ERROR] 
