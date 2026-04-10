@@ -19,7 +19,10 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
   sql:
     init:
-      mode: never
+      mode: always
+      schema-locations: classpath:schema-app.sql
+      data-locations: classpath:seed-app.sql
+      continue-on-error: false
 
 logging:
   level:
