@@ -7,6 +7,9 @@ import com.scooter.modules.booking.dto.BookingCreateResponse;
 import com.scooter.modules.booking.dto.BookingRequest;
 import com.scooter.modules.booking.dto.BookingResponse;
 import com.scooter.modules.payment.dto.PaymentRequest; // New Import
+import com.scooter.modules.payment.entity.Payment;
+import com.scooter.modules.payment.entity.PaymentStatus;
+import com.scooter.modules.payment.repository.PaymentRepository;
 import com.scooter.modules.booking.entity.Booking;
 import com.scooter.modules.booking.entity.BookingStatus;
 import com.scooter.modules.booking.repository.BookingRepository;
@@ -46,6 +49,8 @@ public class BookingService {
     private UserRepository userRepository;
     @Autowired
     private DiscountRuleService discountRuleService;
+    @Autowired
+    private PaymentRepository paymentRepository;
 
     /**
      * Issue #6: Create a new booking
@@ -126,6 +131,16 @@ public class BookingService {
         // 3. Update Booking Status
         booking.setStatus(BookingStatus.PAID);
         bookingRepository.save(booking);
+
+        Payment payment = new Payment();
+        payment.setBooking(booking);
+        payment.setUserId(booking.getUserId().toString());
+        payment.setAmount(booking.getTotalPrice());
+        payment.setPaymentMethod(request.getPaymentMethod() != null ? request.getPaymentMethod() : "CREDIT_CARD");
+        payment.setPaymentStatus(PaymentStatus.SUCCESS);
+        payment.setTransactionNo("TXN-" + System.currentTimeMillis());
+        payment.setPaidAt(LocalDateTime.now());
+        paymentRepository.save(payment);
 
         // 4. Update Scooter Status to IN_USE
         Scooter scooter = booking.getScooter();
