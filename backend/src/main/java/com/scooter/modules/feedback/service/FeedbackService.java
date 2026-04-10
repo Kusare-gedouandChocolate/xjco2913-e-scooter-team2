@@ -5,8 +5,12 @@ import com.scooter.common.security.SecurityUtils;
 import com.scooter.modules.booking.entity.Booking;
 import com.scooter.modules.booking.repository.BookingRepository;
 import com.scooter.modules.feedback.dto.FeedbackCreateRequest;
+import com.scooter.modules.feedback.dto.FeedbackPriorityUpdateRequest;
 import com.scooter.modules.feedback.dto.FeedbackResponse;
+import com.scooter.modules.feedback.dto.FeedbackStatusUpdateRequest;
 import com.scooter.modules.feedback.entity.Feedback;
+import com.scooter.modules.feedback.entity.FeedbackPriority;
+import com.scooter.modules.feedback.entity.FeedbackStatus;
 import com.scooter.modules.feedback.repository.FeedbackRepository;
 import com.scooter.modules.scooter.repository.ScooterRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +66,34 @@ public class FeedbackService {
         return toResponse(feedback);
     }
 
+    @Transactional
+    public FeedbackResponse updatePriority(Long feedbackId, FeedbackPriorityUpdateRequest request) {
+        SecurityUtils.requireManagerRole();
+        Feedback feedback = findFeedbackOrThrow(feedbackId);
+        feedback.setPriority(request.getPriority());
+        if (request.getPriority() == FeedbackPriority.HIGH && feedback.getStatus() == FeedbackStatus.SUBMITTED) {
+            feedback.setStatus(FeedbackStatus.IN_PROGRESS);
+        }
+        return toResponse(feedbackRepository.save(feedback));
+    }
+
+    @Transactional
+    public FeedbackResponse updateStatus(Long feedbackId, FeedbackStatusUpdateRequest request) {
+        SecurityUtils.requireManagerRole();
+        Feedback feedback = findFeedbackOrThrow(feedbackId);
+        validateStatusTransition(feedback.getStatus(), request.getStatus());
+        feedback.setStatus(request.getStatus());
+        return toResponse(feedbackRepository.save(feedback));
+    }
+
+    @Transactional(readOnly = true)
+    public List<FeedbackResponse> getHighPriorityFeedback() {
+        SecurityUtils.requireManagerRole();
+        return feedbackRepository.findByPriorityOrderByCreatedAtDesc(FeedbackPriority.HIGH).stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
+
     private void validateAssociations(UUID userId, Long bookingId, Long scooterId) {
         if (bookingId != null) {
             Booking booking = bookingRepository.findById(bookingId)
@@ -85,12 +117,34 @@ public class FeedbackService {
         return normalized;
     }
 
+    private Feedback findFeedbackOrThrow(Long feedbackId) {
+        return feedbackRepository.findById(feedbackId)
+                .orElseThrow(() -> new BusinessException("FEEDBACK_NOT_FOUND", "Feedback not found"));
+    }
+
+    private void validateStatusTransition(FeedbackStatus currentStatus, FeedbackStatus nextStatus) {
+        if (currentStatus == nextStatus) {
+            return;
+        }
+        boolean validTransition = switch (currentStatus) {
+            case SUBMITTED -> nextStatus == FeedbackStatus.IN_PROGRESS;
+            case IN_PROGRESS -> nextStatus == FeedbackStatus.RESOLVED;
+            case RESOLVED -> false;
+        };
+        if (!validTransition) {
+            throw new BusinessException("FEEDBACK_STATUS_CONFLICT",
+                    "Invalid feedback status transition from " + currentStatus + " to " + nextStatus);
+        }
+    }
+
     private FeedbackResponse toResponse(Feedback feedback) {
         FeedbackResponse response = new FeedbackResponse();
         response.setFeedbackId(feedback.getId().toString());
         response.setUserId(feedback.getUserId().toString());
         response.setCategory(feedback.getCategory().name());
         response.setContent(feedback.getContent());
+        response.setPriority(feedback.getPriority().name());
+        response.setStatus(feedback.getStatus().name());
         response.setBookingId(feedback.getBookingId() != null ? feedback.getBookingId().toString() : null);
         response.setScooterId(feedback.getScooterId() != null ? feedback.getScooterId().toString() : null);
         response.setCreatedAt(feedback.getCreatedAt());

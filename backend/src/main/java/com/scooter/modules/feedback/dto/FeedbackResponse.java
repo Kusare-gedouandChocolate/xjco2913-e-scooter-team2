@@ -10,6 +10,8 @@ public class FeedbackResponse {
     private String userId;
     private String category;
     private String content;
+    private String priority;
+    private String status;
     private String bookingId;
     private String scooterId;
     private LocalDateTime createdAt;
