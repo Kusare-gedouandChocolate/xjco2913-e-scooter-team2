@@ -34,137 +34,40 @@
  =========|_|==============|___/=/_/_/_/
  :: Spring Boot ::                (v3.2.0)
 
-2026-04-10T18:22:22.300+08:00  INFO 28396 --- [           main] com.scooter.BackendApplication           : Starting BackendApplication using Java 17.0.14 with PID 28396 (D:\Documents\3.2\Soft Engineering Project\新建文件夹\xjco2913-e-scooter-team2-merge\backend\target\classes started by zhang in D:\Documents\3.2\Soft Engineering Project\新建文件夹\xjco2913-e-scooter-team2-merge\backend)
-2026-04-10T18:22:22.303+08:00  INFO 28396 --- [           main] com.scooter.BackendApplication           : No active profile set, falling back to 1 default profile: "default"
-2026-04-10T18:22:22.698+08:00  INFO 28396 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2026-04-10T18:22:22.745+08:00  INFO 28396 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 41 ms. Found 5 JPA repository interfaces.
-2026-04-10T18:22:23.087+08:00  INFO 28396 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8081 (http)
-2026-04-10T18:22:23.097+08:00  INFO 28396 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2026-04-10T18:22:23.098+08:00  INFO 28396 --- [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.16]
-2026-04-10T18:22:23.162+08:00  INFO 28396 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2026-04-10T18:22:23.164+08:00  INFO 28396 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 833 ms
-2026-04-10T18:22:23.231+08:00  INFO 28396 --- [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
-2026-04-10T18:22:23.264+08:00  INFO 28396 --- [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.3.1.Final
-2026-04-10T18:22:23.286+08:00  INFO 28396 --- [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
-2026-04-10T18:22:23.429+08:00  INFO 28396 --- [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
-2026-04-10T18:22:23.446+08:00  INFO 28396 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2026-04-10T18:22:23.606+08:00  INFO 28396 --- [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@1290757
-2026-04-10T18:22:23.608+08:00  INFO 28396 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2026-04-10T18:22:23.631+08:00  WARN 28396 --- [           main] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
-2026-04-10T18:22:24.220+08:00  INFO 28396 --- [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
-2026-04-10T18:22:24.281+08:00  INFO 28396 --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
-2026-04-10T18:22:24.764+08:00  INFO 28396 --- [           main] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@7d173f, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@f12744, org.springframework.security.web.context.SecurityContextHolderFilter@1381eae, org.springframework.security.web.header.HeaderWriterFilter@1629063, org.springframework.web.filter.CorsFilter@618295, org.springframework.security.web.authentication.logout.LogoutFilter@153295e, com.scooter.common.security.JwtAuthenticationFilter@10806c, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@57ca10, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@12be8c, org.springframework.security.web.session.SessionManagementFilter@1c4b8d6, org.springframework.security.web.access.ExceptionTranslationFilter@76b2fe, org.springframework.security.web.access.intercept.AuthorizationFilter@4c0bc7]
-2026-04-10T18:22:24.879+08:00  INFO 28396 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8081 (http) with context path ''
-2026-04-10T18:22:24.884+08:00  INFO 28396 --- [           main] com.scooter.BackendApplication           : Started BackendApplication in 2.834 seconds (process running for 3.077)
-2026-04-10T18:22:41.190+08:00  INFO 28396 --- [nio-8081-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2026-04-10T18:22:41.191+08:00  INFO 28396 --- [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2026-04-10T18:22:41.192+08:00  INFO 28396 --- [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
-2026-04-10T18:22:41.207+08:00  WARN 28396 --- [nio-8081-exec-1] o.s.w.s.h.HandlerMappingIntrospector     : Cache miss for REQUEST dispatch to '/api/v1/scooters' (previous null). Performing MatchableHandlerMapping lookup. This is logged once only at WARN level, and every time at TRACE.
-2026-04-10T18:22:41.329+08:00 DEBUG 28396 --- [nio-8081-exec-1] org.hibernate.SQL                        : 
-    select
-        s1_0.id,
-        s1_0.battery_level,
-        s1_0.created_at,
-        s1_0.current_location,
-        s1_0.model,
-        s1_0.status 
-    from
-        scooter s1_0
-Hibernate: 
-    select
-        s1_0.id,
-        s1_0.battery_level,
-        s1_0.created_at,
-        s1_0.current_location,
-        s1_0.model,
-        s1_0.status 
-    from
-        scooter s1_0
-2026-04-10T18:22:41.355+08:00 DEBUG 28396 --- [nio-8081-exec-1] org.hibernate.SQL                        : 
-    select
-        ro1_0.id,
-        ro1_0.duration_hours,
-        ro1_0.duration_label,
-        ro1_0.price 
-    from
-        rental_option ro1_0
-Hibernate: 
-    select
-        ro1_0.id,
-        ro1_0.duration_hours,
-        ro1_0.duration_label,
-        ro1_0.price 
-    from
-        rental_option ro1_0
-2026-04-10T18:22:41.360+08:00 DEBUG 28396 --- [nio-8081-exec-1] org.hibernate.SQL                        : 
-    select
-        ro1_0.id,
-        ro1_0.duration_hours,
-        ro1_0.duration_label,
-        ro1_0.price 
-    from
-        rental_option ro1_0
-Hibernate: 
-    select
-        ro1_0.id,
-        ro1_0.duration_hours,
-        ro1_0.duration_label,
-        ro1_0.price 
-    from
-        rental_option ro1_0
-2026-04-10T18:22:41.363+08:00 DEBUG 28396 --- [nio-8081-exec-1] org.hibernate.SQL                        : 
-    select
-        ro1_0.id,
-        ro1_0.duration_hours,
-        ro1_0.duration_label,
-        ro1_0.price 
-    from
-        rental_option ro1_0
-Hibernate: 
-    select
-        ro1_0.id,
-        ro1_0.duration_hours,
-        ro1_0.duration_label,
-        ro1_0.price 
-    from
-        rental_option ro1_0
-2026-04-10T18:22:41.364+08:00 DEBUG 28396 --- [nio-8081-exec-1] org.hibernate.SQL                        : 
-    select
-        ro1_0.id,
-        ro1_0.duration_hours,
-        ro1_0.duration_label,
-        ro1_0.price 
-    from
-        rental_option ro1_0
-Hibernate: 
-    select
-        ro1_0.id,
-        ro1_0.duration_hours,
-        ro1_0.duration_label,
-        ro1_0.price 
-    from
-        rental_option ro1_0
-2026-04-10T18:22:41.367+08:00 DEBUG 28396 --- [nio-8081-exec-1] org.hibernate.SQL                        : 
-    select
-        ro1_0.id,
-        ro1_0.duration_hours,
-        ro1_0.duration_label,
-        ro1_0.price 
-    from
-        rental_option ro1_0
-Hibernate: 
-    select
-        ro1_0.id,
-        ro1_0.duration_hours,
-        ro1_0.duration_label,
-        ro1_0.price 
-    from
-        rental_option ro1_0
-2026-04-10T18:23:01.797+08:00 DEBUG 28396 --- [nio-8081-exec-2] org.hibernate.SQL                        : 
+2026-04-10T19:29:15.072+08:00  INFO 49676 --- [           main] com.scooter.BackendApplication           : Starting BackendApplication using Java 17.0.14 with PID 49676 (D:\Documents\3.2\Soft Engineering Project\新建文件夹\xjco2913-e-scooter-team2-merge\backend\target\classes started by zhang in D:\Documents\3.2\Soft Engineering Project\新建文件夹\xjco2913-e-scooter-team2-merge\backend)
+2026-04-10T19:29:15.076+08:00  INFO 49676 --- [           main] com.scooter.BackendApplication           : No active profile set, falling back to 1 default profile: "default"
+2026-04-10T19:29:15.569+08:00  INFO 49676 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-04-10T19:29:15.637+08:00  INFO 49676 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 60 ms. Found 6 JPA repository interfaces.
+2026-04-10T19:29:16.070+08:00  INFO 49676 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8081 (http)
+2026-04-10T19:29:16.079+08:00  INFO 49676 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-04-10T19:29:16.080+08:00  INFO 49676 --- [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.16]
+2026-04-10T19:29:16.156+08:00  INFO 49676 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-04-10T19:29:16.159+08:00  INFO 49676 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1051 ms
+2026-04-10T19:29:16.254+08:00  INFO 49676 --- [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-04-10T19:29:16.296+08:00  INFO 49676 --- [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.3.1.Final
+2026-04-10T19:29:16.322+08:00  INFO 49676 --- [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-04-10T19:29:16.512+08:00  INFO 49676 --- [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-04-10T19:29:16.536+08:00  INFO 49676 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-04-10T19:29:16.744+08:00  INFO 49676 --- [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@e03769
+2026-04-10T19:29:16.750+08:00  INFO 49676 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-04-10T19:29:16.780+08:00  WARN 49676 --- [           main] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-04-10T19:29:17.559+08:00  INFO 49676 --- [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-04-10T19:29:17.644+08:00  INFO 49676 --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-04-10T19:29:18.509+08:00  INFO 49676 --- [           main] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@7fc07e, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@1ebaf2f, org.springframework.security.web.context.SecurityContextHolderFilter@6c2726, org.springframework.security.web.header.HeaderWriterFilter@ed9480, org.springframework.web.filter.CorsFilter@61f634, org.springframework.security.web.authentication.logout.LogoutFilter@1811d4d, com.scooter.common.security.JwtAuthenticationFilter@14bb6ae, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@ecead5, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@1255d1, org.springframework.security.web.session.SessionManagementFilter@d8e6b6, org.springframework.security.web.access.ExceptionTranslationFilter@1e2344a, org.springframework.security.web.access.intercept.AuthorizationFilter@19c53e5]
+2026-04-10T19:29:18.725+08:00  INFO 49676 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8081 (http) with context path ''
+2026-04-10T19:29:18.737+08:00  INFO 49676 --- [           main] com.scooter.BackendApplication           : Started BackendApplication in 3.978 seconds (process running for 4.278)
+2026-04-10T19:29:59.759+08:00  INFO 49676 --- [nio-8081-exec-2] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-04-10T19:29:59.761+08:00  INFO 49676 --- [nio-8081-exec-2] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-04-10T19:29:59.763+08:00  INFO 49676 --- [nio-8081-exec-2] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
+2026-04-10T19:29:59.781+08:00  WARN 49676 --- [nio-8081-exec-2] o.s.w.s.h.HandlerMappingIntrospector     : Cache miss for REQUEST dispatch to '/api/v1/auth/login' (previous null). Performing MatchableHandlerMapping lookup. This is logged once only at WARN level, and every time at TRACE.
+2026-04-10T19:30:00.099+08:00 DEBUG 49676 --- [nio-8081-exec-2] org.hibernate.SQL                        : 
     select
         u1_0.user_id,
+        u1_0.created_at,
         u1_0.email,
+        u1_0.full_name,
         u1_0.password_hash,
+        u1_0.phone,
         u1_0.role 
     from
         users u1_0 
@@ -173,38 +76,24 @@ Hibernate:
 Hibernate: 
     select
         u1_0.user_id,
+        u1_0.created_at,
         u1_0.email,
+        u1_0.full_name,
         u1_0.password_hash,
+        u1_0.phone,
         u1_0.role 
     from
         users u1_0 
     where
         u1_0.email=?
-2026-04-10T18:23:02.104+08:00 DEBUG 28396 --- [nio-8081-exec-2] org.hibernate.SQL                        : 
+2026-04-10T19:30:00.448+08:00 DEBUG 49676 --- [nio-8081-exec-2] org.hibernate.SQL                        : 
     select
         u1_0.user_id,
+        u1_0.created_at,
         u1_0.email,
+        u1_0.full_name,
         u1_0.password_hash,
-        u1_0.role 
-    from
-        users u1_0 
-    where
-        u1_0.email=?
-Hibernate: 
-    select
-        u1_0.user_id,
-        u1_0.email,
-        u1_0.password_hash,
-        u1_0.role 
-    from
-        users u1_0 
-    where
-        u1_0.email=?
-2026-04-10T18:23:02.134+08:00 DEBUG 28396 --- [nio-8081-exec-3] org.hibernate.SQL                        : 
-    select
-        u1_0.user_id,
-        u1_0.email,
-        u1_0.password_hash,
+        u1_0.phone,
         u1_0.role 
     from
         users u1_0 
@@ -213,38 +102,24 @@ Hibernate:
 Hibernate: 
     select
         u1_0.user_id,
+        u1_0.created_at,
         u1_0.email,
+        u1_0.full_name,
         u1_0.password_hash,
+        u1_0.phone,
         u1_0.role 
     from
         users u1_0 
     where
         u1_0.email=?
-2026-04-10T18:23:02.395+08:00 DEBUG 28396 --- [nio-8081-exec-3] org.hibernate.SQL                        : 
+2026-04-10T19:30:00.557+08:00 DEBUG 49676 --- [nio-8081-exec-1] org.hibernate.SQL                        : 
     select
         u1_0.user_id,
+        u1_0.created_at,
         u1_0.email,
+        u1_0.full_name,
         u1_0.password_hash,
-        u1_0.role 
-    from
-        users u1_0 
-    where
-        u1_0.email=?
-Hibernate: 
-    select
-        u1_0.user_id,
-        u1_0.email,
-        u1_0.password_hash,
-        u1_0.role 
-    from
-        users u1_0 
-    where
-        u1_0.email=?
-2026-04-10T18:23:02.437+08:00 DEBUG 28396 --- [nio-8081-exec-6] org.hibernate.SQL                        : 
-    select
-        u1_0.user_id,
-        u1_0.email,
-        u1_0.password_hash,
+        u1_0.phone,
         u1_0.role 
     from
         users u1_0 
@@ -253,14 +128,17 @@ Hibernate:
 Hibernate: 
     select
         u1_0.user_id,
+        u1_0.created_at,
         u1_0.email,
+        u1_0.full_name,
         u1_0.password_hash,
+        u1_0.phone,
         u1_0.role 
     from
         users u1_0 
     where
         u1_0.user_id=?
-2026-04-10T18:23:02.466+08:00 DEBUG 28396 --- [nio-8081-exec-6] org.hibernate.SQL                        : 
+2026-04-10T19:30:00.593+08:00 DEBUG 49676 --- [nio-8081-exec-1] org.hibernate.SQL                        : 
     select
         s1_0.id 
     from
@@ -278,7 +156,7 @@ Hibernate:
         upper(s1_0.model)=upper(?) 
     fetch
         first ? rows only
-2026-04-10T18:23:02.485+08:00 DEBUG 28396 --- [nio-8081-exec-6] org.hibernate.SQL                        : 
+2026-04-10T19:30:00.615+08:00 DEBUG 49676 --- [nio-8081-exec-1] org.hibernate.SQL                        : 
     insert 
     into
         scooter
@@ -292,11 +170,14 @@ Hibernate:
         (battery_level, created_at, current_location, model, status) 
     values
         (?, ?, ?, ?, ?)
-2026-04-10T18:23:02.520+08:00 DEBUG 28396 --- [nio-8081-exec-5] org.hibernate.SQL                        : 
+2026-04-10T19:30:00.648+08:00 DEBUG 49676 --- [nio-8081-exec-9] org.hibernate.SQL                        : 
     select
         u1_0.user_id,
+        u1_0.created_at,
         u1_0.email,
+        u1_0.full_name,
         u1_0.password_hash,
+        u1_0.phone,
         u1_0.role 
     from
         users u1_0 
@@ -305,140 +186,543 @@ Hibernate:
 Hibernate: 
     select
         u1_0.user_id,
+        u1_0.created_at,
         u1_0.email,
+        u1_0.full_name,
         u1_0.password_hash,
+        u1_0.phone,
         u1_0.role 
     from
         users u1_0 
     where
         u1_0.user_id=?
-2026-04-10T18:23:02.525+08:00 DEBUG 28396 --- [nio-8081-exec-5] org.hibernate.SQL                        : 
+2026-04-10T19:30:00.666+08:00 DEBUG 49676 --- [nio-8081-exec-9] org.hibernate.SQL                        : 
     select
-        s1_0.id,
-        s1_0.battery_level,
-        s1_0.created_at,
-        s1_0.current_location,
-        s1_0.model,
-        s1_0.status 
+        dr1_0.id 
     from
-        scooter s1_0
-Hibernate: 
-    select
-        s1_0.id,
-        s1_0.battery_level,
-        s1_0.created_at,
-        s1_0.current_location,
-        s1_0.model,
-        s1_0.status 
-    from
-        scooter s1_0
-2026-04-10T18:23:02.542+08:00 DEBUG 28396 --- [nio-8081-exec-8] org.hibernate.SQL                        : 
-    select
-        u1_0.user_id,
-        u1_0.email,
-        u1_0.password_hash,
-        u1_0.role 
-    from
-        users u1_0 
+        discount_rule dr1_0 
     where
-        u1_0.user_id=?
-Hibernate: 
-    select
-        u1_0.user_id,
-        u1_0.email,
-        u1_0.password_hash,
-        u1_0.role 
-    from
-        users u1_0 
-    where
-        u1_0.user_id=?
-2026-04-10T18:23:02.550+08:00 DEBUG 28396 --- [nio-8081-exec-8] org.hibernate.SQL                        : 
-    select
-        s1_0.id,
-        s1_0.battery_level,
-        s1_0.created_at,
-        s1_0.current_location,
-        s1_0.model,
-        s1_0.status 
-    from
-        scooter s1_0 
-    where
-        s1_0.id=?
-Hibernate: 
-    select
-        s1_0.id,
-        s1_0.battery_level,
-        s1_0.created_at,
-        s1_0.current_location,
-        s1_0.model,
-        s1_0.status 
-    from
-        scooter s1_0 
-    where
-        s1_0.id=?
-2026-04-10T18:23:02.560+08:00 DEBUG 28396 --- [nio-8081-exec-7] org.hibernate.SQL                        : 
-    select
-        u1_0.user_id,
-        u1_0.email,
-        u1_0.password_hash,
-        u1_0.role 
-    from
-        users u1_0 
-    where
-        u1_0.user_id=?
-Hibernate: 
-    select
-        u1_0.user_id,
-        u1_0.email,
-        u1_0.password_hash,
-        u1_0.role 
-    from
-        users u1_0 
-    where
-        u1_0.user_id=?
-2026-04-10T18:23:02.564+08:00 DEBUG 28396 --- [nio-8081-exec-7] org.hibernate.SQL                        : 
-    select
-        s1_0.id,
-        s1_0.battery_level,
-        s1_0.created_at,
-        s1_0.current_location,
-        s1_0.model,
-        s1_0.status 
-    from
-        scooter s1_0 
-    where
-        s1_0.id=?
-Hibernate: 
-    select
-        s1_0.id,
-        s1_0.battery_level,
-        s1_0.created_at,
-        s1_0.current_location,
-        s1_0.model,
-        s1_0.status 
-    from
-        scooter s1_0 
-    where
-        s1_0.id=?
-2026-04-10T18:23:02.568+08:00 DEBUG 28396 --- [nio-8081-exec-7] org.hibernate.SQL                        : 
-    select
-        s1_0.id 
-    from
-        scooter s1_0 
-    where
-        upper(s1_0.model)=upper(?) 
+        dr1_0.rule_type=? 
     fetch
         first ? rows only
 Hibernate: 
     select
-        s1_0.id 
+        dr1_0.id 
+    from
+        discount_rule dr1_0 
+    where
+        dr1_0.rule_type=? 
+    fetch
+        first ? rows only
+2026-04-10T19:30:00.690+08:00 DEBUG 49676 --- [io-8081-exec-10] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+Hibernate: 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+2026-04-10T19:30:00.698+08:00 DEBUG 49676 --- [io-8081-exec-10] org.hibernate.SQL                        : 
+    select
+        dr1_0.id 
+    from
+        discount_rule dr1_0 
+    where
+        dr1_0.rule_type=? 
+    fetch
+        first ? rows only
+Hibernate: 
+    select
+        dr1_0.id 
+    from
+        discount_rule dr1_0 
+    where
+        dr1_0.rule_type=? 
+    fetch
+        first ? rows only
+2026-04-10T19:30:00.713+08:00 DEBUG 49676 --- [nio-8081-exec-5] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+Hibernate: 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+2026-04-10T19:30:00.721+08:00 DEBUG 49676 --- [nio-8081-exec-5] org.hibernate.SQL                        : 
+    select
+        dr1_0.id 
+    from
+        discount_rule dr1_0 
+    where
+        dr1_0.rule_type=? 
+    fetch
+        first ? rows only
+Hibernate: 
+    select
+        dr1_0.id 
+    from
+        discount_rule dr1_0 
+    where
+        dr1_0.rule_type=? 
+    fetch
+        first ? rows only
+2026-04-10T19:30:00.731+08:00 DEBUG 49676 --- [nio-8081-exec-6] org.hibernate.SQL                        : 
+    select
+        dr1_0.id,
+        dr1_0.created_at,
+        dr1_0.discount_rate,
+        dr1_0.enabled,
+        dr1_0.min_completed_bookings,
+        dr1_0.rule_type 
+    from
+        discount_rule dr1_0
+Hibernate: 
+    select
+        dr1_0.id,
+        dr1_0.created_at,
+        dr1_0.discount_rate,
+        dr1_0.enabled,
+        dr1_0.min_completed_bookings,
+        dr1_0.rule_type 
+    from
+        discount_rule dr1_0
+2026-04-10T19:30:00.754+08:00 DEBUG 49676 --- [nio-8081-exec-7] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+Hibernate: 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+2026-04-10T19:30:00.758+08:00 DEBUG 49676 --- [nio-8081-exec-7] org.hibernate.SQL                        : 
+    select
+        dr1_0.id 
+    from
+        discount_rule dr1_0 
+    where
+        dr1_0.rule_type=? 
+    fetch
+        first ? rows only
+Hibernate: 
+    select
+        dr1_0.id 
+    from
+        discount_rule dr1_0 
+    where
+        dr1_0.rule_type=? 
+    fetch
+        first ? rows only
+2026-04-10T19:30:00.781+08:00 DEBUG 49676 --- [nio-8081-exec-8] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+Hibernate: 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+2026-04-10T19:30:00.818+08:00 DEBUG 49676 --- [nio-8081-exec-3] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+2026-04-10T19:30:00.899+08:00 DEBUG 49676 --- [nio-8081-exec-3] org.hibernate.SQL                        : 
+    insert 
+    into
+        users
+        (created_at, email, full_name, password_hash, phone, role, user_id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        users
+        (created_at, email, full_name, password_hash, phone, role, user_id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?)
+2026-04-10T19:30:00.904+08:00 DEBUG 49676 --- [nio-8081-exec-3] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+Hibernate: 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+2026-04-10T19:30:00.912+08:00 DEBUG 49676 --- [nio-8081-exec-4] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+2026-04-10T19:30:00.982+08:00 DEBUG 49676 --- [nio-8081-exec-4] org.hibernate.SQL                        : 
+    insert 
+    into
+        users
+        (created_at, email, full_name, password_hash, phone, role, user_id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        users
+        (created_at, email, full_name, password_hash, phone, role, user_id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?)
+2026-04-10T19:30:00.985+08:00 DEBUG 49676 --- [nio-8081-exec-4] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+Hibernate: 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+2026-04-10T19:30:00.993+08:00 DEBUG 49676 --- [nio-8081-exec-2] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+2026-04-10T19:30:01.263+08:00 DEBUG 49676 --- [nio-8081-exec-2] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+2026-04-10T19:30:01.277+08:00 DEBUG 49676 --- [nio-8081-exec-1] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+Hibernate: 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+2026-04-10T19:30:01.287+08:00 DEBUG 49676 --- [nio-8081-exec-1] org.hibernate.SQL                        : 
+    select
+        s1_0.id,
+        s1_0.battery_level,
+        s1_0.created_at,
+        s1_0.current_location,
+        s1_0.model,
+        s1_0.status 
     from
         scooter s1_0 
     where
-        upper(s1_0.model)=upper(?) 
-    fetch
-        first ? rows only
-2026-04-10T18:23:02.578+08:00 DEBUG 28396 --- [nio-8081-exec-7] org.hibernate.SQL                        : 
+        s1_0.id=?
+Hibernate: 
+    select
+        s1_0.id,
+        s1_0.battery_level,
+        s1_0.created_at,
+        s1_0.current_location,
+        s1_0.model,
+        s1_0.status 
+    from
+        scooter s1_0 
+    where
+        s1_0.id=?
+2026-04-10T19:30:01.290+08:00 DEBUG 49676 --- [nio-8081-exec-1] org.hibernate.SQL                        : 
+    select
+        ro1_0.id,
+        ro1_0.duration_hours,
+        ro1_0.duration_label,
+        ro1_0.price 
+    from
+        rental_option ro1_0 
+    where
+        ro1_0.id=?
+Hibernate: 
+    select
+        ro1_0.id,
+        ro1_0.duration_hours,
+        ro1_0.duration_label,
+        ro1_0.price 
+    from
+        rental_option ro1_0 
+    where
+        ro1_0.id=?
+2026-04-10T19:30:01.292+08:00 DEBUG 49676 --- [nio-8081-exec-1] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+Hibernate: 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+2026-04-10T19:30:01.294+08:00 DEBUG 49676 --- [nio-8081-exec-1] org.hibernate.SQL                        : 
+    select
+        dr1_0.id,
+        dr1_0.created_at,
+        dr1_0.discount_rate,
+        dr1_0.enabled,
+        dr1_0.min_completed_bookings,
+        dr1_0.rule_type 
+    from
+        discount_rule dr1_0
+Hibernate: 
+    select
+        dr1_0.id,
+        dr1_0.created_at,
+        dr1_0.discount_rate,
+        dr1_0.enabled,
+        dr1_0.min_completed_bookings,
+        dr1_0.rule_type 
+    from
+        discount_rule dr1_0
+2026-04-10T19:30:01.302+08:00 DEBUG 49676 --- [nio-8081-exec-1] org.hibernate.SQL                        : 
+    select
+        count(b1_0.id) 
+    from
+        booking b1_0 
+    where
+        b1_0.user_id=? 
+        and b1_0.status in (?, ?)
+Hibernate: 
+    select
+        count(b1_0.id) 
+    from
+        booking b1_0 
+    where
+        b1_0.user_id=? 
+        and b1_0.status in (?, ?)
+2026-04-10T19:30:01.310+08:00 DEBUG 49676 --- [nio-8081-exec-1] org.hibernate.SQL                        : 
+    insert 
+    into
+        booking
+        (applied_discount_rate, applied_discount_type, created_at, discount_amount, original_price, rental_option_id, scooter_id, start_time, status, total_price, user_id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        booking
+        (applied_discount_rate, applied_discount_type, created_at, discount_amount, original_price, rental_option_id, scooter_id, start_time, status, total_price, user_id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+2026-04-10T19:30:01.317+08:00 DEBUG 49676 --- [nio-8081-exec-1] org.hibernate.SQL                        : 
     update
         scooter 
     set
@@ -458,11 +742,14 @@ Hibernate:
         status=? 
     where
         id=?
-2026-04-10T18:23:02.589+08:00 DEBUG 28396 --- [io-8081-exec-10] org.hibernate.SQL                        : 
+2026-04-10T19:30:01.329+08:00 DEBUG 49676 --- [nio-8081-exec-9] org.hibernate.SQL                        : 
     select
         u1_0.user_id,
+        u1_0.created_at,
         u1_0.email,
+        u1_0.full_name,
         u1_0.password_hash,
+        u1_0.phone,
         u1_0.role 
     from
         users u1_0 
@@ -471,152 +758,1484 @@ Hibernate:
 Hibernate: 
     select
         u1_0.user_id,
+        u1_0.created_at,
         u1_0.email,
+        u1_0.full_name,
         u1_0.password_hash,
+        u1_0.phone,
         u1_0.role 
     from
         users u1_0 
     where
         u1_0.user_id=?
-2026-04-10T18:23:02.613+08:00 DEBUG 28396 --- [nio-8081-exec-9] org.hibernate.SQL                        : 
+2026-04-10T19:30:01.335+08:00 DEBUG 49676 --- [nio-8081-exec-9] org.hibernate.SQL                        : 
     select
-        u1_0.user_id,
-        u1_0.email,
-        u1_0.password_hash,
-        u1_0.role 
-    from
-        users u1_0 
-    where
-        u1_0.user_id=?
-Hibernate: 
-    select
-        u1_0.user_id,
-        u1_0.email,
-        u1_0.password_hash,
-        u1_0.role 
-    from
-        users u1_0 
-    where
-        u1_0.user_id=?
-2026-04-10T18:23:02.641+08:00 DEBUG 28396 --- [nio-8081-exec-1] org.hibernate.SQL                        : 
-    select
-        u1_0.user_id,
-        u1_0.email,
-        u1_0.password_hash,
-        u1_0.role 
-    from
-        users u1_0 
-    where
-        u1_0.user_id=?
-Hibernate: 
-    select
-        u1_0.user_id,
-        u1_0.email,
-        u1_0.password_hash,
-        u1_0.role 
-    from
-        users u1_0 
-    where
-        u1_0.user_id=?
-2026-04-10T18:23:02.648+08:00 DEBUG 28396 --- [nio-8081-exec-1] org.hibernate.SQL                        : 
-    select
-        s1_0.id,
-        s1_0.battery_level,
-        s1_0.created_at,
-        s1_0.current_location,
-        s1_0.model,
-        s1_0.status 
-    from
-        scooter s1_0 
-    where
-        s1_0.id=?
-Hibernate: 
-    select
-        s1_0.id,
-        s1_0.battery_level,
-        s1_0.created_at,
-        s1_0.current_location,
-        s1_0.model,
-        s1_0.status 
-    from
-        scooter s1_0 
-    where
-        s1_0.id=?
-2026-04-10T18:23:02.652+08:00 DEBUG 28396 --- [nio-8081-exec-1] org.hibernate.SQL                        : 
-    select
-        b1_0.id 
+        b1_0.id,
+        b1_0.applied_discount_rate,
+        b1_0.applied_discount_type,
+        b1_0.created_at,
+        b1_0.discount_amount,
+        b1_0.original_price,
+        b1_0.rental_option_id,
+        b1_0.scooter_id,
+        b1_0.start_time,
+        b1_0.status,
+        b1_0.total_price,
+        b1_0.user_id 
     from
         booking b1_0 
     where
-        b1_0.scooter_id=? 
+        b1_0.id=?
+Hibernate: 
+    select
+        b1_0.id,
+        b1_0.applied_discount_rate,
+        b1_0.applied_discount_type,
+        b1_0.created_at,
+        b1_0.discount_amount,
+        b1_0.original_price,
+        b1_0.rental_option_id,
+        b1_0.scooter_id,
+        b1_0.start_time,
+        b1_0.status,
+        b1_0.total_price,
+        b1_0.user_id 
+    from
+        booking b1_0 
+    where
+        b1_0.id=?
+2026-04-10T19:30:01.343+08:00 DEBUG 49676 --- [nio-8081-exec-9] org.hibernate.SQL                        : 
+    select
+        s1_0.id,
+        s1_0.battery_level,
+        s1_0.created_at,
+        s1_0.current_location,
+        s1_0.model,
+        s1_0.status 
+    from
+        scooter s1_0 
+    where
+        s1_0.id=?
+Hibernate: 
+    select
+        s1_0.id,
+        s1_0.battery_level,
+        s1_0.created_at,
+        s1_0.current_location,
+        s1_0.model,
+        s1_0.status 
+    from
+        scooter s1_0 
+    where
+        s1_0.id=?
+2026-04-10T19:30:01.346+08:00 DEBUG 49676 --- [nio-8081-exec-9] org.hibernate.SQL                        : 
+    update
+        booking 
+    set
+        applied_discount_rate=?,
+        applied_discount_type=?,
+        discount_amount=?,
+        original_price=?,
+        rental_option_id=?,
+        scooter_id=?,
+        start_time=?,
+        status=?,
+        total_price=?,
+        user_id=? 
+    where
+        id=?
+Hibernate: 
+    update
+        booking 
+    set
+        applied_discount_rate=?,
+        applied_discount_type=?,
+        discount_amount=?,
+        original_price=?,
+        rental_option_id=?,
+        scooter_id=?,
+        start_time=?,
+        status=?,
+        total_price=?,
+        user_id=? 
+    where
+        id=?
+2026-04-10T19:30:01.348+08:00 DEBUG 49676 --- [nio-8081-exec-9] org.hibernate.SQL                        : 
+    update
+        scooter 
+    set
+        battery_level=?,
+        current_location=?,
+        model=?,
+        status=? 
+    where
+        id=?
+Hibernate: 
+    update
+        scooter 
+    set
+        battery_level=?,
+        current_location=?,
+        model=?,
+        status=? 
+    where
+        id=?
+2026-04-10T19:30:01.358+08:00 DEBUG 49676 --- [io-8081-exec-10] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+Hibernate: 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+2026-04-10T19:30:01.362+08:00 DEBUG 49676 --- [io-8081-exec-10] org.hibernate.SQL                        : 
+    select
+        s1_0.id,
+        s1_0.battery_level,
+        s1_0.created_at,
+        s1_0.current_location,
+        s1_0.model,
+        s1_0.status 
+    from
+        scooter s1_0 
+    where
+        s1_0.id=?
+Hibernate: 
+    select
+        s1_0.id,
+        s1_0.battery_level,
+        s1_0.created_at,
+        s1_0.current_location,
+        s1_0.model,
+        s1_0.status 
+    from
+        scooter s1_0 
+    where
+        s1_0.id=?
+2026-04-10T19:30:01.364+08:00 DEBUG 49676 --- [io-8081-exec-10] org.hibernate.SQL                        : 
+    select
+        ro1_0.id,
+        ro1_0.duration_hours,
+        ro1_0.duration_label,
+        ro1_0.price 
+    from
+        rental_option ro1_0 
+    where
+        ro1_0.id=?
+Hibernate: 
+    select
+        ro1_0.id,
+        ro1_0.duration_hours,
+        ro1_0.duration_label,
+        ro1_0.price 
+    from
+        rental_option ro1_0 
+    where
+        ro1_0.id=?
+2026-04-10T19:30:01.366+08:00 DEBUG 49676 --- [io-8081-exec-10] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+Hibernate: 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+2026-04-10T19:30:01.369+08:00 DEBUG 49676 --- [io-8081-exec-10] org.hibernate.SQL                        : 
+    select
+        dr1_0.id,
+        dr1_0.created_at,
+        dr1_0.discount_rate,
+        dr1_0.enabled,
+        dr1_0.min_completed_bookings,
+        dr1_0.rule_type 
+    from
+        discount_rule dr1_0
+Hibernate: 
+    select
+        dr1_0.id,
+        dr1_0.created_at,
+        dr1_0.discount_rate,
+        dr1_0.enabled,
+        dr1_0.min_completed_bookings,
+        dr1_0.rule_type 
+    from
+        discount_rule dr1_0
+2026-04-10T19:30:01.371+08:00 DEBUG 49676 --- [io-8081-exec-10] org.hibernate.SQL                        : 
+    select
+        count(b1_0.id) 
+    from
+        booking b1_0 
+    where
+        b1_0.user_id=? 
+        and b1_0.status in (?, ?)
+Hibernate: 
+    select
+        count(b1_0.id) 
+    from
+        booking b1_0 
+    where
+        b1_0.user_id=? 
+        and b1_0.status in (?, ?)
+2026-04-10T19:30:01.373+08:00 DEBUG 49676 --- [io-8081-exec-10] org.hibernate.SQL                        : 
+    insert 
+    into
+        booking
+        (applied_discount_rate, applied_discount_type, created_at, discount_amount, original_price, rental_option_id, scooter_id, start_time, status, total_price, user_id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        booking
+        (applied_discount_rate, applied_discount_type, created_at, discount_amount, original_price, rental_option_id, scooter_id, start_time, status, total_price, user_id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+2026-04-10T19:30:01.375+08:00 DEBUG 49676 --- [io-8081-exec-10] org.hibernate.SQL                        : 
+    update
+        scooter 
+    set
+        battery_level=?,
+        current_location=?,
+        model=?,
+        status=? 
+    where
+        id=?
+Hibernate: 
+    update
+        scooter 
+    set
+        battery_level=?,
+        current_location=?,
+        model=?,
+        status=? 
+    where
+        id=?
+2026-04-10T19:30:01.383+08:00 DEBUG 49676 --- [nio-8081-exec-5] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+Hibernate: 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+2026-04-10T19:30:01.386+08:00 DEBUG 49676 --- [nio-8081-exec-5] org.hibernate.SQL                        : 
+    select
+        b1_0.id,
+        b1_0.applied_discount_rate,
+        b1_0.applied_discount_type,
+        b1_0.created_at,
+        b1_0.discount_amount,
+        b1_0.original_price,
+        b1_0.rental_option_id,
+        b1_0.scooter_id,
+        b1_0.start_time,
+        b1_0.status,
+        b1_0.total_price,
+        b1_0.user_id 
+    from
+        booking b1_0 
+    where
+        b1_0.id=?
+Hibernate: 
+    select
+        b1_0.id,
+        b1_0.applied_discount_rate,
+        b1_0.applied_discount_type,
+        b1_0.created_at,
+        b1_0.discount_amount,
+        b1_0.original_price,
+        b1_0.rental_option_id,
+        b1_0.scooter_id,
+        b1_0.start_time,
+        b1_0.status,
+        b1_0.total_price,
+        b1_0.user_id 
+    from
+        booking b1_0 
+    where
+        b1_0.id=?
+2026-04-10T19:30:01.388+08:00 DEBUG 49676 --- [nio-8081-exec-5] org.hibernate.SQL                        : 
+    select
+        s1_0.id,
+        s1_0.battery_level,
+        s1_0.created_at,
+        s1_0.current_location,
+        s1_0.model,
+        s1_0.status 
+    from
+        scooter s1_0 
+    where
+        s1_0.id=?
+Hibernate: 
+    select
+        s1_0.id,
+        s1_0.battery_level,
+        s1_0.created_at,
+        s1_0.current_location,
+        s1_0.model,
+        s1_0.status 
+    from
+        scooter s1_0 
+    where
+        s1_0.id=?
+2026-04-10T19:30:01.390+08:00 DEBUG 49676 --- [nio-8081-exec-5] org.hibernate.SQL                        : 
+    update
+        booking 
+    set
+        applied_discount_rate=?,
+        applied_discount_type=?,
+        discount_amount=?,
+        original_price=?,
+        rental_option_id=?,
+        scooter_id=?,
+        start_time=?,
+        status=?,
+        total_price=?,
+        user_id=? 
+    where
+        id=?
+Hibernate: 
+    update
+        booking 
+    set
+        applied_discount_rate=?,
+        applied_discount_type=?,
+        discount_amount=?,
+        original_price=?,
+        rental_option_id=?,
+        scooter_id=?,
+        start_time=?,
+        status=?,
+        total_price=?,
+        user_id=? 
+    where
+        id=?
+2026-04-10T19:30:01.391+08:00 DEBUG 49676 --- [nio-8081-exec-5] org.hibernate.SQL                        : 
+    update
+        scooter 
+    set
+        battery_level=?,
+        current_location=?,
+        model=?,
+        status=? 
+    where
+        id=?
+Hibernate: 
+    update
+        scooter 
+    set
+        battery_level=?,
+        current_location=?,
+        model=?,
+        status=? 
+    where
+        id=?
+2026-04-10T19:30:01.403+08:00 DEBUG 49676 --- [nio-8081-exec-6] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+Hibernate: 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+2026-04-10T19:30:01.408+08:00 DEBUG 49676 --- [nio-8081-exec-6] org.hibernate.SQL                        : 
+    select
+        s1_0.id,
+        s1_0.battery_level,
+        s1_0.created_at,
+        s1_0.current_location,
+        s1_0.model,
+        s1_0.status 
+    from
+        scooter s1_0 
+    where
+        s1_0.id=?
+Hibernate: 
+    select
+        s1_0.id,
+        s1_0.battery_level,
+        s1_0.created_at,
+        s1_0.current_location,
+        s1_0.model,
+        s1_0.status 
+    from
+        scooter s1_0 
+    where
+        s1_0.id=?
+2026-04-10T19:30:01.412+08:00 DEBUG 49676 --- [nio-8081-exec-6] org.hibernate.SQL                        : 
+    select
+        ro1_0.id,
+        ro1_0.duration_hours,
+        ro1_0.duration_label,
+        ro1_0.price 
+    from
+        rental_option ro1_0 
+    where
+        ro1_0.id=?
+Hibernate: 
+    select
+        ro1_0.id,
+        ro1_0.duration_hours,
+        ro1_0.duration_label,
+        ro1_0.price 
+    from
+        rental_option ro1_0 
+    where
+        ro1_0.id=?
+2026-04-10T19:30:01.416+08:00 DEBUG 49676 --- [nio-8081-exec-6] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+Hibernate: 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+2026-04-10T19:30:01.419+08:00 DEBUG 49676 --- [nio-8081-exec-6] org.hibernate.SQL                        : 
+    select
+        dr1_0.id,
+        dr1_0.created_at,
+        dr1_0.discount_rate,
+        dr1_0.enabled,
+        dr1_0.min_completed_bookings,
+        dr1_0.rule_type 
+    from
+        discount_rule dr1_0
+Hibernate: 
+    select
+        dr1_0.id,
+        dr1_0.created_at,
+        dr1_0.discount_rate,
+        dr1_0.enabled,
+        dr1_0.min_completed_bookings,
+        dr1_0.rule_type 
+    from
+        discount_rule dr1_0
+2026-04-10T19:30:01.422+08:00 DEBUG 49676 --- [nio-8081-exec-6] org.hibernate.SQL                        : 
+    select
+        count(b1_0.id) 
+    from
+        booking b1_0 
+    where
+        b1_0.user_id=? 
+        and b1_0.status in (?, ?)
+Hibernate: 
+    select
+        count(b1_0.id) 
+    from
+        booking b1_0 
+    where
+        b1_0.user_id=? 
+        and b1_0.status in (?, ?)
+2026-04-10T19:30:01.423+08:00 DEBUG 49676 --- [nio-8081-exec-6] org.hibernate.SQL                        : 
+    insert 
+    into
+        booking
+        (applied_discount_rate, applied_discount_type, created_at, discount_amount, original_price, rental_option_id, scooter_id, start_time, status, total_price, user_id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        booking
+        (applied_discount_rate, applied_discount_type, created_at, discount_amount, original_price, rental_option_id, scooter_id, start_time, status, total_price, user_id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+2026-04-10T19:30:01.425+08:00 DEBUG 49676 --- [nio-8081-exec-6] org.hibernate.SQL                        : 
+    update
+        scooter 
+    set
+        battery_level=?,
+        current_location=?,
+        model=?,
+        status=? 
+    where
+        id=?
+Hibernate: 
+    update
+        scooter 
+    set
+        battery_level=?,
+        current_location=?,
+        model=?,
+        status=? 
+    where
+        id=?
+2026-04-10T19:30:01.435+08:00 DEBUG 49676 --- [nio-8081-exec-7] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+Hibernate: 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+2026-04-10T19:30:01.441+08:00 DEBUG 49676 --- [nio-8081-exec-7] org.hibernate.SQL                        : 
+    select
+        dr1_0.id,
+        dr1_0.created_at,
+        dr1_0.discount_rate,
+        dr1_0.enabled,
+        dr1_0.min_completed_bookings,
+        dr1_0.rule_type 
+    from
+        discount_rule dr1_0 
+    where
+        dr1_0.id=?
+Hibernate: 
+    select
+        dr1_0.id,
+        dr1_0.created_at,
+        dr1_0.discount_rate,
+        dr1_0.enabled,
+        dr1_0.min_completed_bookings,
+        dr1_0.rule_type 
+    from
+        discount_rule dr1_0 
+    where
+        dr1_0.id=?
+2026-04-10T19:30:01.450+08:00 DEBUG 49676 --- [nio-8081-exec-8] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+Hibernate: 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+2026-04-10T19:30:01.454+08:00 DEBUG 49676 --- [nio-8081-exec-8] org.hibernate.SQL                        : 
+    select
+        s1_0.id,
+        s1_0.battery_level,
+        s1_0.created_at,
+        s1_0.current_location,
+        s1_0.model,
+        s1_0.status 
+    from
+        scooter s1_0 
+    where
+        s1_0.id=?
+Hibernate: 
+    select
+        s1_0.id,
+        s1_0.battery_level,
+        s1_0.created_at,
+        s1_0.current_location,
+        s1_0.model,
+        s1_0.status 
+    from
+        scooter s1_0 
+    where
+        s1_0.id=?
+2026-04-10T19:30:22.305+08:00 DEBUG 49676 --- [nio-8081-exec-4] org.hibernate.SQL                        : 
+    select
+        dr1_0.id,
+        dr1_0.created_at,
+        dr1_0.discount_rate,
+        dr1_0.enabled,
+        dr1_0.min_completed_bookings,
+        dr1_0.rule_type 
+    from
+        discount_rule dr1_0
+Hibernate: 
+    select
+        dr1_0.id,
+        dr1_0.created_at,
+        dr1_0.discount_rate,
+        dr1_0.enabled,
+        dr1_0.min_completed_bookings,
+        dr1_0.rule_type 
+    from
+        discount_rule dr1_0
+2026-04-10T19:30:22.360+08:00 DEBUG 49676 --- [nio-8081-exec-2] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+2026-04-10T19:30:22.727+08:00 DEBUG 49676 --- [nio-8081-exec-2] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+2026-04-10T19:30:22.744+08:00 DEBUG 49676 --- [nio-8081-exec-9] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+Hibernate: 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+2026-04-10T19:30:22.758+08:00 DEBUG 49676 --- [nio-8081-exec-9] org.hibernate.SQL                        : 
+    select
+        b1_0.id,
+        b1_0.applied_discount_rate,
+        b1_0.applied_discount_type,
+        b1_0.created_at,
+        b1_0.discount_amount,
+        b1_0.original_price,
+        b1_0.rental_option_id,
+        b1_0.scooter_id,
+        b1_0.start_time,
+        b1_0.status,
+        b1_0.total_price,
+        b1_0.user_id 
+    from
+        booking b1_0 
+    where
+        b1_0.user_id=? 
+    order by
+        b1_0.start_time desc
+Hibernate: 
+    select
+        b1_0.id,
+        b1_0.applied_discount_rate,
+        b1_0.applied_discount_type,
+        b1_0.created_at,
+        b1_0.discount_amount,
+        b1_0.original_price,
+        b1_0.rental_option_id,
+        b1_0.scooter_id,
+        b1_0.start_time,
+        b1_0.status,
+        b1_0.total_price,
+        b1_0.user_id 
+    from
+        booking b1_0 
+    where
+        b1_0.user_id=? 
+    order by
+        b1_0.start_time desc
+2026-04-10T19:30:22.762+08:00 DEBUG 49676 --- [nio-8081-exec-9] org.hibernate.SQL                        : 
+    select
+        ro1_0.id,
+        ro1_0.duration_hours,
+        ro1_0.duration_label,
+        ro1_0.price 
+    from
+        rental_option ro1_0 
+    where
+        ro1_0.id=?
+Hibernate: 
+    select
+        ro1_0.id,
+        ro1_0.duration_hours,
+        ro1_0.duration_label,
+        ro1_0.price 
+    from
+        rental_option ro1_0 
+    where
+        ro1_0.id=?
+2026-04-10T19:30:22.764+08:00 DEBUG 49676 --- [nio-8081-exec-9] org.hibernate.SQL                        : 
+    select
+        ro1_0.id,
+        ro1_0.duration_hours,
+        ro1_0.duration_label,
+        ro1_0.price 
+    from
+        rental_option ro1_0 
+    where
+        ro1_0.id=?
+Hibernate: 
+    select
+        ro1_0.id,
+        ro1_0.duration_hours,
+        ro1_0.duration_label,
+        ro1_0.price 
+    from
+        rental_option ro1_0 
+    where
+        ro1_0.id=?
+2026-04-10T19:30:22.764+08:00 DEBUG 49676 --- [nio-8081-exec-9] org.hibernate.SQL                        : 
+    select
+        ro1_0.id,
+        ro1_0.duration_hours,
+        ro1_0.duration_label,
+        ro1_0.price 
+    from
+        rental_option ro1_0 
+    where
+        ro1_0.id=?
+Hibernate: 
+    select
+        ro1_0.id,
+        ro1_0.duration_hours,
+        ro1_0.duration_label,
+        ro1_0.price 
+    from
+        rental_option ro1_0 
+    where
+        ro1_0.id=?
+2026-04-10T19:30:53.758+08:00 DEBUG 49676 --- [nio-8081-exec-5] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+2026-04-10T19:30:54.038+08:00 DEBUG 49676 --- [nio-8081-exec-5] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+2026-04-10T19:30:54.051+08:00 DEBUG 49676 --- [nio-8081-exec-6] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+Hibernate: 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+2026-04-10T19:30:54.055+08:00 DEBUG 49676 --- [nio-8081-exec-6] org.hibernate.SQL                        : 
+    select
+        dr1_0.id,
+        dr1_0.created_at,
+        dr1_0.discount_rate,
+        dr1_0.enabled,
+        dr1_0.min_completed_bookings,
+        dr1_0.rule_type 
+    from
+        discount_rule dr1_0 
+    where
+        dr1_0.id=?
+Hibernate: 
+    select
+        dr1_0.id,
+        dr1_0.created_at,
+        dr1_0.discount_rate,
+        dr1_0.enabled,
+        dr1_0.min_completed_bookings,
+        dr1_0.rule_type 
+    from
+        discount_rule dr1_0 
+    where
+        dr1_0.id=?
+2026-04-10T19:30:54.061+08:00 DEBUG 49676 --- [nio-8081-exec-6] org.hibernate.SQL                        : 
+    update
+        discount_rule 
+    set
+        discount_rate=?,
+        enabled=?,
+        min_completed_bookings=?,
+        rule_type=? 
+    where
+        id=?
+Hibernate: 
+    update
+        discount_rule 
+    set
+        discount_rate=?,
+        enabled=?,
+        min_completed_bookings=?,
+        rule_type=? 
+    where
+        id=?
+2026-04-10T19:30:54.075+08:00 DEBUG 49676 --- [nio-8081-exec-7] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+Hibernate: 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+2026-04-10T19:30:54.081+08:00 DEBUG 49676 --- [nio-8081-exec-7] org.hibernate.SQL                        : 
+    select
+        s1_0.id 
+    from
+        scooter s1_0 
+    where
+        upper(s1_0.model)=upper(?) 
     fetch
         first ? rows only
 Hibernate: 
     select
-        b1_0.id 
+        s1_0.id 
+    from
+        scooter s1_0 
+    where
+        upper(s1_0.model)=upper(?) 
+    fetch
+        first ? rows only
+2026-04-10T19:30:54.084+08:00 DEBUG 49676 --- [nio-8081-exec-7] org.hibernate.SQL                        : 
+    insert 
+    into
+        scooter
+        (battery_level, created_at, current_location, model, status) 
+    values
+        (?, ?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        scooter
+        (battery_level, created_at, current_location, model, status) 
+    values
+        (?, ?, ?, ?, ?)
+2026-04-10T19:30:54.094+08:00 DEBUG 49676 --- [nio-8081-exec-8] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+Hibernate: 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+2026-04-10T19:30:54.099+08:00 DEBUG 49676 --- [nio-8081-exec-8] org.hibernate.SQL                        : 
+    select
+        s1_0.id 
+    from
+        scooter s1_0 
+    where
+        upper(s1_0.model)=upper(?) 
+    fetch
+        first ? rows only
+Hibernate: 
+    select
+        s1_0.id 
+    from
+        scooter s1_0 
+    where
+        upper(s1_0.model)=upper(?) 
+    fetch
+        first ? rows only
+2026-04-10T19:30:54.101+08:00 DEBUG 49676 --- [nio-8081-exec-8] org.hibernate.SQL                        : 
+    insert 
+    into
+        scooter
+        (battery_level, created_at, current_location, model, status) 
+    values
+        (?, ?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        scooter
+        (battery_level, created_at, current_location, model, status) 
+    values
+        (?, ?, ?, ?, ?)
+2026-04-10T19:30:54.111+08:00 DEBUG 49676 --- [nio-8081-exec-3] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+Hibernate: 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+2026-04-10T19:30:54.116+08:00 DEBUG 49676 --- [nio-8081-exec-3] org.hibernate.SQL                        : 
+    select
+        s1_0.id 
+    from
+        scooter s1_0 
+    where
+        upper(s1_0.model)=upper(?) 
+    fetch
+        first ? rows only
+Hibernate: 
+    select
+        s1_0.id 
+    from
+        scooter s1_0 
+    where
+        upper(s1_0.model)=upper(?) 
+    fetch
+        first ? rows only
+2026-04-10T19:30:54.118+08:00 DEBUG 49676 --- [nio-8081-exec-3] org.hibernate.SQL                        : 
+    insert 
+    into
+        scooter
+        (battery_level, created_at, current_location, model, status) 
+    values
+        (?, ?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        scooter
+        (battery_level, created_at, current_location, model, status) 
+    values
+        (?, ?, ?, ?, ?)
+2026-04-10T19:30:54.125+08:00 DEBUG 49676 --- [nio-8081-exec-4] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+2026-04-10T19:30:54.206+08:00 DEBUG 49676 --- [nio-8081-exec-4] org.hibernate.SQL                        : 
+    insert 
+    into
+        users
+        (created_at, email, full_name, password_hash, phone, role, user_id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        users
+        (created_at, email, full_name, password_hash, phone, role, user_id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?)
+2026-04-10T19:30:54.210+08:00 DEBUG 49676 --- [nio-8081-exec-4] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+Hibernate: 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+2026-04-10T19:30:54.216+08:00 DEBUG 49676 --- [nio-8081-exec-1] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+2026-04-10T19:30:54.480+08:00 DEBUG 49676 --- [nio-8081-exec-1] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+2026-04-10T19:30:54.492+08:00 DEBUG 49676 --- [nio-8081-exec-2] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+Hibernate: 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+2026-04-10T19:30:54.496+08:00 DEBUG 49676 --- [nio-8081-exec-2] org.hibernate.SQL                        : 
+    select
+        s1_0.id,
+        s1_0.battery_level,
+        s1_0.created_at,
+        s1_0.current_location,
+        s1_0.model,
+        s1_0.status 
+    from
+        scooter s1_0 
+    where
+        s1_0.id=?
+Hibernate: 
+    select
+        s1_0.id,
+        s1_0.battery_level,
+        s1_0.created_at,
+        s1_0.current_location,
+        s1_0.model,
+        s1_0.status 
+    from
+        scooter s1_0 
+    where
+        s1_0.id=?
+2026-04-10T19:30:54.497+08:00 DEBUG 49676 --- [nio-8081-exec-2] org.hibernate.SQL                        : 
+    select
+        ro1_0.id,
+        ro1_0.duration_hours,
+        ro1_0.duration_label,
+        ro1_0.price 
+    from
+        rental_option ro1_0 
+    where
+        ro1_0.id=?
+Hibernate: 
+    select
+        ro1_0.id,
+        ro1_0.duration_hours,
+        ro1_0.duration_label,
+        ro1_0.price 
+    from
+        rental_option ro1_0 
+    where
+        ro1_0.id=?
+2026-04-10T19:30:54.498+08:00 DEBUG 49676 --- [nio-8081-exec-2] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+Hibernate: 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+2026-04-10T19:30:54.500+08:00 DEBUG 49676 --- [nio-8081-exec-2] org.hibernate.SQL                        : 
+    select
+        dr1_0.id,
+        dr1_0.created_at,
+        dr1_0.discount_rate,
+        dr1_0.enabled,
+        dr1_0.min_completed_bookings,
+        dr1_0.rule_type 
+    from
+        discount_rule dr1_0
+Hibernate: 
+    select
+        dr1_0.id,
+        dr1_0.created_at,
+        dr1_0.discount_rate,
+        dr1_0.enabled,
+        dr1_0.min_completed_bookings,
+        dr1_0.rule_type 
+    from
+        discount_rule dr1_0
+2026-04-10T19:30:54.503+08:00 DEBUG 49676 --- [nio-8081-exec-2] org.hibernate.SQL                        : 
+    select
+        count(b1_0.id) 
     from
         booking b1_0 
     where
-        b1_0.scooter_id=? 
-    fetch
-        first ? rows only
-2026-04-10T18:23:02.662+08:00 DEBUG 28396 --- [nio-8081-exec-1] org.hibernate.SQL                        : 
-    delete 
+        b1_0.user_id=? 
+        and b1_0.status in (?, ?)
+Hibernate: 
+    select
+        count(b1_0.id) 
     from
+        booking b1_0 
+    where
+        b1_0.user_id=? 
+        and b1_0.status in (?, ?)
+2026-04-10T19:30:54.505+08:00 DEBUG 49676 --- [nio-8081-exec-2] org.hibernate.SQL                        : 
+    insert 
+    into
+        booking
+        (applied_discount_rate, applied_discount_type, created_at, discount_amount, original_price, rental_option_id, scooter_id, start_time, status, total_price, user_id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        booking
+        (applied_discount_rate, applied_discount_type, created_at, discount_amount, original_price, rental_option_id, scooter_id, start_time, status, total_price, user_id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+2026-04-10T19:30:54.507+08:00 DEBUG 49676 --- [nio-8081-exec-2] org.hibernate.SQL                        : 
+    update
         scooter 
+    set
+        battery_level=?,
+        current_location=?,
+        model=?,
+        status=? 
     where
         id=?
 Hibernate: 
-    delete 
-    from
+    update
         scooter 
+    set
+        battery_level=?,
+        current_location=?,
+        model=?,
+        status=? 
     where
         id=?
-2026-04-10T18:23:16.082+08:00 DEBUG 28396 --- [nio-8081-exec-2] org.hibernate.SQL                        : 
+2026-04-10T19:30:54.514+08:00 DEBUG 49676 --- [nio-8081-exec-9] org.hibernate.SQL                        : 
     select
         u1_0.user_id,
+        u1_0.created_at,
         u1_0.email,
+        u1_0.full_name,
         u1_0.password_hash,
-        u1_0.role 
-    from
-        users u1_0 
-    where
-        u1_0.email=?
-Hibernate: 
-    select
-        u1_0.user_id,
-        u1_0.email,
-        u1_0.password_hash,
-        u1_0.role 
-    from
-        users u1_0 
-    where
-        u1_0.email=?
-2026-04-10T18:23:16.348+08:00 DEBUG 28396 --- [nio-8081-exec-2] org.hibernate.SQL                        : 
-    select
-        u1_0.user_id,
-        u1_0.email,
-        u1_0.password_hash,
-        u1_0.role 
-    from
-        users u1_0 
-    where
-        u1_0.email=?
-Hibernate: 
-    select
-        u1_0.user_id,
-        u1_0.email,
-        u1_0.password_hash,
-        u1_0.role 
-    from
-        users u1_0 
-    where
-        u1_0.email=?
-2026-04-10T18:23:16.359+08:00 DEBUG 28396 --- [nio-8081-exec-3] org.hibernate.SQL                        : 
-    select
-        u1_0.user_id,
-        u1_0.email,
-        u1_0.password_hash,
+        u1_0.phone,
         u1_0.role 
     from
         users u1_0 
@@ -625,14 +2244,87 @@ Hibernate:
 Hibernate: 
     select
         u1_0.user_id,
+        u1_0.created_at,
         u1_0.email,
+        u1_0.full_name,
         u1_0.password_hash,
+        u1_0.phone,
         u1_0.role 
     from
         users u1_0 
     where
         u1_0.user_id=?
-2026-04-10T18:23:16.362+08:00 DEBUG 28396 --- [nio-8081-exec-3] org.hibernate.SQL                        : 
+2026-04-10T19:30:54.517+08:00 DEBUG 49676 --- [nio-8081-exec-9] org.hibernate.SQL                        : 
+    select
+        dr1_0.id,
+        dr1_0.created_at,
+        dr1_0.discount_rate,
+        dr1_0.enabled,
+        dr1_0.min_completed_bookings,
+        dr1_0.rule_type 
+    from
+        discount_rule dr1_0 
+    where
+        dr1_0.id=?
+Hibernate: 
+    select
+        dr1_0.id,
+        dr1_0.created_at,
+        dr1_0.discount_rate,
+        dr1_0.enabled,
+        dr1_0.min_completed_bookings,
+        dr1_0.rule_type 
+    from
+        discount_rule dr1_0 
+    where
+        dr1_0.id=?
+2026-04-10T19:30:54.519+08:00 DEBUG 49676 --- [nio-8081-exec-9] org.hibernate.SQL                        : 
+    update
+        discount_rule 
+    set
+        discount_rate=?,
+        enabled=?,
+        min_completed_bookings=?,
+        rule_type=? 
+    where
+        id=?
+Hibernate: 
+    update
+        discount_rule 
+    set
+        discount_rate=?,
+        enabled=?,
+        min_completed_bookings=?,
+        rule_type=? 
+    where
+        id=?
+2026-04-10T19:30:54.526+08:00 DEBUG 49676 --- [io-8081-exec-10] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+Hibernate: 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+2026-04-10T19:30:54.530+08:00 DEBUG 49676 --- [io-8081-exec-10] org.hibernate.SQL                        : 
     select
         s1_0.id,
         s1_0.battery_level,
@@ -656,11 +2348,293 @@ Hibernate:
         scooter s1_0 
     where
         s1_0.id=?
+2026-04-10T19:30:54.532+08:00 DEBUG 49676 --- [io-8081-exec-10] org.hibernate.SQL                        : 
+    select
+        ro1_0.id,
+        ro1_0.duration_hours,
+        ro1_0.duration_label,
+        ro1_0.price 
+    from
+        rental_option ro1_0 
+    where
+        ro1_0.id=?
+Hibernate: 
+    select
+        ro1_0.id,
+        ro1_0.duration_hours,
+        ro1_0.duration_label,
+        ro1_0.price 
+    from
+        rental_option ro1_0 
+    where
+        ro1_0.id=?
+2026-04-10T19:30:54.533+08:00 DEBUG 49676 --- [io-8081-exec-10] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+Hibernate: 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+2026-04-10T19:30:54.535+08:00 DEBUG 49676 --- [io-8081-exec-10] org.hibernate.SQL                        : 
+    select
+        dr1_0.id,
+        dr1_0.created_at,
+        dr1_0.discount_rate,
+        dr1_0.enabled,
+        dr1_0.min_completed_bookings,
+        dr1_0.rule_type 
+    from
+        discount_rule dr1_0
+Hibernate: 
+    select
+        dr1_0.id,
+        dr1_0.created_at,
+        dr1_0.discount_rate,
+        dr1_0.enabled,
+        dr1_0.min_completed_bookings,
+        dr1_0.rule_type 
+    from
+        discount_rule dr1_0
+2026-04-10T19:30:54.538+08:00 DEBUG 49676 --- [io-8081-exec-10] org.hibernate.SQL                        : 
+    select
+        count(b1_0.id) 
+    from
+        booking b1_0 
+    where
+        b1_0.user_id=? 
+        and b1_0.status in (?, ?)
+Hibernate: 
+    select
+        count(b1_0.id) 
+    from
+        booking b1_0 
+    where
+        b1_0.user_id=? 
+        and b1_0.status in (?, ?)
+2026-04-10T19:30:54.540+08:00 DEBUG 49676 --- [io-8081-exec-10] org.hibernate.SQL                        : 
+    insert 
+    into
+        booking
+        (applied_discount_rate, applied_discount_type, created_at, discount_amount, original_price, rental_option_id, scooter_id, start_time, status, total_price, user_id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        booking
+        (applied_discount_rate, applied_discount_type, created_at, discount_amount, original_price, rental_option_id, scooter_id, start_time, status, total_price, user_id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+2026-04-10T19:30:54.542+08:00 DEBUG 49676 --- [io-8081-exec-10] org.hibernate.SQL                        : 
+    update
+        scooter 
+    set
+        battery_level=?,
+        current_location=?,
+        model=?,
+        status=? 
+    where
+        id=?
+Hibernate: 
+    update
+        scooter 
+    set
+        battery_level=?,
+        current_location=?,
+        model=?,
+        status=? 
+    where
+        id=?
+2026-04-10T19:30:54.549+08:00 DEBUG 49676 --- [nio-8081-exec-5] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+Hibernate: 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+2026-04-10T19:30:54.552+08:00 DEBUG 49676 --- [nio-8081-exec-5] org.hibernate.SQL                        : 
+    select
+        s1_0.id,
+        s1_0.battery_level,
+        s1_0.created_at,
+        s1_0.current_location,
+        s1_0.model,
+        s1_0.status 
+    from
+        scooter s1_0 
+    where
+        s1_0.id=?
+Hibernate: 
+    select
+        s1_0.id,
+        s1_0.battery_level,
+        s1_0.created_at,
+        s1_0.current_location,
+        s1_0.model,
+        s1_0.status 
+    from
+        scooter s1_0 
+    where
+        s1_0.id=?
+2026-04-10T19:30:54.553+08:00 DEBUG 49676 --- [nio-8081-exec-5] org.hibernate.SQL                        : 
+    select
+        ro1_0.id,
+        ro1_0.duration_hours,
+        ro1_0.duration_label,
+        ro1_0.price 
+    from
+        rental_option ro1_0 
+    where
+        ro1_0.id=?
+Hibernate: 
+    select
+        ro1_0.id,
+        ro1_0.duration_hours,
+        ro1_0.duration_label,
+        ro1_0.price 
+    from
+        rental_option ro1_0 
+    where
+        ro1_0.id=?
+2026-04-10T19:30:54.554+08:00 DEBUG 49676 --- [nio-8081-exec-5] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+Hibernate: 
+    select
+        u1_0.user_id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role 
+    from
+        users u1_0 
+    where
+        u1_0.user_id=?
+2026-04-10T19:30:54.557+08:00 DEBUG 49676 --- [nio-8081-exec-5] org.hibernate.SQL                        : 
+    select
+        dr1_0.id,
+        dr1_0.created_at,
+        dr1_0.discount_rate,
+        dr1_0.enabled,
+        dr1_0.min_completed_bookings,
+        dr1_0.rule_type 
+    from
+        discount_rule dr1_0
+Hibernate: 
+    select
+        dr1_0.id,
+        dr1_0.created_at,
+        dr1_0.discount_rate,
+        dr1_0.enabled,
+        dr1_0.min_completed_bookings,
+        dr1_0.rule_type 
+    from
+        discount_rule dr1_0
+2026-04-10T19:30:54.560+08:00 DEBUG 49676 --- [nio-8081-exec-5] org.hibernate.SQL                        : 
+    select
+        count(b1_0.id) 
+    from
+        booking b1_0 
+    where
+        b1_0.user_id=? 
+        and b1_0.status in (?, ?)
+Hibernate: 
+    select
+        count(b1_0.id) 
+    from
+        booking b1_0 
+    where
+        b1_0.user_id=? 
+        and b1_0.status in (?, ?)
+2026-04-10T19:30:54.562+08:00 DEBUG 49676 --- [nio-8081-exec-5] org.hibernate.SQL                        : 
+    insert 
+    into
+        booking
+        (applied_discount_rate, applied_discount_type, created_at, discount_amount, original_price, rental_option_id, scooter_id, start_time, status, total_price, user_id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        booking
+        (applied_discount_rate, applied_discount_type, created_at, discount_amount, original_price, rental_option_id, scooter_id, start_time, status, total_price, user_id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+2026-04-10T19:30:54.564+08:00 DEBUG 49676 --- [nio-8081-exec-5] org.hibernate.SQL                        : 
+    update
+        scooter 
+    set
+        battery_level=?,
+        current_location=?,
+        model=?,
+        status=? 
+    where
+        id=?
+Hibernate: 
+    update
+        scooter 
+    set
+        battery_level=?,
+        current_location=?,
+        model=?,
+        status=? 
+    where
+        id=?
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD FAILURE
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time:  01:04 min
-[INFO] Finished at: 2026-04-10T18:23:24+08:00
+[INFO] Total time:  01:57 min
+[INFO] Finished at: 2026-04-10T19:31:10+08:00
 [INFO] ------------------------------------------------------------------------
 [ERROR] Failed to execute goal org.springframework.boot:spring-boot-maven-plugin:3.2.0:run (default-cli) on project xjco2913-backend: Process terminated with exit code: -1 -> [Help 1]
 [ERROR] 

@@ -16,4 +16,8 @@ public class BookingResponse {
     private String endTime;
     private String status;
     private String totalCost;
+    private String originalCost;
+    private String discountAmount;
+    private String appliedDiscountType;
+    private String appliedDiscountRate;
 }
