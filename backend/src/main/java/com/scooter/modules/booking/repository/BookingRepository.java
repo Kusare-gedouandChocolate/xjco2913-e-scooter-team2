@@ -18,4 +18,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findByUserId(UUID userId, Sort sort);
 
     boolean existsByScooter_Id(Long scooterId);
+
+    long countByUserIdAndStatusIn(UUID userId, List<com.scooter.modules.booking.entity.BookingStatus> statuses);
 }

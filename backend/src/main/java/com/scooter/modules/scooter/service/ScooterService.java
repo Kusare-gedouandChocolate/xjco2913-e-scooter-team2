@@ -6,6 +6,7 @@ import com.scooter.modules.booking.repository.BookingRepository;
 import com.scooter.modules.scooter.dto.AdminScooterRequest;
 import com.scooter.modules.scooter.dto.AdminScooterResponse;
 import com.scooter.modules.scooter.dto.PricingRuleResponse;
+import com.scooter.modules.scooter.dto.PricingRuleUpdateRequest;
 import com.scooter.modules.scooter.dto.ScooterResponse;
 import com.scooter.modules.scooter.entity.RentalOption;
 import com.scooter.modules.scooter.entity.Scooter;
@@ -57,6 +58,22 @@ public class ScooterService {
         return rentalOptionRepository.findAll().stream()
                 .map(this::convertToPricingRule)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public PricingRuleResponse getPricingRuleById(Long ruleId) {
+        return convertToPricingRule(findPricingRuleOrThrow(ruleId));
+    }
+
+    @Transactional
+    public PricingRuleResponse updatePricingRule(Long ruleId, PricingRuleUpdateRequest request) {
+        SecurityUtils.requireManagerRole();
+
+        RentalOption option = findPricingRuleOrThrow(ruleId);
+        option.setDurationLabel(request.getHireType().trim());
+        option.setDurationHours(request.getDurationHours());
+        option.setPrice(request.getPrice());
+        return convertToPricingRule(rentalOptionRepository.save(option));
     }
 
     @Transactional
@@ -120,6 +137,11 @@ public class ScooterService {
     private Scooter findScooterOrThrow(Long scooterId) {
         return scooterRepository.findById(scooterId)
                 .orElseThrow(() -> new BusinessException("SCOOTER_NOT_FOUND", "Scooter not found"));
+    }
+
+    private RentalOption findPricingRuleOrThrow(Long ruleId) {
+        return rentalOptionRepository.findById(ruleId)
+                .orElseThrow(() -> new BusinessException("PRICING_RULE_NOT_FOUND", "Pricing rule not found"));
     }
 
     private void applyAdminRequest(Scooter scooter, AdminScooterRequest request, String normalizedModel) {

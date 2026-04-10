@@ -1,6 +1,8 @@
 package com.scooter.modules.booking.service;
 
 import com.scooter.common.exception.BusinessException;
+import com.scooter.modules.auth.entity.User;
+import com.scooter.modules.auth.repository.UserRepository;
 import com.scooter.modules.booking.dto.BookingCreateResponse;
 import com.scooter.modules.booking.dto.BookingRequest;
 import com.scooter.modules.booking.dto.BookingResponse;
@@ -10,6 +12,8 @@ import com.scooter.modules.booking.entity.BookingStatus;
 import com.scooter.modules.booking.repository.BookingRepository;
 import com.scooter.modules.confirmation.entity.BookingConfirmation; // New Import
 import com.scooter.modules.confirmation.repository.ConfirmationRepository; // New Import
+import com.scooter.modules.discount.service.DiscountRuleService;
+import com.scooter.modules.discount.service.DiscountRuleService.AppliedDiscount;
 import com.scooter.modules.scooter.entity.RentalOption;
 import com.scooter.modules.scooter.entity.Scooter;
 import com.scooter.modules.scooter.entity.ScooterStatus;
@@ -21,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -37,6 +42,10 @@ public class BookingService {
     private RentalOptionRepository rentalOptionRepository;
     @Autowired
     private ConfirmationRepository confirmationRepository; // New Injection
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private DiscountRuleService discountRuleService;
 
     /**
      * Issue #6: Create a new booking
@@ -55,6 +64,12 @@ public class BookingService {
 
         RentalOption option = rentalOptionRepository.findById(rentalOptionId)
                 .orElseThrow(() -> new BusinessException("RENTAL_OPTION_NOT_FOUND", "Rental option not found"));
+        User user = userRepository.findById(UUID.fromString(userId))
+                .orElseThrow(() -> new BusinessException("USER_NOT_FOUND", "User not found"));
+        AppliedDiscount appliedDiscount = discountRuleService.resolveBestDiscount(user);
+        BigDecimal originalPrice = option.getPrice();
+        BigDecimal discountAmount = discountRuleService.calculateDiscountAmount(originalPrice, appliedDiscount);
+        BigDecimal finalPrice = originalPrice.subtract(discountAmount);
 
         scooter.setStatus(ScooterStatus.LOCKED);
         scooterRepository.save(scooter);
@@ -64,7 +79,11 @@ public class BookingService {
         booking.setScooter(scooter);
         booking.setRentalOption(option);
 
-        booking.setTotalPrice(option.getPrice());
+        booking.setOriginalPrice(originalPrice);
+        booking.setDiscountAmount(discountAmount);
+        booking.setAppliedDiscountType(appliedDiscount.ruleType());
+        booking.setAppliedDiscountRate(appliedDiscount.discountRate());
+        booking.setTotalPrice(finalPrice);
         booking.setCreatedAt(LocalDateTime.now());
         booking.setStatus(BookingStatus.PENDING_PAYMENT);
 
@@ -75,6 +94,11 @@ public class BookingService {
         BookingCreateResponse resp = new BookingCreateResponse();
         resp.setBookingId(saved.getId().toString());
         resp.setStatus(mapBookingStatusToCamelCase(saved.getStatus()));
+        resp.setOriginalCost(saved.getOriginalPrice() != null ? saved.getOriginalPrice().toString() : null);
+        resp.setDiscountAmount(saved.getDiscountAmount() != null ? saved.getDiscountAmount().toString() : null);
+        resp.setAppliedDiscountType(saved.getAppliedDiscountType());
+        resp.setAppliedDiscountRate(saved.getAppliedDiscountRate() != null ? saved.getAppliedDiscountRate().toString() : null);
+        resp.setTotalCost(saved.getTotalPrice() != null ? saved.getTotalPrice().toString() : null);
         return resp;
     }
 
@@ -171,6 +195,11 @@ public class BookingService {
         }
 
         response.setTotalCost(booking.getTotalPrice() != null ? booking.getTotalPrice().toString() : null);
+        response.setOriginalCost(booking.getOriginalPrice() != null ? booking.getOriginalPrice().toString() : null);
+        response.setDiscountAmount(booking.getDiscountAmount() != null ? booking.getDiscountAmount().toString() : null);
+        response.setAppliedDiscountType(booking.getAppliedDiscountType());
+        response.setAppliedDiscountRate(
+                booking.getAppliedDiscountRate() != null ? booking.getAppliedDiscountRate().toString() : null);
 
         return response;
     }

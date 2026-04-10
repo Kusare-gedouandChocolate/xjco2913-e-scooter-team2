@@ -71,6 +71,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/api/v1/scooters", "/api/v1/scooters/**").permitAll()
                         .requestMatchers("/api/v1/pricing-rules", "/api/v1/pricing-rules/**").permitAll()
+                        .requestMatchers("/api/v1/discount-rules", "/api/v1/discount-rules/**").permitAll()
                         // All other requests must be authenticated
                         .anyRequest().authenticated())
 

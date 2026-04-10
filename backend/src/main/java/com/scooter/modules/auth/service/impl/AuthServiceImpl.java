@@ -39,6 +39,8 @@ public class AuthServiceImpl implements AuthService {
                 .email(email)
                 .passwordHash(encodedPassword)
                 .role(request.getRole() != null ? request.getRole() : "customer")
+                .fullName(request.getFullName())
+                .phone(request.getPhone())
                 .build();
 
         User savedUser = Objects.requireNonNull(userRepository.save(user), "Saved user must not be null");
