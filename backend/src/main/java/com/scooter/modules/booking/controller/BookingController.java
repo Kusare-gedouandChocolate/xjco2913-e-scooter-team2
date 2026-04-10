@@ -7,6 +7,7 @@ import com.scooter.modules.booking.dto.BookingRequest;
 import com.scooter.modules.booking.dto.BookingResponse;
 import com.scooter.modules.booking.entity.Booking;
 import com.scooter.modules.booking.service.BookingService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,7 +21,7 @@ public class BookingController {
     private BookingService bookingService;
 
     @PostMapping
-    public Result<BookingCreateResponse> create(@RequestBody BookingRequest request) {
+    public Result<BookingCreateResponse> create(@Valid @RequestBody BookingRequest request) {
         String userId = SecurityUtils.getCurrentUserId();
         return Result.success(bookingService.createBooking(userId, request));
     }
@@ -33,8 +34,8 @@ public class BookingController {
     @GetMapping
     public Result<List<BookingResponse>> getUserBookings(@RequestParam(defaultValue = "startTime") String sortBy,
             @RequestParam(defaultValue = "desc") String sortOrder) {
-        String userId = SecurityUtils.getCurrentUserId();
-        List<BookingResponse> bookings = bookingService.findByUserId(userId, sortBy, sortOrder);
+        List<BookingResponse> bookings = bookingService.findByUserId(SecurityUtils.getCurrentUserId(), sortBy,
+                sortOrder);
         return Result.success(bookings);
     }
 

@@ -48,19 +48,27 @@ export const BookingPage: React.FC = () => {
     }
   };
 
+  const isCancelableStatus = (status: Booking['status']) => {
+    return ['pendingPayment', 'confirmed', 'PENDING_PAYMENT', 'PAID'].includes(status);
+  };
+
   // 状态样式映射字典：根据 UML 状态机返回不同视觉 [cite: 325-339]
   const getStatusConfig = (status: Booking['status']) => {
     switch (status) {
+      case 'pendingPayment':
+      case 'PENDING_PAYMENT':
+        return { label: '待支付', color: '#f59e0b', bg: '#fef3c7' }; // 橙黄
       case 'confirmed':
+      case 'PAID':
+        return { label: '已确认', color: 'var(--color-primary)', bg: '#e6f7f6' }; // 石绿
       case 'active':
       case 'extended':
         return { label: '进行中', color: 'var(--color-primary)', bg: '#e6f7f6' }; // 石绿
       case 'completed':
         return { label: '已完成', color: 'var(--color-text-muted)', bg: '#f1f5f9' }; // 灰色
       case 'cancelled':
+      case 'CANCELLED':
         return { label: '已取消', color: 'var(--color-accent)', bg: '#fff1f2' }; // 山茶红
-      case 'pendingPayment':
-        return { label: '待支付', color: '#f59e0b', bg: '#fef3c7' }; // 橙黄
       default:
         return { label: '未知状态', color: '#94a3b8', bg: '#f8fafc' };
     }
@@ -91,7 +99,8 @@ export const BookingPage: React.FC = () => {
           {bookings.map((booking) => {
             const statusConfig = getStatusConfig(booking.status);
             // 只有 pendingPayment 或 confirmed（开始前）允许取消 [cite: 326, 330, 331]
-            const canCancel = booking.status === 'pendingPayment' || booking.status === 'confirmed';
+            const canCancel = isCancelableStatus(booking.status);
+            const totalCost = typeof booking.totalCost === 'string' ? Number(booking.totalCost) : booking.totalCost;
 
             return (
               <div key={booking.bookingId} style={styles.card}>
@@ -116,7 +125,7 @@ export const BookingPage: React.FC = () => {
                   </div>
                   <div style={styles.infoRow}>
                     <span style={styles.infoLabel}>总费用</span>
-                    <span style={styles.priceValue}>{formatPrice(booking.totalCost)}</span>
+                    <span style={styles.priceValue}>{formatPrice(Number.isFinite(totalCost) ? totalCost : 0)}</span>
                   </div>
                 </div>
 

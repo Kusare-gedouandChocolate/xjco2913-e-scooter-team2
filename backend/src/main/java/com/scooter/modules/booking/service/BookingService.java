@@ -1,5 +1,6 @@
 package com.scooter.modules.booking.service;
 
+import com.scooter.common.exception.BusinessException;
 import com.scooter.modules.booking.dto.BookingCreateResponse;
 import com.scooter.modules.booking.dto.BookingRequest;
 import com.scooter.modules.booking.dto.BookingResponse;
@@ -21,7 +22,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.UUID;
 
 @Service
 public class BookingService {
@@ -40,27 +43,38 @@ public class BookingService {
      */
     @Transactional
     public BookingCreateResponse createBooking(String userId, BookingRequest request) {
-        Scooter scooter = scooterRepository.findById(request.getScooterId())
-                .orElseThrow(() -> new RuntimeException("Scooter not found"));
+        Long scooterId = Objects.requireNonNull(request.getScooterId(), "Scooter ID must not be null");
+        Long rentalOptionId = Objects.requireNonNull(request.getRentalOptionId(), "Rental option ID must not be null");
+
+        Scooter scooter = scooterRepository.findById(scooterId)
+                .orElseThrow(() -> new BusinessException("SCOOTER_NOT_FOUND", "Scooter not found"));
 
         if (scooter.getStatus() != ScooterStatus.AVAILABLE) {
-            throw new RuntimeException("Scooter is not available");
+            throw new BusinessException("SCOOTER_CONFLICT", "Scooter is not available");
         }
+
+        RentalOption option = rentalOptionRepository.findById(rentalOptionId)
+                .orElseThrow(() -> new BusinessException("RENTAL_OPTION_NOT_FOUND", "Rental option not found"));
 
         scooter.setStatus(ScooterStatus.LOCKED);
         scooterRepository.save(scooter);
 
         Booking booking = new Booking();
-        booking.setUserId(userId);
-        booking.setScooterId(scooter.getId());
-        booking.setRentalOptionId(request.getRentalOptionId());
-        booking.setStatus(BookingStatus.PENDING_PAYMENT);
+        booking.setUserId(UUID.fromString(userId));
+        booking.setScooter(scooter);
+        booking.setRentalOption(option);
+
+        booking.setTotalPrice(option.getPrice());
         booking.setCreatedAt(LocalDateTime.now());
+        booking.setStatus(BookingStatus.PENDING_PAYMENT);
+
+        booking.setStartTime(resolveStartTime(request));
 
         Booking saved = bookingRepository.save(booking);
+
         BookingCreateResponse resp = new BookingCreateResponse();
         resp.setBookingId(saved.getId().toString());
-        resp.setStatus(saved.getStatus().name().toLowerCase());
+        resp.setStatus(mapBookingStatusToCamelCase(saved.getStatus()));
         return resp;
     }
 
@@ -70,18 +84,19 @@ public class BookingService {
     @Transactional
     public BookingConfirmation processPayment(PaymentRequest request) {
         // 1. Fetch booking and validate
-        Booking booking = bookingRepository.findById(request.getBookingId())
-                .orElseThrow(() -> new RuntimeException("Booking not found"));
+        Long bookingId = Objects.requireNonNull(request.getBookingId(), "Booking ID must not be null");
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new BusinessException("BOOKING_NOT_FOUND", "Booking not found"));
 
         if (booking.getStatus() != BookingStatus.PENDING_PAYMENT) {
-            throw new RuntimeException("Booking is not in a payable state");
+            throw new BusinessException("BOOKING_CONFLICT", "Booking is not in a payable state");
         }
 
         // 2. Mock payment logic
         if (Boolean.FALSE.equals(request.getSimulateSuccess())) {
             // If payment fails, we could unlock the scooter or keep it pending.
             // For Sprint 1, we'll throw an exception to trigger rollback.
-            throw new RuntimeException("Payment failed: Transaction rejected by mock provider");
+            throw new BusinessException("PAYMENT_FAILED", "Payment failed: Transaction rejected by mock provider");
         }
 
         // 3. Update Booking Status
@@ -89,8 +104,7 @@ public class BookingService {
         bookingRepository.save(booking);
 
         // 4. Update Scooter Status to IN_USE
-        Scooter scooter = scooterRepository.findById(booking.getScooterId())
-                .orElseThrow(() -> new RuntimeException("Scooter lost during payment"));
+        Scooter scooter = booking.getScooter();
         scooter.setStatus(ScooterStatus.IN_USE);
         scooterRepository.save(scooter);
 
@@ -103,23 +117,27 @@ public class BookingService {
         return confirmationRepository.save(confirmation);
     }
 
-    public List<BookingResponse> findByUserId(String userId, String sortBy, String sortOrder) {
-        Sort sort = Sort.by(Sort.Direction.fromString(sortOrder), sortBy);
+    @Transactional(readOnly = true)
+    public List<BookingResponse> findByUserId(String userIdStr, String sortBy, String sortOrder) {
+        UUID userId = UUID.fromString(userIdStr);
+
+        Sort sort = sortOrder.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+
         List<Booking> bookings = bookingRepository.findByUserId(userId, sort);
+
         return bookings.stream().map(this::convertToResponse).collect(Collectors.toList());
     }
 
     @Transactional
     public void cancelBooking(Long bookingId) {
-        Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new RuntimeException("Booking not found"));
+        Booking booking = bookingRepository.findById(Objects.requireNonNull(bookingId, "Booking ID must not be null"))
+                .orElseThrow(() -> new BusinessException("BOOKING_NOT_FOUND", "Booking not found"));
 
         if (booking.getStatus() != BookingStatus.PENDING_PAYMENT && booking.getStatus() != BookingStatus.PAID) {
-            throw new RuntimeException("Booking cannot be cancelled in current status");
+            throw new BusinessException("BOOKING_CONFLICT", "Booking cannot be cancelled in current status");
         }
 
-        Scooter scooter = scooterRepository.findById(booking.getScooterId())
-                .orElseThrow(() -> new RuntimeException("Scooter not found"));
+        Scooter scooter = booking.getScooter();
         scooter.setStatus(ScooterStatus.AVAILABLE);
         scooterRepository.save(scooter);
 
@@ -128,20 +146,56 @@ public class BookingService {
     }
 
     private BookingResponse convertToResponse(Booking booking) {
-        BookingResponse resp = new BookingResponse();
-        resp.setBookingId(booking.getId().toString());
-        resp.setScooterId(booking.getScooterId().toString());
+        BookingResponse response = new BookingResponse();
 
-        RentalOption option = rentalOptionRepository.findById(booking.getRentalOptionId()).orElse(null);
-        resp.setHireType(option != null ? option.getDurationLabel() : "Unknown");
-        resp.setStartTime(booking.getStartTime().toString());
-        resp.setStatus(booking.getStatus().name().toLowerCase());
-        resp.setTotalCost(booking.getTotalPrice());
-        return resp;
+        response.setBookingId(booking.getId() == null ? null : booking.getId().toString());
+
+        if (booking.getScooter() != null) {
+            response.setScooterId(String.valueOf(booking.getScooter().getId()));
+        }
+
+        if (booking.getRentalOption() != null) {
+            response.setHireType(booking.getRentalOption().getDurationLabel());
+        }
+
+        if (booking.getStartTime() != null) {
+            response.setStartTime(booking.getStartTime().toString());
+            if (booking.getRentalOption() != null && booking.getRentalOption().getDurationHours() != null) {
+                response.setEndTime(
+                        booking.getStartTime().plusHours(booking.getRentalOption().getDurationHours()).toString());
+            }
+        }
+
+        if (booking.getStatus() != null) {
+            response.setStatus(mapBookingStatusToCamelCase(booking.getStatus()));
+        }
+
+        response.setTotalCost(booking.getTotalPrice() != null ? booking.getTotalPrice().toString() : null);
+
+        return response;
+    }
+
+    private LocalDateTime resolveStartTime(BookingRequest request) {
+        return request.getStartTime() != null ? request.getStartTime() : LocalDateTime.now();
+    }
+
+    private String mapBookingStatusToCamelCase(BookingStatus status) {
+        switch (status) {
+            case PENDING_PAYMENT:
+                return "pendingPayment";
+            case PAID:
+                return "confirmed";
+            case CANCELLED:
+                return "cancelled";
+            case COMPLETED:
+                return "completed";
+            default:
+                return status.name().toLowerCase();
+        }
     }
 
     public Booking getBookingById(Long bookingId) {
-        return bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new RuntimeException("Booking not found"));
+        return bookingRepository.findById(Objects.requireNonNull(bookingId, "Booking ID must not be null"))
+                .orElseThrow(() -> new BusinessException("BOOKING_NOT_FOUND", "Booking not found"));
     }
 }

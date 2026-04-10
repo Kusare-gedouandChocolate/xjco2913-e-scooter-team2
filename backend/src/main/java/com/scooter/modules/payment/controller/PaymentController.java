@@ -4,6 +4,7 @@ import com.scooter.common.response.Result;
 import com.scooter.modules.payment.dto.PaymentRequest;
 import com.scooter.modules.booking.service.BookingService;
 import com.scooter.modules.confirmation.entity.BookingConfirmation;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,7 +18,7 @@ public class PaymentController {
     private BookingService bookingService;
 
     @PostMapping
-    public Result<BookingConfirmation> createPayment(@RequestBody PaymentRequest request) {
+    public Result<BookingConfirmation> createPayment(@Valid @RequestBody PaymentRequest request) {
         return Result.success(bookingService.processPayment(request));
     }
 }
