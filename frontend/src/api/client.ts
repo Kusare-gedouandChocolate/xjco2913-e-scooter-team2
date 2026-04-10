@@ -38,7 +38,7 @@ apiClient.interceptors.response.use(
     // 统一错误处理逻辑 (可以将错误抛给页面的 StateWrapper 处理)
     if (error.response) {
       // 处理规范中约定的 401, 403, 404, 409 等状态码
-      if (error.response.status === 401 || error.response.status === 403) {
+      if (error.response.status === 401) {
         // Token 过期或未登录，清理本地状态并跳转登录
         localStorage.removeItem('authToken');
         window.location.href = '/login'; 
