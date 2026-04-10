@@ -16,4 +16,6 @@ import java.util.UUID;
 public interface BookingRepository extends JpaRepository<Booking, Long> {
     // Basic CRUD operations like save() and findById() are already provided.
     List<Booking> findByUserId(UUID userId, Sort sort);
+
+    boolean existsByScooter_Id(Long scooterId);
 }

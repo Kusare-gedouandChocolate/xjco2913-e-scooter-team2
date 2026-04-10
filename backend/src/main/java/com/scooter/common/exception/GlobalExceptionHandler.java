@@ -22,6 +22,8 @@ public class GlobalExceptionHandler {
             status = HttpStatus.CONFLICT;
         if (e.getCode().contains("AUTH"))
             status = HttpStatus.UNAUTHORIZED;
+        if (e.getCode().contains("FORBIDDEN"))
+            status = HttpStatus.FORBIDDEN;
 
         return ResponseEntity
                 .status(status)

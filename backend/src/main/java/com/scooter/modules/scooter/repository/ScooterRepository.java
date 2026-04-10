@@ -13,4 +13,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface ScooterRepository extends JpaRepository<Scooter, Long> {
     // Standard query method to find scooters by their current status
     Page<Scooter> findByStatus(ScooterStatus status, Pageable pageable);
+
+    boolean existsByModelIgnoreCase(String model);
 }
