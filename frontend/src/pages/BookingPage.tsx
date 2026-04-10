@@ -21,7 +21,7 @@ export const BookingPage: React.FC = () => {
       setBookings(res.data || []);
     } catch (err: unknown) {
       const error = err as { message?: string };
-      setError(error.message || '获取预订记录失败');
+      setError(error.message || 'Failed to obtain the reservation record');
     } finally {
       setLoading(false);
     }
@@ -33,7 +33,7 @@ export const BookingPage: React.FC = () => {
 
   const handleCancel = async (bookingId: string) => {
     // 增加二次确认，防止误触
-    if (!window.confirm('确定要取消这个预订吗？')) return;
+    if (!window.confirm('Are you sure you want to cancel this reservation?')) return;
     
     setCancellingId(bookingId);
     try {
@@ -42,35 +42,27 @@ export const BookingPage: React.FC = () => {
       await fetchBookings();
     } catch (err: unknown) {
       const error = err as { message?: string };
-      alert(error.message || '取消失败，当前状态可能不允许取消'); // [cite: 473]
+      alert(error.message || 'The cancellation failed. The current status may not allow for cancellation.'); // [cite: 473]
     } finally {
       setCancellingId(null);
     }
   };
 
-  const isCancelableStatus = (status: Booking['status']) => {
-    return ['pendingPayment', 'confirmed', 'PENDING_PAYMENT', 'PAID'].includes(status);
-  };
-
   // 状态样式映射字典：根据 UML 状态机返回不同视觉 [cite: 325-339]
   const getStatusConfig = (status: Booking['status']) => {
     switch (status) {
-      case 'pendingPayment':
-      case 'PENDING_PAYMENT':
-        return { label: '待支付', color: '#f59e0b', bg: '#fef3c7' }; // 橙黄
       case 'confirmed':
-      case 'PAID':
-        return { label: '已确认', color: 'var(--color-primary)', bg: '#e6f7f6' }; // 石绿
       case 'active':
       case 'extended':
-        return { label: '进行中', color: 'var(--color-primary)', bg: '#e6f7f6' }; // 石绿
+        return { label: 'underway', color: 'var(--color-primary)', bg: '#e6f7f6' }; // 石绿
       case 'completed':
-        return { label: '已完成', color: 'var(--color-text-muted)', bg: '#f1f5f9' }; // 灰色
+        return { label: 'completed', color: 'var(--color-text-muted)', bg: '#f1f5f9' }; // 灰色
       case 'cancelled':
-      case 'CANCELLED':
-        return { label: '已取消', color: 'var(--color-accent)', bg: '#fff1f2' }; // 山茶红
+        return { label: 'canceled', color: 'var(--color-accent)', bg: '#fff1f2' }; // 山茶红
+      case 'pendingPayment':
+        return { label: 'unpaid', color: '#f59e0b', bg: '#fef3c7' }; // 橙黄
       default:
-        return { label: '未知状态', color: '#94a3b8', bg: '#f8fafc' };
+        return { label: 'unknown state', color: '#94a3b8', bg: '#f8fafc' };
     }
   };
 
@@ -84,30 +76,29 @@ export const BookingPage: React.FC = () => {
   return (
     <div style={styles.container}>
       <header style={styles.header}>
-        <h1 style={styles.title}>我的行程</h1>
-        <p style={styles.subtitle}>查看您的预订记录与历史订单</p>
+        <h1 style={styles.title}>my journey</h1>
+        <p style={styles.subtitle}>View your reservation records and historical orders</p>
       </header>
 
       <StateWrapper 
         loading={loading} 
         error={error} 
         empty={bookings.length === 0}
-        emptyMessage="您还没有任何预订记录，快去开启第一段旅程吧！"
+        emptyMessage="You don't have any reservation records yet. Hurry up and start your first journey!"
         onRetry={fetchBookings}
       >
         <div style={styles.list}>
           {bookings.map((booking) => {
             const statusConfig = getStatusConfig(booking.status);
             // 只有 pendingPayment 或 confirmed（开始前）允许取消 [cite: 326, 330, 331]
-            const canCancel = isCancelableStatus(booking.status);
-            const totalCost = typeof booking.totalCost === 'string' ? Number(booking.totalCost) : booking.totalCost;
+            const canCancel = booking.status === 'pendingPayment' || booking.status === 'confirmed';
 
             return (
               <div key={booking.bookingId} style={styles.card}>
                 <div style={styles.cardHeader}>
                   <div style={styles.scooterInfo}>
                     <span style={styles.scooterIcon}>🛴</span>
-                    <span style={styles.scooterCode}>车辆 #{booking.scooterId.slice(-4)}</span>
+                    <span style={styles.scooterCode}>vehicle #{booking.scooterId.slice(-4)}</span>
                   </div>
                   <span style={styles.badge(statusConfig.color, statusConfig.bg)}>
                     {statusConfig.label}
@@ -116,16 +107,16 @@ export const BookingPage: React.FC = () => {
 
                 <div style={styles.cardBody}>
                   <div style={styles.infoRow}>
-                    <span style={styles.infoLabel}>预订时长</span>
+                    <span style={styles.infoLabel}>Reservation duration</span>
                     <span style={styles.infoValue}>{booking.hireType}</span>
                   </div>
                   <div style={styles.infoRow}>
-                    <span style={styles.infoLabel}>开始时间</span>
+                    <span style={styles.infoLabel}>start time</span>
                     <span style={styles.infoValue}>{formatDate(booking.startTime)}</span>
                   </div>
                   <div style={styles.infoRow}>
-                    <span style={styles.infoLabel}>总费用</span>
-                    <span style={styles.priceValue}>{formatPrice(Number.isFinite(totalCost) ? totalCost : 0)}</span>
+                    <span style={styles.infoLabel}>Total Tour Fee</span>
+                    <span style={styles.priceValue}>{formatPrice(booking.totalCost)}</span>
                   </div>
                 </div>
 
@@ -137,7 +128,7 @@ export const BookingPage: React.FC = () => {
                       disabled={cancellingId === booking.bookingId}
                       onClick={() => handleCancel(booking.bookingId)}
                     >
-                      {cancellingId === booking.bookingId ? '正在取消...' : '取消预订'}
+                      {cancellingId === booking.bookingId ? 'Cancelling...' : 'Cancel reservation'}
                     </button>
                   </div>
                 )}

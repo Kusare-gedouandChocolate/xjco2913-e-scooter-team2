@@ -1,4 +1,6 @@
 /* src/index.css */
+@import 'leaflet/dist/leaflet.css';
+
 :root {
   /* 核心配色 */
   --color-primary: #57c2c0; /* 石绿：主色调，用于品牌露出、主要按钮、成功状态 */

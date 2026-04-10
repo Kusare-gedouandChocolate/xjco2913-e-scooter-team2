@@ -29,7 +29,7 @@ export interface CustomerProfile {
 export interface Scooter {
   scooterId: string;
   code: string;
-  status: 'available' | 'in_use' | 'maintenance' | 'locked';
+  status: 'available' | 'reserved' | 'unavailable' | 'maintenance';
   location: string;
   basePrice: number;
 }
@@ -45,8 +45,46 @@ export interface Booking {
   bookingId: string;
   scooterId: string;
   startTime: string;
-  endTime?: string;
+  endTime: string;
   hireType: string;
-  status: 'pendingPayment' | 'confirmed' | 'active' | 'extended' | 'completed' | 'cancelled' | 'PENDING_PAYMENT' | 'PAID' | 'CANCELLED';
-  totalCost: number | string;
+  status: 'pendingPayment' | 'confirmed' | 'active' | 'extended' | 'completed' | 'cancelled';
+  totalCost: number;
+}
+
+// --- 以下为 Sprint 2 新增业务模型 ---
+
+// 地图点位模型
+export interface ScooterLocation {
+  scooterId: string;
+  code: string;
+  status: 'available' | 'reserved' | 'unavailable' | 'maintenance';
+  latitude: number;
+  longitude: number;
+  locationZone: string;
+}
+
+// 用户反馈模型 
+export interface Feedback {
+  issueId: string;
+  scooterId?: string;
+  bookingId?: string;
+  userId: string;
+  priority: 'high' | 'low';
+  severity: 'critical' | 'major' | 'minor';
+  status: 'open' | 'inProgress' | 'resolved' | 'closed';
+  description: string;
+  createdAt: string;
+}
+
+// 统计报表模型
+export interface ReportItem {
+  hireType: string;
+  incomeInCents: number;
+}
+
+export interface WeeklyIncomeReport {
+  weekStart: string;
+  weekEnd: string;
+  totalIncomeInCents: number;
+  items: ReportItem[];
 }
