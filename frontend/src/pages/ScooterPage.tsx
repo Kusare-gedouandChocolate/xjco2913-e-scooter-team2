@@ -40,7 +40,7 @@ export const ScooterPage: React.FC = () => {
   
   // --- 交互状态 ---
   const [onlyAvailable, setOnlyAvailable] = useState(true); // 状态筛选
-  const [mapCenter, setMapCenter] = useState<[number, number] | null>(null);
+  const [mapCenter, setMapCenter] = useState<[number, number]>([53.8, -1.55]);
   const [mapError, setMapError] = useState(false); // 地图兜底文案标识
 
   // --- 预订交互状态 ---
@@ -53,7 +53,6 @@ export const ScooterPage: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      // 并发请求：车辆列表、价格规则、地图点位
       const [scootersRes, rulesRes, locsRes] = await Promise.all([
         scootersApi.getScooters(),
         scootersApi.getPricingRules(),
@@ -61,11 +60,17 @@ export const ScooterPage: React.FC = () => {
       ]);
       setScooters(scootersRes.data || []);
       setRules(rulesRes.data || []);
-      setLocations(locsRes.data || []);
-      
+
+      const rawLocs = locsRes.data || [];
+      // 过滤掉无效坐标的位置点
+      const validLocs = rawLocs.filter(loc =>
+          loc.latitude != null && loc.longitude != null &&
+          !isNaN(loc.latitude) && !isNaN(loc.longitude)
+      );
+      setLocations(validLocs);
       // 默认将地图中心设为第一辆车的位置
-      if (locsRes.data && locsRes.data.length > 0) {
-        setMapCenter([locsRes.data[0].latitude, locsRes.data[0].longitude]);
+      if (validLocs.length > 0) {
+        setMapCenter([validLocs[0].latitude, validLocs[0].longitude]);
       }
     } catch (err: unknown) {
       const e = err as { message?: string };
@@ -104,7 +109,7 @@ export const ScooterPage: React.FC = () => {
     try {
       const bookingRes = await bookingsApi.createBooking({
         scooterId: selectedScooter.scooterId,
-        hireType: selectedHireType,
+        rentalOptionId: selectedHireType,
         startTime: getUTCTimeString(),
       });
       const bId = bookingRes.data.bookingId;
@@ -157,12 +162,12 @@ export const ScooterPage: React.FC = () => {
                 <p>地图组件加载失败，但您仍可通过下方列表预订车辆。</p>
               </div>
             ) : (
-              <MapContainer 
-                center={mapCenter || [53.8, -1.55]} // 默认利兹/市中心附近坐标
-                zoom={14} 
-                style={{ height: '100%', width: '100%', borderRadius: '16px', zIndex: 0 }}
-                whenReady={() => setMapError(false)}
-              >
+                <MapContainer
+                    center={mapCenter}
+                    zoom={14}
+                    style={{ height: '100%', width: '100%', borderRadius: '16px', zIndex: 0 }}
+                    whenReady={() => setMapError(false)}
+                >
                 <TileLayer
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                   url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" // 使用现代感浅色地图底图
@@ -170,6 +175,7 @@ export const ScooterPage: React.FC = () => {
                 <MapController center={mapCenter} />
                 
                 {locations.map(loc => (
+
                   <Marker 
                     key={loc.scooterId} 
                     position={[loc.latitude, loc.longitude]}

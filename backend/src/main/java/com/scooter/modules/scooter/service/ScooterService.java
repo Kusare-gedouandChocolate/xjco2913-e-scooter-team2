@@ -3,11 +3,7 @@ package com.scooter.modules.scooter.service;
 import com.scooter.common.exception.BusinessException;
 import com.scooter.common.security.SecurityUtils;
 import com.scooter.modules.booking.repository.BookingRepository;
-import com.scooter.modules.scooter.dto.AdminScooterRequest;
-import com.scooter.modules.scooter.dto.AdminScooterResponse;
-import com.scooter.modules.scooter.dto.PricingRuleResponse;
-import com.scooter.modules.scooter.dto.PricingRuleUpdateRequest;
-import com.scooter.modules.scooter.dto.ScooterResponse;
+import com.scooter.modules.scooter.dto.*;
 import com.scooter.modules.scooter.entity.RentalOption;
 import com.scooter.modules.scooter.entity.Scooter;
 import com.scooter.modules.scooter.entity.ScooterStatus;
@@ -21,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class ScooterService {
@@ -191,5 +188,40 @@ public class ScooterService {
                 .min(Comparator.naturalOrder())
                 .map(price -> price.intValue())
                 .orElse(0);
+    }
+
+    public List<ScooterLocationResponse> getScooterLocations(boolean onlyAvailable) {
+        Stream<Scooter> stream = scooterRepository.findAll().stream();
+        if (onlyAvailable) {
+            stream = stream.filter(s -> s.getStatus() == ScooterStatus.AVAILABLE);
+        }
+        return stream
+                .map(this::convertToLocationResponse)
+                .collect(Collectors.toList());
+    }
+
+    private ScooterLocationResponse convertToLocationResponse(Scooter scooter) {
+        ScooterLocationResponse resp = new ScooterLocationResponse();
+        resp.setScooterId(scooter.getId().toString());
+        resp.setCode(scooter.getModel());
+        resp.setStatus(scooter.getStatus().name().toLowerCase());
+
+        // 解析 currentLocation 字符串 "lat,lng"
+        String location = scooter.getCurrentLocation();
+        if (location != null && location.contains(",")) {
+            String[] parts = location.split(",");
+            try {
+                resp.setLatitude(Double.parseDouble(parts[0].trim()));
+                resp.setLongitude(Double.parseDouble(parts[1].trim()));
+            } catch (NumberFormatException e) {
+                // 解析失败时设为默认坐标或 null
+                resp.setLatitude(null);
+                resp.setLongitude(null);
+            }
+        } else {
+            resp.setLatitude(null);
+            resp.setLongitude(null);
+        }
+        return resp;
     }
 }

@@ -1,16 +1,20 @@
 // src/pages/BookingPage.tsx
 import React, { useState, useEffect } from 'react';
 import { bookingsApi } from '../api';
-import type { Booking } from '../types';
+import type { Booking, BookingStatus } from '../types';
 import { StateWrapper } from '../components/StateWrapper';
-import { formatPrice } from '../utils/format';
+
+// 辅助函数：格式化后端返回的价格字符串（单位为元）
+const formatPriceFromString = (value?: string): string => {
+  if (!value) return '¥ 0.00';
+  const num = parseFloat(value);
+  return isNaN(num) ? '¥ 0.00' : `¥ ${num.toFixed(2)}`;
+};
 
 export const BookingPage: React.FC = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
-  // 记录正在执行取消操作的订单 ID，用于展示局部 Loading 态
   const [cancellingId, setCancellingId] = useState<string | null>(null);
 
   const fetchBookings = async () => {
@@ -21,7 +25,7 @@ export const BookingPage: React.FC = () => {
       setBookings(res.data || []);
     } catch (err: unknown) {
       const error = err as { message?: string };
-      setError(error.message || 'Failed to obtain the reservation record');
+      setError(error.message || '获取预订记录失败');
     } finally {
       setLoading(false);
     }
@@ -32,41 +36,35 @@ export const BookingPage: React.FC = () => {
   }, []);
 
   const handleCancel = async (bookingId: string) => {
-    // 增加二次确认，防止误触
-    if (!window.confirm('Are you sure you want to cancel this reservation?')) return;
-    
+    if (!window.confirm('确定要取消此预订吗？')) return;
     setCancellingId(bookingId);
     try {
       await bookingsApi.cancelBooking(bookingId);
-      // 取消成功后刷新列表
-      await fetchBookings();
+      await fetchBookings(); // 刷新列表
     } catch (err: unknown) {
       const error = err as { message?: string };
-      alert(error.message || 'The cancellation failed. The current status may not allow for cancellation.'); // [cite: 473]
+      alert(error.message || '取消失败，当前状态可能不允许取消。');
     } finally {
       setCancellingId(null);
     }
   };
 
-  // 状态样式映射字典：根据 UML 状态机返回不同视觉 [cite: 325-339]
-  const getStatusConfig = (status: Booking['status']) => {
+  // 状态样式映射（与后端 BookingStatus 对齐）
+  const getStatusConfig = (status: BookingStatus) => {
     switch (status) {
-      case 'confirmed':
-      case 'active':
-      case 'extended':
-        return { label: 'underway', color: 'var(--color-primary)', bg: '#e6f7f6' }; // 石绿
-      case 'completed':
-        return { label: 'completed', color: 'var(--color-text-muted)', bg: '#f1f5f9' }; // 灰色
-      case 'cancelled':
-        return { label: 'canceled', color: 'var(--color-accent)', bg: '#fff1f2' }; // 山茶红
-      case 'pendingPayment':
-        return { label: 'unpaid', color: '#f59e0b', bg: '#fef3c7' }; // 橙黄
+      case 'PAID':
+        return { label: '已确认', color: 'var(--color-primary)', bg: '#e6f7f6' };
+      case 'PENDING_PAYMENT':
+        return { label: '待支付', color: '#f59e0b', bg: '#fef3c7' };
+      case 'CANCELLED':
+        return { label: '已取消', color: 'var(--color-accent)', bg: '#fff1f2' };
+      case 'COMPLETED':
+        return { label: '已完成', color: 'var(--color-text-muted)', bg: '#f1f5f9' };
       default:
-        return { label: 'unknown state', color: '#94a3b8', bg: '#f8fafc' };
+        return { label: '未知', color: '#94a3b8', bg: '#f8fafc' };
     }
   };
 
-  // 格式化 UTC 时间为本地易读格式
   const formatDate = (isoString: string) => {
     if (!isoString) return '--';
     const date = new Date(isoString);
@@ -74,78 +72,91 @@ export const BookingPage: React.FC = () => {
   };
 
   return (
-    <div style={styles.container}>
-      <header style={styles.header}>
-        <h1 style={styles.title}>my journey</h1>
-        <p style={styles.subtitle}>View your reservation records and historical orders</p>
-      </header>
+      <div style={styles.container}>
+        <header style={styles.header}>
+          <h1 style={styles.title}>我的行程</h1>
+          <p style={styles.subtitle}>查看您的预订记录与历史订单</p>
+        </header>
 
-      <StateWrapper 
-        loading={loading} 
-        error={error} 
-        empty={bookings.length === 0}
-        emptyMessage="You don't have any reservation records yet. Hurry up and start your first journey!"
-        onRetry={fetchBookings}
-      >
-        <div style={styles.list}>
-          {bookings.map((booking) => {
-            const statusConfig = getStatusConfig(booking.status);
-            // 只有 pendingPayment 或 confirmed（开始前）允许取消 [cite: 326, 330, 331]
-            const canCancel = booking.status === 'pendingPayment' || booking.status === 'confirmed';
+        <StateWrapper
+            loading={loading}
+            error={error}
+            empty={bookings.length === 0}
+            emptyMessage="您还没有任何预订记录，快去开启一段旅程吧！"
+            onRetry={fetchBookings}
+        >
+          <div style={styles.list}>
+            {bookings.map((booking) => {
+              const statusConfig = getStatusConfig(booking.status);
+              // 只有 PENDING_PAYMENT 或 PAID 状态允许取消（与后端一致）
+              const canCancel = booking.status === 'PENDING_PAYMENT' || booking.status === 'PAID';
 
-            return (
-              <div key={booking.bookingId} style={styles.card}>
-                <div style={styles.cardHeader}>
-                  <div style={styles.scooterInfo}>
-                    <span style={styles.scooterIcon}>🛴</span>
-                    <span style={styles.scooterCode}>vehicle #{booking.scooterId.slice(-4)}</span>
-                  </div>
-                  <span style={styles.badge(statusConfig.color, statusConfig.bg)}>
+              return (
+                  <div key={booking.bookingId} style={styles.card}>
+                    <div style={styles.cardHeader}>
+                      <div style={styles.scooterInfo}>
+                        <span style={styles.scooterIcon}>🛴</span>
+                        <span style={styles.scooterCode}>车辆 #{booking.scooterId.slice(-4)}</span>
+                      </div>
+                      <span style={styles.badge(statusConfig.color, statusConfig.bg)}>
                     {statusConfig.label}
                   </span>
-                </div>
+                    </div>
 
-                <div style={styles.cardBody}>
-                  <div style={styles.infoRow}>
-                    <span style={styles.infoLabel}>Reservation duration</span>
-                    <span style={styles.infoValue}>{booking.hireType}</span>
-                  </div>
-                  <div style={styles.infoRow}>
-                    <span style={styles.infoLabel}>start time</span>
-                    <span style={styles.infoValue}>{formatDate(booking.startTime)}</span>
-                  </div>
-                  <div style={styles.infoRow}>
-                    <span style={styles.infoLabel}>Total Tour Fee</span>
-                    <span style={styles.priceValue}>{formatPrice(booking.totalCost)}</span>
-                  </div>
-                </div>
+                    <div style={styles.cardBody}>
+                      <div style={styles.infoRow}>
+                        <span style={styles.infoLabel}>租赁套餐</span>
+                        <span style={styles.infoValue}>{booking.hireType}</span>
+                      </div>
+                      <div style={styles.infoRow}>
+                        <span style={styles.infoLabel}>开始时间</span>
+                        <span style={styles.infoValue}>{formatDate(booking.startTime)}</span>
+                      </div>
+                      {booking.endTime && (
+                          <div style={styles.infoRow}>
+                            <span style={styles.infoLabel}>预计结束</span>
+                            <span style={styles.infoValue}>{formatDate(booking.endTime)}</span>
+                          </div>
+                      )}
+                      <div style={styles.infoRow}>
+                        <span style={styles.infoLabel}>总费用</span>
+                        <span style={styles.priceValue}>{formatPriceFromString(booking.totalCost)}</span>
+                      </div>
+                      {booking.discountAmount && parseFloat(booking.discountAmount) > 0 && (
+                          <div style={styles.infoRow}>
+                            <span style={styles.infoLabel}>折扣优惠</span>
+                            <span style={{ ...styles.infoValue, color: 'var(--color-accent)' }}>
+                        -{formatPriceFromString(booking.discountAmount)}
+                      </span>
+                          </div>
+                      )}
+                    </div>
 
-                {/* 操作区：如果是可取消状态，展示山茶红取消按钮 */}
-                {canCancel && (
-                  <div style={styles.cardFooter}>
-                    <button 
-                      style={styles.cancelBtn(cancellingId === booking.bookingId)}
-                      disabled={cancellingId === booking.bookingId}
-                      onClick={() => handleCancel(booking.bookingId)}
-                    >
-                      {cancellingId === booking.bookingId ? 'Cancelling...' : 'Cancel reservation'}
-                    </button>
+                    {canCancel && (
+                        <div style={styles.cardFooter}>
+                          <button
+                              style={styles.cancelBtn(cancellingId === booking.bookingId)}
+                              disabled={cancellingId === booking.bookingId}
+                              onClick={() => handleCancel(booking.bookingId)}
+                          >
+                            {cancellingId === booking.bookingId ? '取消中...' : '取消预订'}
+                          </button>
+                        </div>
+                    )}
                   </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </StateWrapper>
-    </div>
+              );
+            })}
+          </div>
+        </StateWrapper>
+      </div>
   );
 };
 
-// --- 内联样式字典 ---
+// --- 内联样式字典（保持原风格）---
 const styles = {
   container: {
     padding: '24px',
-    maxWidth: '800px', // 记录页不需要铺太宽，窄一点更聚光
+    maxWidth: '800px',
     margin: '0 auto',
   },
   header: {
@@ -237,10 +248,10 @@ const styles = {
     borderRadius: '8px',
     fontWeight: 600,
     fontSize: '0.9rem',
-    color: isCancelling ? '#fca5a5' : 'var(--color-accent)', // 山茶红
-    backgroundColor: isCancelling ? '#fef2f2' : '#fff1f2', // 极浅山茶红底色
+    color: isCancelling ? '#fca5a5' : 'var(--color-accent)',
+    backgroundColor: isCancelling ? '#fef2f2' : '#fff1f2',
     border: 'none',
     cursor: isCancelling ? 'not-allowed' : 'pointer',
     transition: 'background-color 0.2s',
-  })
+  }),
 };

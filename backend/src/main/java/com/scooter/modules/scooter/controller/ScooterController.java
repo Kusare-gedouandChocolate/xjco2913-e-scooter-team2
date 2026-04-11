@@ -2,6 +2,7 @@ package com.scooter.modules.scooter.controller;
 
 import com.scooter.common.response.Result;
 import com.scooter.modules.scooter.dto.PricingRuleResponse;
+import com.scooter.modules.scooter.dto.ScooterLocationResponse;
 import com.scooter.modules.scooter.dto.ScooterResponse;
 import com.scooter.modules.scooter.entity.ScooterStatus;
 import com.scooter.modules.scooter.service.ScooterService;
@@ -33,5 +34,11 @@ public class ScooterController {
     @GetMapping("/pricing-rules")
     public Result<List<PricingRuleResponse>> getPricingRules() {
         return Result.success(scooterService.getPricingRules());
+    }
+
+    @GetMapping("/locations")
+    public Result<List<ScooterLocationResponse>> getScooterLocations(
+            @RequestParam(defaultValue = "true") boolean onlyAvailable) {
+        return Result.success(scooterService.getScooterLocations(onlyAvailable));
     }
 }

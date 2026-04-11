@@ -14,6 +14,10 @@ import com.scooter.modules.feedback.entity.FeedbackStatus;
 import com.scooter.modules.feedback.repository.FeedbackRepository;
 import com.scooter.modules.scooter.repository.ScooterRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -149,5 +153,25 @@ public class FeedbackService {
         response.setScooterId(feedback.getScooterId() != null ? feedback.getScooterId().toString() : null);
         response.setCreatedAt(feedback.getCreatedAt());
         return response;
+    }
+
+    @Transactional(readOnly = true)
+    public Page<FeedbackResponse> getAllFeedback(FeedbackPriority priority, FeedbackStatus status, int page, int size) {
+        SecurityUtils.requireManagerRole();
+
+        PageRequest pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<Feedback> feedbackPage;
+
+        if (priority != null && status != null) {
+            feedbackPage = feedbackRepository.findByPriorityAndStatus(priority, status, pageable);
+        } else if (priority != null) {
+            feedbackPage = feedbackRepository.findByPriority(priority, pageable);
+        } else if (status != null) {
+            feedbackPage = feedbackRepository.findByStatus(status, pageable);
+        } else {
+            feedbackPage = feedbackRepository.findAll(pageable);
+        }
+
+        return feedbackPage.map(this::toResponse);
     }
 }

@@ -4,9 +4,13 @@ import com.scooter.common.response.Result;
 import com.scooter.modules.feedback.dto.FeedbackPriorityUpdateRequest;
 import com.scooter.modules.feedback.dto.FeedbackResponse;
 import com.scooter.modules.feedback.dto.FeedbackStatusUpdateRequest;
+import com.scooter.modules.feedback.entity.FeedbackPriority;
+import com.scooter.modules.feedback.entity.FeedbackStatus;
 import com.scooter.modules.feedback.service.FeedbackService;
 import jakarta.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,5 +37,15 @@ public class AdminFeedbackController {
     @GetMapping("/high-priority")
     public Result<List<FeedbackResponse>> getHighPriorityFeedback() {
         return Result.success(feedbackService.getHighPriorityFeedback());
+    }
+
+    @GetMapping
+    public Result<Page<FeedbackResponse>> getAllFeedback(
+            @RequestParam(required = false) FeedbackPriority priority,
+            @RequestParam(required = false) FeedbackStatus status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        Page<FeedbackResponse> result = feedbackService.getAllFeedback(priority, status, page, size);
+        return Result.success(result);
     }
 }

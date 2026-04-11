@@ -1,13 +1,21 @@
 // src/api/index.ts
 import apiClient from './client';
-import type { ApiResponse, User, Scooter, PricingRule, Booking, ScooterLocation, Feedback, WeeklyIncomeReport } from '../types';
+import type {
+  ApiResponse,
+  Scooter,
+  PricingRule,
+  AdminScooterRequest,
+  AdminScooterResponse,
+  PricingRuleUpdateRequest,
+  PricingRuleResponse, ScooterLocation, Feedback, Booking, User, WeeklyRevenueStatisticsResponse,
+} from '../types';
 
 // ==========================================
 // 1. Auth 模块 (对应规范 4.1) [cite: 389-392]
 // ==========================================
 export interface LoginPayload {
   email: string;
-  passwordHash: string;
+  password: string;
 }
 
 export interface RegisterPayload extends LoginPayload {
@@ -41,7 +49,7 @@ export const scootersApi = {
 // ==========================================
 export const bookingsApi = {
   // 创建预订
-  createBooking: (data: { scooterId: string; hireType: string; startTime: string }): Promise<ApiResponse<{ bookingId: string; status: string }>> => {
+  createBooking: (data: { scooterId: string; rentalOptionId: string; startTime: string }): Promise<ApiResponse<{ bookingId: string; status: string }>> => {
     return apiClient.post('/bookings', data);
   },
   
@@ -66,7 +74,12 @@ export const bookingsApi = {
 // ==========================================
 export const feedbackApi = {
   // 客户：提交反馈
-  submitFeedback: (data: { description: string; severity: string; scooterId?: string }): Promise<ApiResponse<null>> => {
+  submitFeedback: (data: {
+    content: string;
+    category: 'BUG_REPORT' | 'COMPLAINT' | 'SUGGESTION' | 'OTHER';
+    bookingId?: number;
+    scooterId?: number;
+  }): Promise<ApiResponse<null>> => {
     return apiClient.post('/feedback', data);
   },
   // 管理端：获取反馈列表
@@ -84,16 +97,33 @@ export const feedbackApi = {
 // ==========================================
 export const adminApi = {
   // 获取所有车辆 (包含不可用)
-  getAllScooters: (): Promise<ApiResponse<Scooter[]>> => {
+  getAllScooters: (): Promise<ApiResponse<AdminScooterResponse[]>> => {
     return apiClient.get('/admin/scooters');
   },
-  // 更新车辆状态或配置
-  updateScooter: (scooterId: string, data: Partial<Scooter>): Promise<ApiResponse<Scooter>> => {
-    return apiClient.patch(`/admin/scooters/${scooterId}`, data);
+
+  // 创建车辆（如有需要）
+  createScooter: (data: AdminScooterRequest): Promise<ApiResponse<AdminScooterResponse>> => {
+    return apiClient.post('/admin/scooters', data);
   },
-  // 更新价格规则
-  updatePricingRule: (ruleId: string, data: Partial<PricingRule>): Promise<ApiResponse<PricingRule>> => {
-    return apiClient.patch(`/admin/pricing-rules/${ruleId}`, data);
+
+  // 更新车辆 (注意方法改为 PUT，请求体改为 AdminScooterRequest)
+  updateScooter: (scooterId: string, data: AdminScooterRequest): Promise<ApiResponse<AdminScooterResponse>> => {
+    return apiClient.put(`/admin/scooters/${scooterId}`, data);
+  },
+
+  // 删除车辆
+  deleteScooter: (scooterId: string): Promise<ApiResponse<void>> => {
+    return apiClient.delete(`/admin/scooters/${scooterId}`);
+  },
+
+  // 获取所有价格规则（也可复用 scootersApi 中的）
+  getPricingRules: (): Promise<ApiResponse<PricingRuleResponse[]>> => {
+    return apiClient.get('/pricing-rules');
+  },
+
+  // 更新价格规则 (方法改为 PUT，请求体改为 PricingRuleUpdateRequest)
+  updatePricingRule: (ruleId: string, data: PricingRuleUpdateRequest): Promise<ApiResponse<PricingRuleResponse>> => {
+    return apiClient.put(`/admin/pricing-rules/${ruleId}`, data);
   }
 };
 
@@ -108,8 +138,10 @@ export const mapsApi = {
 };
 
 export const reportsApi = {
-  // 获取周收入统计
-  getWeeklyIncome: (weekStart: string): Promise<ApiResponse<WeeklyIncomeReport>> => {
-    return apiClient.get(`/reports/weekly-income?weekStart=${weekStart}&groupBy=hireType`);
+  // 获取周收入统计 (路径改为后端实际端点，参数增加 startDate/endDate)
+  getWeeklyRevenue: (startDate: string, endDate: string, weekStart?: string): Promise<ApiResponse<WeeklyRevenueStatisticsResponse>> => {
+    const params = new URLSearchParams({ startDate, endDate });
+    if (weekStart) params.append('weekStart', weekStart);
+    return apiClient.get(`/admin/statistics/weekly-revenue?${params.toString()}`);
   }
 };

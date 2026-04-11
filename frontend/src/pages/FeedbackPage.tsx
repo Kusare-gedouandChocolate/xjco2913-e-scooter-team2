@@ -2,7 +2,10 @@
 import React, { useState, useEffect } from 'react';
 import { feedbackApi } from '../api';
 import type { Feedback } from '../types';
-import { StateWrapper } from '../components/StateWrapper';
+import { StateWrapper } from '../components/StateWrapper'
+
+type FeedbackCategory = 'BUG_REPORT' | 'COMPLAINT' | 'SUGGESTION' | 'OTHER';
+
 
 export const FeedbackPage: React.FC = () => {
   // --- 身份与视图控制 ---
@@ -10,8 +13,8 @@ export const FeedbackPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<'customer' | 'admin'>('customer');
 
   // --- 用户端：提交反馈状态 ---
-  const [description, setDescription] = useState('');
-  const [severity, setSeverity] = useState('minor');
+  const [content, setContent] = useState('');
+  const [category, setCategory] = useState<FeedbackCategory>('SUGGESTION');
   const [scooterId, setScooterId] = useState('');
   const [submitLoading, setSubmitLoading] = useState(false);
   const [submitResult, setSubmitResult] = useState<{ type: 'success' | 'error', msg: string } | null>(null);
@@ -25,7 +28,7 @@ export const FeedbackPage: React.FC = () => {
   // --- 1. 用户端：提交反馈逻辑 ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!description.trim()) {
+    if (!content.trim()) {
       setSubmitResult({ type: 'error', msg: '请填写反馈内容' });
       return;
     }
@@ -33,14 +36,15 @@ export const FeedbackPage: React.FC = () => {
     setSubmitResult(null);
     try {
       await feedbackApi.submitFeedback({
-        description,
-        severity,
-        scooterId: scooterId || undefined // 如果没填就不传
+        content,
+        category,
+        scooterId: scooterId ? Number(scooterId) : undefined,
       });
       setSubmitResult({ type: 'success', msg: '反馈提交成功！感谢您的协助。' });
-      setDescription('');
+      setContent('');
       setScooterId('');
-      setSeverity('minor');
+
+      setCategory('SUGGESTION');
     } catch (err: unknown) {
       const error = err as { message?: string };
       setSubmitResult({ type: 'error', msg: error.message || '提交失败，请重试' });
@@ -122,37 +126,38 @@ export const FeedbackPage: React.FC = () => {
 
           <form onSubmit={handleSubmit} style={styles.form}>
             <div style={styles.formGroup}>
-              <label style={styles.label}>问题严重程度</label>
-              <select 
-                value={severity} 
-                onChange={(e) => setSeverity(e.target.value)}
-                style={styles.input}
+              <label style={styles.label}>反馈类别</label>
+              <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value as FeedbackCategory)}
+                  style={styles.input}
               >
-                <option value="minor">轻微 (Minor) - 不影响骑行</option>
-                <option value="major">一般 (Major) - 影响部分体验</option>
-                <option value="critical">严重 (Critical) - 无法骑行或有安全隐患</option>
+                <option value="BUG_REPORT">🐛 故障报告 (Bug Report)</option>
+                <option value="COMPLAINT">⚠️ 投诉建议 (Complaint)</option>
+                <option value="SUGGESTION">💡 功能建议 (Suggestion)</option>
+                <option value="OTHER">📌 其他 (Other)</option>
               </select>
             </div>
 
             <div style={styles.formGroup}>
               <label style={styles.label}>关联车辆编号 (可选)</label>
-              <input 
-                type="text" 
-                placeholder="例如: SC-001"
-                value={scooterId}
-                onChange={(e) => setScooterId(e.target.value)}
-                style={styles.input}
+              <input
+                  type="text"
+                  placeholder="例如: SC-001"
+                  value={scooterId}
+                  onChange={(e) => setScooterId(e.target.value)}
+                  style={styles.input}
               />
             </div>
 
             <div style={styles.formGroup}>
-              <label style={styles.label}>问题描述</label>
-              <textarea 
-                rows={5}
-                placeholder="请详细描述您遇到的问题..."
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                style={{ ...styles.input, resize: 'vertical' as const }}
+              <label style={styles.label}>反馈内容</label>
+              <textarea
+                  rows={5}
+                  placeholder="请详细描述您遇到的问题或建议..."
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  style={{...styles.input, resize: 'vertical' as const}}
               />
             </div>
 
@@ -167,28 +172,28 @@ export const FeedbackPage: React.FC = () => {
       {/* 视图 B：管理员 - 反馈处理列表 */}
       {/* ============================== */}
       {viewMode === 'admin' && (
-        <div>
-          <div style={styles.adminHeader}>
-            <h2>后台反馈处理中心</h2>
-            <div style={styles.filterGroup}>
-              <label style={{ fontSize: '0.9rem', fontWeight: 600 }}>筛选：</label>
-              <select 
-                value={filterPriority} 
-                onChange={(e) => setFilterPriority(e.target.value as 'all' | 'high')}
-                style={styles.filterSelect}
-              >
-                <option value="all">所有反馈</option>
-                <option value="high">仅看高优先级 (High Priority)</option>
-              </select>
+          <div>
+            <div style={styles.adminHeader}>
+              <h2>后台反馈处理中心</h2>
+              <div style={styles.filterGroup}>
+                <label style={{fontSize: '0.9rem', fontWeight: 600}}>筛选：</label>
+                <select
+                    value={filterPriority}
+                    onChange={(e) => setFilterPriority(e.target.value as 'all' | 'high')}
+                    style={styles.filterSelect}
+                >
+                  <option value="all">所有反馈</option>
+                  <option value="high">仅看高优先级 (High Priority)</option>
+                </select>
+              </div>
             </div>
-          </div>
 
-          <StateWrapper 
-            loading={adminLoading} 
-            error={adminError} 
-            empty={feedbacks.length === 0} 
-            emptyMessage="当前没有需要处理的反馈"
-            onRetry={fetchFeedbacks}
+            <StateWrapper
+                loading={adminLoading}
+                error={adminError}
+                empty={feedbacks.length === 0}
+                emptyMessage="当前没有需要处理的反馈"
+                onRetry={fetchFeedbacks}
           >
             <div style={styles.listGrid}>
               {feedbacks.map(fb => (
