@@ -138,7 +138,8 @@ Backend startup now initializes repeatable local demo data automatically through
 3. `seed-users.sql`
 4. `seed-demo-data.sql`
 
-After starting the backend, a fresh or existing local PostgreSQL database will be aligned with the baseline demo dataset.
+After starting the backend, a fresh or existing local PostgreSQL
+database will be aligned with the baseline demo dataset.
 
 ### 11.1 Default Accounts
 
@@ -168,6 +169,10 @@ The local demo dataset includes:
 
 ### 11.3 Notes
 
-1. The seed scripts are designed to be repeatable and should work on both new and existing local databases.
-2. If login role changes are not reflected in the browser, sign out and sign in again, and clear `localStorage` if needed.
-3. If PostgreSQL connection settings differ on another machine, update `backend/src/main/resources/application.yml` before starting the backend.
+1. The seed scripts are designed to be repeatable and should work on
+   both new and existing local databases.
+2. If login role changes are not reflected in the browser, sign out and
+   sign in again, and clear `localStorage` if needed.
+3. If PostgreSQL connection settings differ on another machine, update
+   `backend/src/main/resources/application.yml` before starting the
+   backend.
