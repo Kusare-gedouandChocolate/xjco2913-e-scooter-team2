@@ -2,6 +2,7 @@ package com.scooter.modules.statistics.service;
 
 import com.scooter.common.exception.BusinessException;
 import com.scooter.common.security.SecurityUtils;
+import com.scooter.modules.booking.entity.BookingStatus;
 import com.scooter.modules.payment.entity.Payment;
 import com.scooter.modules.payment.entity.PaymentStatus;
 import com.scooter.modules.payment.repository.PaymentRepository;
@@ -44,8 +45,8 @@ public class RevenueStatisticsService {
 
         LocalDateTime startDateTime = startDate.atStartOfDay();
         LocalDateTime endDateTime = endDate.plusDays(1).atStartOfDay().minusNanos(1);
-        List<Payment> payments = paymentRepository.findByPaymentStatusAndPaidAtBetweenOrderByPaidAtAsc(
-                PaymentStatus.SUCCESS, startDateTime, endDateTime);
+        List<Payment> payments = paymentRepository.findByPaymentStatusAndBooking_StatusAndBooking_CompletedAtBetweenOrderByBooking_CompletedAtAsc(
+                PaymentStatus.SUCCESS, BookingStatus.COMPLETED, startDateTime, endDateTime);
 
         List<WeeklyRevenueSummaryResponse> summaries = aggregateByWeek(payments);
 
@@ -69,8 +70,8 @@ public class RevenueStatisticsService {
 
         LocalDateTime startDateTime = dateQuery.startDate().atStartOfDay();
         LocalDateTime endDateTime = dateQuery.endDate().plusDays(1).atStartOfDay().minusNanos(1);
-        List<Payment> payments = paymentRepository.findByPaymentStatusAndPaidAtBetweenOrderByPaidAtAsc(
-                PaymentStatus.SUCCESS, startDateTime, endDateTime);
+        List<Payment> payments = paymentRepository.findByPaymentStatusAndBooking_StatusAndBooking_CompletedAtBetweenOrderByBooking_CompletedAtAsc(
+                PaymentStatus.SUCCESS, BookingStatus.COMPLETED, startDateTime, endDateTime);
 
         List<DailyRevenueSummaryResponse> summaries = aggregateByDay(payments, dateQuery.startDate(), dateQuery.endDate());
 

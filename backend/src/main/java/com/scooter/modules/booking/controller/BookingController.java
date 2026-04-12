@@ -44,4 +44,10 @@ public class BookingController {
         bookingService.cancelBooking(bookingId);
         return Result.success(null);
     }
+
+    @PostMapping("/{bookingId}/complete")
+    public Result<Void> completeBooking(@PathVariable Long bookingId) {
+        bookingService.completeBooking(bookingId);
+        return Result.success(null);
+    }
 }

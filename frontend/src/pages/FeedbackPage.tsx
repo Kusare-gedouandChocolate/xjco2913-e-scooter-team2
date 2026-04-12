@@ -6,6 +6,7 @@ import { isManager } from '../utils/auth';
 
 type FeedbackCategory = 'BUG_REPORT' | 'COMPLAINT' | 'SUGGESTION' | 'OTHER';
 type AdminFilterPriority = 'all' | 'HIGH';
+type AdminFilterStatus = 'all' | 'SUBMITTED' | 'IN_PROGRESS' | 'RESOLVED';
 
 const categoryLabelMap: Record<Feedback['category'], string> = {
   BUG_REPORT: 'Bug Report',
@@ -34,6 +35,7 @@ export const FeedbackPage: React.FC = () => {
   const [adminLoading, setAdminLoading] = useState(false);
   const [adminError, setAdminError] = useState<string | null>(null);
   const [filterPriority, setFilterPriority] = useState<AdminFilterPriority>('all');
+  const [filterStatus, setFilterStatus] = useState<AdminFilterStatus>('all');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,7 +68,10 @@ export const FeedbackPage: React.FC = () => {
     setAdminLoading(true);
     setAdminError(null);
     try {
-      const params = filterPriority === 'HIGH' ? { priority: 'HIGH' as const } : undefined;
+      const params = {
+        ...(filterPriority === 'HIGH' ? { priority: 'HIGH' as const } : {}),
+        ...(filterStatus !== 'all' ? { status: filterStatus } : {}),
+      };
       const res = await feedbackApi.getAdminFeedback(params);
       setFeedbacks(res.data?.content ?? []);
     } catch (err: unknown) {
@@ -83,7 +88,7 @@ export const FeedbackPage: React.FC = () => {
       fetchFeedbacks();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [manager, viewMode, filterPriority]);
+  }, [manager, viewMode, filterPriority, filterStatus]);
 
   const handleUpdatePriority = async (feedbackId: string, newPriority: 'HIGH' | 'LOW') => {
     try {
@@ -94,6 +99,18 @@ export const FeedbackPage: React.FC = () => {
     } catch (err: unknown) {
       const error = err as { message?: string };
       alert(error.message || 'Failed to update priority.');
+    }
+  };
+
+  const handleUpdateStatus = async (feedbackId: string, newStatus: 'IN_PROGRESS' | 'RESOLVED') => {
+    try {
+      await feedbackApi.updateStatus(feedbackId, { status: newStatus });
+      setFeedbacks((prev) =>
+        prev.map((fb) => (fb.feedbackId === feedbackId ? { ...fb, status: newStatus } : fb))
+      );
+    } catch (err: unknown) {
+      const error = err as { message?: string };
+      alert(error.message || 'Failed to update status.');
     }
   };
 
@@ -190,6 +207,17 @@ export const FeedbackPage: React.FC = () => {
                 <option value="all">All</option>
                 <option value="HIGH">High Priority Only</option>
               </select>
+              <label style={{ fontSize: '0.9rem', fontWeight: 600 }}>Status:</label>
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value as AdminFilterStatus)}
+                style={styles.filterSelect}
+              >
+                <option value="all">All</option>
+                <option value="SUBMITTED">Submitted</option>
+                <option value="IN_PROGRESS">In Progress</option>
+                <option value="RESOLVED">Resolved</option>
+              </select>
             </div>
           </div>
 
@@ -238,6 +266,22 @@ export const FeedbackPage: React.FC = () => {
                         onClick={() => handleUpdatePriority(fb.feedbackId, 'LOW')}
                       >
                         Mark Normal
+                      </button>
+                    )}
+                    {fb.status === 'SUBMITTED' && (
+                      <button
+                        style={styles.actionBtn('progress')}
+                        onClick={() => handleUpdateStatus(fb.feedbackId, 'IN_PROGRESS')}
+                      >
+                        Start Progress
+                      </button>
+                    )}
+                    {fb.status === 'IN_PROGRESS' && (
+                      <button
+                        style={styles.actionBtn('resolve')}
+                        onClick={() => handleUpdateStatus(fb.feedbackId, 'RESOLVED')}
+                      >
+                        Resolve
                       </button>
                     )}
                   </div>
@@ -403,15 +447,29 @@ const styles = {
     borderTop: '1px solid var(--color-border)',
     gap: '12px',
   },
-  actionBtn: (action: 'high' | 'low') => ({
+  actionBtn: (action: 'high' | 'low' | 'progress' | 'resolve') => ({
     padding: '6px 12px',
     borderRadius: '6px',
     border: 'none',
     fontWeight: 600,
     fontSize: '0.85rem',
     cursor: 'pointer',
-    backgroundColor: action === 'high' ? '#fff1f2' : '#f1f5f9',
-    color: action === 'high' ? 'var(--color-accent)' : 'var(--color-text-muted)',
+    backgroundColor:
+      action === 'high'
+        ? '#fff1f2'
+        : action === 'resolve'
+          ? '#e6f7f6'
+          : action === 'progress'
+            ? '#dbeafe'
+            : '#f1f5f9',
+    color:
+      action === 'high'
+        ? 'var(--color-accent)'
+        : action === 'resolve'
+          ? 'var(--color-primary)'
+          : action === 'progress'
+            ? '#2563eb'
+            : 'var(--color-text-muted)',
     transition: 'background-color 0.2s',
   }),
 };

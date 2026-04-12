@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 public class BookingResponse {
     private String bookingId;
     private String scooterId;
+    private String scooterName;
     private String hireType;
     private String startTime;
     private String endTime;

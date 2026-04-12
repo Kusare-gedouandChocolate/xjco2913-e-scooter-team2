@@ -29,7 +29,7 @@ export interface CustomerProfile {
 export interface Scooter {
   scooterId: string;
   code: string;
-  status: 'available' | 'reserved' | 'unavailable' | 'maintenance';
+  status: 'available' | 'in_use' | 'maintenance' | 'locked';
   location: string;
   basePrice: number;
 }
@@ -46,6 +46,7 @@ export type BookingStatus = 'PENDING_PAYMENT' | 'PAID' | 'CANCELLED' | 'COMPLETE
 export interface Booking {
   bookingId: string;
   scooterId: string;
+  scooterName?: string;
   hireType: string;
   startTime: string;
   endTime?: string;
@@ -63,7 +64,7 @@ export interface Booking {
 export interface ScooterLocation {
   scooterId: string;
   code: string;
-  status: 'available' | 'reserved' | 'unavailable' | 'maintenance';
+  status: 'available' | 'in_use' | 'maintenance' | 'locked';
   latitude: number;
   longitude: number;
   locationZone: string;
@@ -163,4 +164,8 @@ export interface PricingRuleUpdateRequest {
   hireType: string;
   durationHours: number;
   price: number;
+}
+
+export interface PricingRuleResponse {
+  durationHours: number;
 }

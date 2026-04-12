@@ -6,5 +6,7 @@ export const formatPrice = (cents: number): string => {
 
 // 规范要求：时间格式 ISO8601，统一 UTC [cite: 366]
 export const getUTCTimeString = (): string => {
-  return new Date().toISOString(); 
+  const now = new Date();
+  const pad = (value: number): string => String(value).padStart(2, '0');
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
 };

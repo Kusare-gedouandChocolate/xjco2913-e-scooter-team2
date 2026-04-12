@@ -49,12 +49,12 @@ export const scootersApi = {
 // ==========================================
 export const bookingsApi = {
   // 创建预订
-  createBooking: (data: { scooterId: string; rentalOptionId: string; startTime: string }): Promise<ApiResponse<{ bookingId: string; status: string }>> => {
+  createBooking: (data: { scooterId: number; rentalOptionId: number; startTime: string }): Promise<ApiResponse<{ bookingId: string; status: string }>> => {
     return apiClient.post('/bookings', data);
   },
   
   // 模拟支付
-  payBooking: (data: { bookingId: string }): Promise<ApiResponse<null>> => {
+  payBooking: (data: { bookingId: number; paymentMethod?: string }): Promise<ApiResponse<null>> => {
     return apiClient.post('/payments', data);
   },
 
@@ -66,6 +66,9 @@ export const bookingsApi = {
   // 取消预订
   cancelBooking: (bookingId: string): Promise<ApiResponse<null>> => {
     return apiClient.post(`/bookings/${bookingId}/cancel`);
+  },
+  completeBooking: (bookingId: string): Promise<ApiResponse<null>> => {
+    return apiClient.post(`/bookings/${bookingId}/complete`);
   }
 };
 
@@ -89,6 +92,9 @@ export const feedbackApi = {
   // 管理端：修改优先级
   updatePriority: (feedbackId: string, data: { priority: 'HIGH' | 'LOW' }): Promise<ApiResponse<Feedback>> => {
     return apiClient.patch(`/admin/feedback/${feedbackId}/priority`, data);
+  },
+  updateStatus: (feedbackId: string, data: { status: 'SUBMITTED' | 'IN_PROGRESS' | 'RESOLVED' }): Promise<ApiResponse<Feedback>> => {
+    return apiClient.patch(`/admin/feedback/${feedbackId}/status`, data);
   }
 };
 
