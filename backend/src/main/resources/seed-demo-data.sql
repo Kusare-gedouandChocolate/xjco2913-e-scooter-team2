@@ -263,6 +263,13 @@ INSERT INTO feedback (id, user_id, category, content, booking_id, scooter_id, pr
 SELECT 4, '44444444-4444-4444-4444-444444444444', 'OTHER', 'Weekly pass discount looks good and checkout was smooth.', 3, 5, 'LOW', 'RESOLVED', '2026-03-25 12:30:00'
 WHERE NOT EXISTS (SELECT 1 FROM feedback WHERE id = 4);
 
+UPDATE booking b
+SET completed_at = b.start_time + make_interval(hours => COALESCE(ro.duration_hours, 0))
+FROM rental_option ro
+WHERE b.rental_option_id = ro.id
+  AND b.status = 'COMPLETED'
+  AND b.completed_at IS NULL;
+
 SELECT setval(pg_get_serial_sequence('rental_option', 'id'), GREATEST(COALESCE((SELECT MAX(id) FROM rental_option), 1), 1), true);
 SELECT setval(pg_get_serial_sequence('scooter', 'id'), GREATEST(COALESCE((SELECT MAX(id) FROM scooter), 1), 1), true);
 SELECT setval(pg_get_serial_sequence('booking', 'id'), GREATEST(COALESCE((SELECT MAX(id) FROM booking), 1), 1), true);

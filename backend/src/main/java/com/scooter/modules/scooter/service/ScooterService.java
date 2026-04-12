@@ -177,6 +177,7 @@ public class ScooterService {
         PricingRuleResponse resp = new PricingRuleResponse();
         resp.setRuleId(option.getId().toString());
         resp.setHireType(option.getDurationLabel());
+        resp.setDurationHours(option.getDurationHours());
         resp.setPrice(option.getPrice().intValue());
         resp.setDiscountEnabled(false);
         return resp;

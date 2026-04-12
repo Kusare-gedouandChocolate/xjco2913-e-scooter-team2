@@ -7,14 +7,22 @@ import {
 import { reportsApi } from '../api';
 import type { WeeklyRevenueStatisticsResponse, RevenueByHireTypeResponse } from '../types';
 import { StateWrapper } from '../components/StateWrapper';
-import { formatPrice } from '../utils/format';
 
 // --- 图表配色方案 ---
 const COLORS = ['#57c2c0', '#38bdf8', '#818cf8', '#fd4569', '#f59e0b'];
 
+const getCurrentWeekStart = (): string => {
+  const today = new Date();
+  const currentDay = today.getDay();
+  const diffToMonday = currentDay === 0 ? -6 : 1 - currentDay;
+  const monday = new Date(today);
+  monday.setDate(today.getDate() + diffToMonday);
+  return monday.toISOString().split('T')[0];
+};
+
 export const ReportPage: React.FC = () => {
   // 默认查询 2026-03-23 这一周（对应 Sprint 2 的 Mock 数据）
-  const [weekStart, setWeekStart] = useState<string>('2026-03-23');
+  const [weekStart, setWeekStart] = useState<string>(getCurrentWeekStart());
   const [report, setReport] = useState<WeeklyRevenueStatisticsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -53,7 +61,7 @@ export const ReportPage: React.FC = () => {
   const chartData: { name: string; income: number }[] =
       selectedWeekData?.revenueByHireType?.map((item: RevenueByHireTypeResponse) => ({
         name: `${item.hireType} 套餐`,
-        income: parseFloat(item.revenue) || 0,
+        income: (parseFloat(item.revenue) || 0) / 100,
       })) || [];
 
   // 图表自定义提示框
@@ -63,7 +71,7 @@ export const ReportPage: React.FC = () => {
           <div style={styles.tooltipBox}>
             <p style={styles.tooltipLabel}>{label}</p>
             <p style={styles.tooltipValue}>
-              收入: <strong>{formatPrice(payload[0].value * 100)}</strong>
+              收入: <strong>{`¥ ${payload[0].value.toFixed(2)}`}</strong>
             </p>
           </div>
       );
@@ -73,7 +81,7 @@ export const ReportPage: React.FC = () => {
 
   // 计算总收入（用于 KPI 卡片）
   const totalRevenue = report?.totalRevenue
-      ? parseFloat(report.totalRevenue)
+      ? (parseFloat(report.totalRevenue) || 0) / 100
       : chartData.reduce((sum, item) => sum + item.income, 0);
 
   return (
@@ -121,7 +129,7 @@ export const ReportPage: React.FC = () => {
                   <div style={{...styles.kpiCard, backgroundColor: 'var(--color-primary)', color: '#fff'}}>
                     <span style={{...styles.kpiLabel, color: '#e6f7f6'}}>周期总收入 (Gross Income)</span>
                     <span style={{...styles.kpiValue, color: '#fff'}}>
-                  {formatPrice(totalRevenue * 100)}
+                  {`¥ ${totalRevenue.toFixed(2)}`}
                 </span>
                   </div>
                 </div>

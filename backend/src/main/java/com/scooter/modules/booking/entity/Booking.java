@@ -51,6 +51,9 @@ public class Booking {
     @Column(name = "start_time")
     private LocalDateTime startTime;
 
+    @Column(name = "completed_at")
+    private LocalDateTime completedAt;
+
     @Column(updatable = false)
     private LocalDateTime createdAt;
 

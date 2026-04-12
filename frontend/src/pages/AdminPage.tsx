@@ -103,7 +103,7 @@ export const AdminPage: React.FC = () => {
     // 注意：后端 PricingRuleResponse 没有 durationHours，此处需根据 hireType 预设，或由用户手动填写
     setRuleForm({
       hireType: rule.hireType,
-      durationHours: 1, // 默认值，用户可修改
+      durationHours: (rule as PricingRuleResponse & { durationHours: number }).durationHours,
       price: rule.price,
     });
     setEditFormError('');

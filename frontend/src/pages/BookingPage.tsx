@@ -8,7 +8,7 @@ import { StateWrapper } from '../components/StateWrapper';
 const formatPriceFromString = (value?: string): string => {
   if (!value) return '¥ 0.00';
   const num = parseFloat(value);
-  return isNaN(num) ? '¥ 0.00' : `¥ ${num.toFixed(2)}`;
+  return isNaN(num) ? '¥ 0.00' : `¥ ${(num / 100).toFixed(2)}`;
 };
 
 export const BookingPage: React.FC = () => {
@@ -16,6 +16,7 @@ export const BookingPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [completingId, setCompletingId] = useState<string | null>(null);
 
   const fetchBookings = async () => {
     setLoading(true);
@@ -46,6 +47,20 @@ export const BookingPage: React.FC = () => {
       alert(error.message || '取消失败，当前状态可能不允许取消。');
     } finally {
       setCancellingId(null);
+    }
+  };
+
+  const handleComplete = async (bookingId: string) => {
+    if (!window.confirm('确定要结束此行程吗？')) return;
+    setCompletingId(bookingId);
+    try {
+      await bookingsApi.completeBooking(bookingId);
+      await fetchBookings();
+    } catch (err: unknown) {
+      const error = err as { message?: string };
+      alert(error.message || '结束行程失败，请重试。');
+    } finally {
+      setCompletingId(null);
     }
   };
 
@@ -90,17 +105,34 @@ export const BookingPage: React.FC = () => {
               const statusConfig = getStatusConfig(booking.status);
               // 只有 PENDING_PAYMENT 或 PAID 状态允许取消（与后端一致）
               const canCancel = booking.status === 'PENDING_PAYMENT' || booking.status === 'PAID';
+              const canComplete = booking.status === 'PAID';
 
               return (
                   <div key={booking.bookingId} style={styles.card}>
                     <div style={styles.cardHeader}>
                       <div style={styles.scooterInfo}>
                         <span style={styles.scooterIcon}>🛴</span>
-                        <span style={styles.scooterCode}>车辆 #{booking.scooterId.slice(-4)}</span>
+                        <span style={styles.scooterCode}>
+                          {booking.scooterName || `车辆 #${booking.scooterId.slice(-4)}`}
+                        </span>
                       </div>
                       <span style={styles.badge(statusConfig.color, statusConfig.bg)}>
                     {statusConfig.label}
                   </span>
+                      {booking.appliedDiscountType && (
+                          <div style={styles.infoRow}>
+                            <span style={styles.infoLabel}>折扣原因</span>
+                            <span style={styles.infoValue}>{booking.appliedDiscountType}</span>
+                          </div>
+                      )}
+                      {booking.appliedDiscountRate && parseFloat(booking.appliedDiscountRate) > 0 && (
+                          <div style={styles.infoRow}>
+                            <span style={styles.infoLabel}>折扣力度</span>
+                            <span style={{ ...styles.infoValue, color: 'var(--color-primary)' }}>
+                              {parseFloat(booking.appliedDiscountRate).toFixed(0)}%
+                            </span>
+                          </div>
+                      )}
                     </div>
 
                     <div style={styles.cardBody}>
@@ -140,6 +172,17 @@ export const BookingPage: React.FC = () => {
                               onClick={() => handleCancel(booking.bookingId)}
                           >
                             {cancellingId === booking.bookingId ? '取消中...' : '取消预订'}
+                          </button>
+                        </div>
+                    )}
+                    {canComplete && (
+                        <div style={styles.cardFooter}>
+                          <button
+                              style={styles.completeBtn(completingId === booking.bookingId)}
+                              disabled={completingId === booking.bookingId}
+                              onClick={() => handleComplete(booking.bookingId)}
+                          >
+                            {completingId === booking.bookingId ? '结束中...' : '结束行程'}
                           </button>
                         </div>
                     )}
@@ -252,6 +295,17 @@ const styles = {
     backgroundColor: isCancelling ? '#fef2f2' : '#fff1f2',
     border: 'none',
     cursor: isCancelling ? 'not-allowed' : 'pointer',
+    transition: 'background-color 0.2s',
+  }),
+  completeBtn: (isCompleting: boolean) => ({
+    padding: '8px 20px',
+    borderRadius: '8px',
+    fontWeight: 600,
+    fontSize: '0.9rem',
+    color: '#ffffff',
+    backgroundColor: isCompleting ? '#94d8d7' : 'var(--color-primary)',
+    border: 'none',
+    cursor: isCompleting ? 'not-allowed' : 'pointer',
     transition: 'background-color 0.2s',
   }),
 };

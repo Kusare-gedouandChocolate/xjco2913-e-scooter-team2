@@ -19,6 +19,13 @@ const createCustomIcon = (color: string) => L.divIcon({
 const availableIcon = createCustomIcon('#57c2c0'); // 石绿
 const unavailableIcon = createCustomIcon('#94a3b8'); // 灰色
 
+const statusLabelMap: Record<Scooter['status'], string> = {
+  available: '可租用',
+  in_use: '使用中',
+  maintenance: '维护中',
+  locked: '已锁定',
+};
+
 // --- 地图视角控制子组件 (用于列表点击联动地图) ---
 const MapController = ({ center }: { center: [number, number] | null }) => {
   const map = useMap();
@@ -97,7 +104,7 @@ export const ScooterPage: React.FC = () => {
 
   const handleOpenBooking = (scooter: Scooter) => {
     setSelectedScooter(scooter);
-    setSelectedHireType(rules[0]?.hireType || '');
+    setSelectedHireType(rules[0]?.ruleId || '');
     setBookingStep('idle');
     setActionError('');
   };
@@ -108,13 +115,13 @@ export const ScooterPage: React.FC = () => {
     setActionError('');
     try {
       const bookingRes = await bookingsApi.createBooking({
-        scooterId: selectedScooter.scooterId,
-        rentalOptionId: selectedHireType,
+        scooterId: Number(selectedScooter.scooterId),
+        rentalOptionId: Number(selectedHireType),
         startTime: getUTCTimeString(),
       });
-      const bId = bookingRes.data.bookingId;
+      const bId = Number(bookingRes.data.bookingId);
       setBookingStep('paying');
-      await bookingsApi.payBooking({ bookingId: bId });
+      await bookingsApi.payBooking({ bookingId: bId, paymentMethod: 'CREDIT_CARD' });
       setBookingStep('success');
       fetchData(); // 支付成功后刷新地图和列表
     } catch (err: unknown) {
@@ -188,7 +195,7 @@ export const ScooterPage: React.FC = () => {
                       <div style={{ textAlign: 'center' as const, minWidth: '120px' }}>
                         <h4 style={{ margin: '0 0 8px 0', fontSize: '1.1rem' }}>#{loc.code}</h4>
                         <span style={styles.badge(loc.status === 'available')}>
-                          {loc.status === 'available' ? '当前可用' : '不可用'}
+                          {loc.status === 'available' ? '当前可用' : statusLabelMap[loc.status]}
                         </span>
                         {loc.status === 'available' && (
                           <button 
@@ -221,7 +228,7 @@ export const ScooterPage: React.FC = () => {
                   <div style={styles.cardHeader}>
                     <span style={styles.scooterCode}>🛴 #{scooter.code}</span>
                     <span style={styles.badge(scooter.status === 'available')}>
-                      {scooter.status === 'available' ? '可租用' : '不可用'}
+                      {statusLabelMap[scooter.status]}
                     </span>
                   </div>
                   
@@ -279,12 +286,12 @@ export const ScooterPage: React.FC = () => {
                   <label style={styles.label}>请选择租赁时长套餐：</label>
                   <div style={styles.radioGroup}>
                     {rules.map((rule) => (
-                      <label key={rule.ruleId} style={styles.radioOption(selectedHireType === rule.hireType)}>
+                      <label key={rule.ruleId} style={styles.radioOption(selectedHireType === rule.ruleId)}>
                         <input 
                           type="radio" 
                           name="hireType" 
-                          value={rule.hireType}
-                          checked={selectedHireType === rule.hireType}
+                          value={rule.ruleId}
+                          checked={selectedHireType === rule.ruleId}
                           onChange={(e) => setSelectedHireType(e.target.value)}
                           style={{ display: 'none' }} 
                         />

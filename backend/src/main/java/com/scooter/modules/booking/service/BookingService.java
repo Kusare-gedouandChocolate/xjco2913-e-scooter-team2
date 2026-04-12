@@ -184,6 +184,24 @@ public class BookingService {
         bookingRepository.save(booking);
     }
 
+    @Transactional
+    public void completeBooking(Long bookingId) {
+        Booking booking = bookingRepository.findById(Objects.requireNonNull(bookingId, "Booking ID must not be null"))
+                .orElseThrow(() -> new BusinessException("BOOKING_NOT_FOUND", "Booking not found"));
+
+        if (booking.getStatus() != BookingStatus.PAID) {
+            throw new BusinessException("BOOKING_CONFLICT", "Only paid bookings can be completed");
+        }
+
+        Scooter scooter = booking.getScooter();
+        scooter.setStatus(ScooterStatus.AVAILABLE);
+        scooterRepository.save(scooter);
+
+        booking.setStatus(BookingStatus.COMPLETED);
+        booking.setCompletedAt(LocalDateTime.now());
+        bookingRepository.save(booking);
+    }
+
     private BookingResponse convertToResponse(Booking booking) {
         BookingResponse response = new BookingResponse();
 
@@ -191,6 +209,7 @@ public class BookingService {
 
         if (booking.getScooter() != null) {
             response.setScooterId(String.valueOf(booking.getScooter().getId()));
+            response.setScooterName(booking.getScooter().getModel());
         }
 
         if (booking.getRentalOption() != null) {
@@ -226,15 +245,15 @@ public class BookingService {
     private String mapBookingStatusToCamelCase(BookingStatus status) {
         switch (status) {
             case PENDING_PAYMENT:
-                return "pendingPayment";
+                return "PENDING_PAYMENT";
             case PAID:
-                return "confirmed";
+                return "PAID";
             case CANCELLED:
-                return "cancelled";
+                return "CANCELLED";
             case COMPLETED:
-                return "completed";
+                return "COMPLETED";
             default:
-                return status.name().toLowerCase();
+                return status.name();
         }
     }
 
