@@ -1,3 +1,64 @@
+CREATE TABLE IF NOT EXISTS users (
+    user_id UUID PRIMARY KEY,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    role VARCHAR(32) NOT NULL,
+    full_name VARCHAR(100),
+    phone VARCHAR(30),
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS scooter (
+    id BIGSERIAL PRIMARY KEY,
+    model VARCHAR(255) NOT NULL,
+    status VARCHAR(32) NOT NULL,
+    battery_level INT,
+    current_location VARCHAR(255),
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS rental_option (
+    id BIGSERIAL PRIMARY KEY,
+    duration_label VARCHAR(50) NOT NULL,
+    duration_hours INT NOT NULL,
+    price NUMERIC(10, 2) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS booking (
+    id BIGSERIAL PRIMARY KEY,
+    user_id UUID NOT NULL,
+    scooter_id BIGINT NOT NULL,
+    rental_option_id BIGINT NOT NULL,
+    status VARCHAR(32) NOT NULL,
+    total_price NUMERIC(10, 2),
+    start_time TIMESTAMP,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_booking_user FOREIGN KEY (user_id) REFERENCES users(user_id),
+    CONSTRAINT fk_booking_scooter FOREIGN KEY (scooter_id) REFERENCES scooter(id),
+    CONSTRAINT fk_booking_rental_option FOREIGN KEY (rental_option_id) REFERENCES rental_option(id)
+);
+
+CREATE TABLE IF NOT EXISTS payment (
+    id BIGSERIAL PRIMARY KEY,
+    booking_id BIGINT NOT NULL UNIQUE,
+    user_id VARCHAR(36) NOT NULL,
+    amount NUMERIC(10, 2) NOT NULL,
+    payment_method VARCHAR(50) NOT NULL,
+    payment_status VARCHAR(32) NOT NULL,
+    transaction_no VARCHAR(100) NOT NULL UNIQUE,
+    paid_at TIMESTAMP,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_payment_booking FOREIGN KEY (booking_id) REFERENCES booking(id)
+);
+
+CREATE TABLE IF NOT EXISTS booking_confirmation (
+    id BIGSERIAL PRIMARY KEY,
+    booking_id BIGINT NOT NULL UNIQUE,
+    confirmation_number VARCHAR(100) NOT NULL UNIQUE,
+    confirmed_at TIMESTAMP NOT NULL,
+    CONSTRAINT fk_confirmation_booking FOREIGN KEY (booking_id) REFERENCES booking(id)
+);
+
 CREATE TABLE IF NOT EXISTS discount_rule (
     id BIGSERIAL PRIMARY KEY,
     rule_type VARCHAR(50) NOT NULL,
