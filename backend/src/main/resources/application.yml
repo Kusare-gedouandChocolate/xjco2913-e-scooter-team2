@@ -21,7 +21,9 @@ spring:
     init:
       mode: always
       schema-locations: classpath:schema-app.sql
-      data-locations: classpath:seed-app.sql
+      data-locations:
+        - classpath:seed-app.sql
+        - classpath:seed-users.sql
       continue-on-error: false
 
 logging:

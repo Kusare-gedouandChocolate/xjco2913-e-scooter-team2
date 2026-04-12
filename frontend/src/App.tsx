@@ -7,7 +7,7 @@ import { BookingPage } from './pages/BookingPage';
 import { ReportPage } from './pages/ReportPage';
 import { FeedbackPage } from './pages/FeedbackPage';
 import { AdminPage } from './pages/AdminPage';
-import { clearSession, getAuthUser, isAuthenticated, isManager } from './utils/auth';
+import { clearSession, getAuthUser, hasManagerRole, isAuthenticated, isManager } from './utils/auth';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   if (!isAuthenticated()) {
@@ -37,7 +37,7 @@ const Navbar = () => {
     navigate('/login');
   };
 
-  const manager = user?.role === 'manager';
+  const manager = hasManagerRole(user?.role);
 
   return (
     <nav style={styles.navbar}>
