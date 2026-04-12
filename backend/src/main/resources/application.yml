@@ -24,6 +24,7 @@ spring:
       data-locations:
         - classpath:seed-app.sql
         - classpath:seed-users.sql
+        - classpath:seed-demo-data.sql
       continue-on-error: false
 
 logging:
