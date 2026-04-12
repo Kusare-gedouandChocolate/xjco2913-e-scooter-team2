@@ -1,6 +1,7 @@
 // src/pages/AuthPage.tsx
 import React, { useState } from 'react';
 import { authApi, type RegisterPayload } from '../api';
+import { saveSession } from '../utils/auth';
 
 export const AuthPage: React.FC = () => {
   const [isLoginMode, setIsLoginMode] = useState(true);
@@ -31,13 +32,13 @@ export const AuthPage: React.FC = () => {
           email: formData.email,
           password: formData.password,
         });
-        localStorage.setItem('authToken', res.data.token);
+        saveSession(res.data.token, res.data.user);
         // TODO: 跳转到车辆浏览页面
         window.location.href = '/scooters';
       } else {
         // 调用注册 API [cite: 390]
         const res = await authApi.register(formData);
-        localStorage.setItem('authToken', res.data.token);
+        saveSession(res.data.token, res.data.user);
         window.location.href = '/scooters';
       }
     } catch (err: unknown) {
@@ -59,6 +60,12 @@ export const AuthPage: React.FC = () => {
           <p style={styles.subtitle}>
             {isLoginMode ? 'Log in to continue your cycling journey' : 'Join us and embark on a green journey!'}
           </p>
+          {isLoginMode && (
+            <div style={styles.accountTips}>
+              <span style={styles.roleHint}>Manager accounts are marked as admin after login.</span>
+              <span style={styles.adminTag}>Admin account</span>
+            </div>
+          )}
         </div>
 
         {/* 错误提示区 (使用山茶红) */}
@@ -192,6 +199,28 @@ const styles = {
   subtitle: {
     fontSize: '0.95rem',
     color: 'var(--color-text-muted)',
+  },
+  accountTips: {
+    marginTop: '16px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '10px',
+    flexWrap: 'wrap' as const,
+  },
+  roleHint: {
+    fontSize: '0.85rem',
+    color: 'var(--color-text-muted)',
+  },
+  adminTag: {
+    padding: '4px 10px',
+    borderRadius: '999px',
+    backgroundColor: '#fff1f2',
+    color: 'var(--color-accent)',
+    fontSize: '0.75rem',
+    fontWeight: 700,
+    textTransform: 'uppercase' as const,
+    letterSpacing: '0.5px',
   },
   errorBox: {
     display: 'flex',

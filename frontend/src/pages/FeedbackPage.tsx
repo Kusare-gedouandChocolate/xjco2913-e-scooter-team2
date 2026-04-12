@@ -1,217 +1,222 @@
-// src/pages/FeedbackPage.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { feedbackApi } from '../api';
 import type { Feedback } from '../types';
-import { StateWrapper } from '../components/StateWrapper'
+import { StateWrapper } from '../components/StateWrapper';
+import { isManager } from '../utils/auth';
 
 type FeedbackCategory = 'BUG_REPORT' | 'COMPLAINT' | 'SUGGESTION' | 'OTHER';
+type AdminFilterPriority = 'all' | 'HIGH';
 
+const categoryLabelMap: Record<Feedback['category'], string> = {
+  BUG_REPORT: 'Bug Report',
+  COMPLAINT: 'Complaint',
+  SUGGESTION: 'Suggestion',
+  OTHER: 'Other',
+};
+
+const statusLabelMap: Record<Feedback['status'], string> = {
+  SUBMITTED: 'Submitted',
+  IN_PROGRESS: 'In Progress',
+  RESOLVED: 'Resolved',
+};
 
 export const FeedbackPage: React.FC = () => {
-  // --- 身份与视图控制 ---
-  // 为了演示方便，这里用一个状态来切换“用户视图”和“管理端视图”
+  const manager = isManager();
   const [viewMode, setViewMode] = useState<'customer' | 'admin'>('customer');
 
-  // --- 用户端：提交反馈状态 ---
   const [content, setContent] = useState('');
   const [category, setCategory] = useState<FeedbackCategory>('SUGGESTION');
   const [scooterId, setScooterId] = useState('');
   const [submitLoading, setSubmitLoading] = useState(false);
-  const [submitResult, setSubmitResult] = useState<{ type: 'success' | 'error', msg: string } | null>(null);
+  const [submitResult, setSubmitResult] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
 
-  // --- 管理端：反馈处理状态 ---
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [adminLoading, setAdminLoading] = useState(false);
   const [adminError, setAdminError] = useState<string | null>(null);
-  const [filterPriority, setFilterPriority] = useState<'all' | 'high'>('all');
+  const [filterPriority, setFilterPriority] = useState<AdminFilterPriority>('all');
 
-  // --- 1. 用户端：提交反馈逻辑 ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!content.trim()) {
-      setSubmitResult({ type: 'error', msg: '请填写反馈内容' });
+      setSubmitResult({ type: 'error', msg: 'Please enter feedback details.' });
       return;
     }
+
     setSubmitLoading(true);
     setSubmitResult(null);
     try {
       await feedbackApi.submitFeedback({
         content,
         category,
-        scooterId: scooterId ? Number(scooterId) : undefined,
+        scooterId: scooterId.trim() ? Number(scooterId) : undefined,
       });
-      setSubmitResult({ type: 'success', msg: '反馈提交成功！感谢您的协助。' });
+      setSubmitResult({ type: 'success', msg: 'Feedback submitted successfully.' });
       setContent('');
       setScooterId('');
-
       setCategory('SUGGESTION');
     } catch (err: unknown) {
       const error = err as { message?: string };
-      setSubmitResult({ type: 'error', msg: error.message || '提交失败，请重试' });
+      setSubmitResult({ type: 'error', msg: error.message || 'Failed to submit feedback.' });
     } finally {
       setSubmitLoading(false);
     }
   };
 
-  // --- 2. 管理端：获取反馈列表逻辑 ---
   const fetchFeedbacks = async () => {
     setAdminLoading(true);
     setAdminError(null);
     try {
-      const params = filterPriority === 'high' ? { priority: 'high' } : undefined;
+      const params = filterPriority === 'HIGH' ? { priority: 'HIGH' as const } : undefined;
       const res = await feedbackApi.getAdminFeedback(params);
-      setFeedbacks(res.data || []);
+      setFeedbacks(res.data?.content ?? []);
     } catch (err: unknown) {
       const error = err as { message?: string };
-      setAdminError(error.message || '获取反馈列表失败');
+      setAdminError(error.message || 'Failed to load feedback list.');
+      setFeedbacks([]);
     } finally {
       setAdminLoading(false);
     }
   };
 
-  // 切换到管理端视图或更改筛选条件时，重新拉取数据
   useEffect(() => {
-    if (viewMode === 'admin') {
+    if (manager && viewMode === 'admin') {
       fetchFeedbacks();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [viewMode, filterPriority]);
+  }, [manager, viewMode, filterPriority]);
 
-  // --- 3. 管理端：更新优先级逻辑 ---
-  const handleUpdatePriority = async (issueId: string, newPriority: 'high' | 'low') => {
+  const handleUpdatePriority = async (feedbackId: string, newPriority: 'HIGH' | 'LOW') => {
     try {
-      await feedbackApi.updatePriority(issueId, { priority: newPriority });
-      // 局部刷新列表状态，提升体验
-      setFeedbacks(prev => prev.map(f => f.issueId === issueId ? { ...f, priority: newPriority } : f));
+      await feedbackApi.updatePriority(feedbackId, { priority: newPriority });
+      setFeedbacks((prev) =>
+        prev.map((fb) => (fb.feedbackId === feedbackId ? { ...fb, priority: newPriority } : fb))
+      );
     } catch (err: unknown) {
       const error = err as { message?: string };
-      alert(error.message || '优先级更新失败');
+      alert(error.message || 'Failed to update priority.');
     }
   };
 
   return (
     <div style={styles.container}>
-      {/* 顶部：视图切换器 (演示专用) */}
       <div style={styles.viewToggle}>
-        <button 
-          style={styles.toggleBtn(viewMode === 'customer')} 
-          onClick={() => { setViewMode('customer'); setSubmitResult(null); }}
+        <button
+          style={styles.toggleBtn(viewMode === 'customer')}
+          onClick={() => {
+            setViewMode('customer');
+            setSubmitResult(null);
+          }}
         >
-          🙋‍♂️ 我要反馈 (Customer)
+          Submit Feedback
         </button>
-        <button 
-          style={styles.toggleBtn(viewMode === 'admin')} 
-          onClick={() => setViewMode('admin')}
-        >
-          👨‍💻 处理中心 (Admin)
-        </button>
+        {manager && (
+          <button
+            style={styles.toggleBtn(viewMode === 'admin')}
+            onClick={() => setViewMode('admin')}
+          >
+            Processing Center
+          </button>
+        )}
       </div>
 
-      {/* ============================== */}
-      {/* 视图 A：普通用户 - 提交反馈表单 */}
-      {/* ============================== */}
       {viewMode === 'customer' && (
         <div style={styles.formCard}>
-          <h2 style={{ marginBottom: '8px' }}>提交问题反馈</h2>
+          <h2 style={{ marginBottom: '8px' }}>Submit Feedback</h2>
           <p style={{ color: 'var(--color-text-muted)', marginBottom: '24px' }}>
-            如果您在使用车辆时遇到问题，请告诉我们。
+            Report a problem or suggestion related to your scooter usage.
           </p>
 
           {submitResult && (
             <div style={styles.alertBox(submitResult.type)}>
-              {submitResult.type === 'success' ? '✅ ' : '❌ '}
               {submitResult.msg}
             </div>
           )}
 
           <form onSubmit={handleSubmit} style={styles.form}>
             <div style={styles.formGroup}>
-              <label style={styles.label}>反馈类别</label>
+              <label style={styles.label}>Category</label>
               <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value as FeedbackCategory)}
-                  style={styles.input}
+                value={category}
+                onChange={(e) => setCategory(e.target.value as FeedbackCategory)}
+                style={styles.input}
               >
-                <option value="BUG_REPORT">🐛 故障报告 (Bug Report)</option>
-                <option value="COMPLAINT">⚠️ 投诉建议 (Complaint)</option>
-                <option value="SUGGESTION">💡 功能建议 (Suggestion)</option>
-                <option value="OTHER">📌 其他 (Other)</option>
+                <option value="BUG_REPORT">Bug Report</option>
+                <option value="COMPLAINT">Complaint</option>
+                <option value="SUGGESTION">Suggestion</option>
+                <option value="OTHER">Other</option>
               </select>
             </div>
 
             <div style={styles.formGroup}>
-              <label style={styles.label}>关联车辆编号 (可选)</label>
+              <label style={styles.label}>Scooter ID (optional)</label>
               <input
-                  type="text"
-                  placeholder="例如: SC-001"
-                  value={scooterId}
-                  onChange={(e) => setScooterId(e.target.value)}
-                  style={styles.input}
+                type="text"
+                placeholder="Example: 1"
+                value={scooterId}
+                onChange={(e) => setScooterId(e.target.value)}
+                style={styles.input}
               />
             </div>
 
             <div style={styles.formGroup}>
-              <label style={styles.label}>反馈内容</label>
+              <label style={styles.label}>Details</label>
               <textarea
-                  rows={5}
-                  placeholder="请详细描述您遇到的问题或建议..."
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  style={{...styles.input, resize: 'vertical' as const}}
+                rows={5}
+                placeholder="Describe the issue or suggestion..."
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                style={{ ...styles.input, resize: 'vertical' as const }}
               />
             </div>
 
             <button type="submit" style={styles.submitBtn} disabled={submitLoading}>
-              {submitLoading ? '提交中...' : '提交反馈'}
+              {submitLoading ? 'Submitting...' : 'Submit'}
             </button>
           </form>
         </div>
       )}
 
-      {/* ============================== */}
-      {/* 视图 B：管理员 - 反馈处理列表 */}
-      {/* ============================== */}
-      {viewMode === 'admin' && (
-          <div>
-            <div style={styles.adminHeader}>
-              <h2>后台反馈处理中心</h2>
-              <div style={styles.filterGroup}>
-                <label style={{fontSize: '0.9rem', fontWeight: 600}}>筛选：</label>
-                <select
-                    value={filterPriority}
-                    onChange={(e) => setFilterPriority(e.target.value as 'all' | 'high')}
-                    style={styles.filterSelect}
-                >
-                  <option value="all">所有反馈</option>
-                  <option value="high">仅看高优先级 (High Priority)</option>
-                </select>
-              </div>
+      {manager && viewMode === 'admin' && (
+        <div>
+          <div style={styles.adminHeader}>
+            <h2>Feedback Processing Center</h2>
+            <div style={styles.filterGroup}>
+              <label style={{ fontSize: '0.9rem', fontWeight: 600 }}>Priority:</label>
+              <select
+                value={filterPriority}
+                onChange={(e) => setFilterPriority(e.target.value as AdminFilterPriority)}
+                style={styles.filterSelect}
+              >
+                <option value="all">All</option>
+                <option value="HIGH">High Priority Only</option>
+              </select>
             </div>
+          </div>
 
-            <StateWrapper
-                loading={adminLoading}
-                error={adminError}
-                empty={feedbacks.length === 0}
-                emptyMessage="当前没有需要处理的反馈"
-                onRetry={fetchFeedbacks}
+          <StateWrapper
+            loading={adminLoading}
+            error={adminError}
+            empty={feedbacks.length === 0}
+            emptyMessage="No feedback to process."
+            onRetry={fetchFeedbacks}
           >
             <div style={styles.listGrid}>
-              {feedbacks.map(fb => (
-                <div key={fb.issueId} style={styles.feedbackCard}>
+              {feedbacks.map((fb) => (
+                <div key={fb.feedbackId} style={styles.feedbackCard}>
                   <div style={styles.cardHeader}>
-                    <span style={styles.badge(fb.priority === 'high' ? 'danger' : 'normal')}>
-                      {fb.priority === 'high' ? '🚨 高优' : '🟢 普通'}
+                    <span style={styles.badge(fb.priority === 'HIGH' ? 'danger' : 'normal')}>
+                      {fb.priority === 'HIGH' ? 'High Priority' : 'Normal Priority'}
                     </span>
                     <span style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
-                      状态: {fb.status}
+                      {statusLabelMap[fb.status]}
                     </span>
                   </div>
-                  
+
                   <div style={styles.cardBody}>
-                    <p style={styles.descText}>{fb.description}</p>
+                    <p style={styles.descText}>{fb.content}</p>
                     <div style={styles.metaInfo}>
-                      <span>程度: <strong>{fb.severity}</strong></span>
-                      {fb.scooterId && <span>车辆: {fb.scooterId}</span>}
+                      <span>Category: <strong>{categoryLabelMap[fb.category]}</strong></span>
+                      {fb.scooterId && <span>Scooter: {fb.scooterId}</span>}
                     </div>
                   </div>
 
@@ -219,21 +224,20 @@ export const FeedbackPage: React.FC = () => {
                     <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
                       {new Date(fb.createdAt).toLocaleString()}
                     </span>
-                    
-                    {/* 优先级调整按钮 */}
-                    {fb.priority === 'low' ? (
-                      <button 
+
+                    {fb.priority === 'LOW' ? (
+                      <button
                         style={styles.actionBtn('high')}
-                        onClick={() => handleUpdatePriority(fb.issueId, 'high')}
+                        onClick={() => handleUpdatePriority(fb.feedbackId, 'HIGH')}
                       >
-                        ↑ 标为高优
+                        Mark High
                       </button>
                     ) : (
-                      <button 
+                      <button
                         style={styles.actionBtn('low')}
-                        onClick={() => handleUpdatePriority(fb.issueId, 'low')}
+                        onClick={() => handleUpdatePriority(fb.feedbackId, 'LOW')}
                       >
-                        ↓ 降为普通
+                        Mark Normal
                       </button>
                     )}
                   </div>
@@ -247,7 +251,6 @@ export const FeedbackPage: React.FC = () => {
   );
 };
 
-// --- 内联样式字典 ---
 const styles = {
   container: {
     padding: '24px',
@@ -389,6 +392,7 @@ const styles = {
     backgroundColor: '#f8fafc',
     padding: '8px',
     borderRadius: '6px',
+    flexWrap: 'wrap' as const,
   },
   cardFooter: {
     display: 'flex',
@@ -397,6 +401,7 @@ const styles = {
     marginTop: '8px',
     paddingTop: '12px',
     borderTop: '1px solid var(--color-border)',
+    gap: '12px',
   },
   actionBtn: (action: 'high' | 'low') => ({
     padding: '6px 12px',
@@ -408,5 +413,5 @@ const styles = {
     backgroundColor: action === 'high' ? '#fff1f2' : '#f1f5f9',
     color: action === 'high' ? 'var(--color-accent)' : 'var(--color-text-muted)',
     transition: 'background-color 0.2s',
-  })
+  }),
 };

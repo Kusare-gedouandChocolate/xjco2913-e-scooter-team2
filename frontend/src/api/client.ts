@@ -1,6 +1,7 @@
 // src/api/client.ts
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
+import { clearSession, getAuthToken } from '../utils/auth';
 
 // 满足规范 2.1: Base URL 为 /api/v1
 const apiClient = axios.create({
@@ -18,7 +19,7 @@ apiClient.interceptors.request.use(
     config.headers['X-Request-Id'] = uuidv4();
 
     // 假设我们将 token 存在 localStorage 中
-    const token = localStorage.getItem('authToken');
+    const token = getAuthToken();
     if (token) {
       // 规范 6.1: 注入 Bearer token
       config.headers['Authorization'] = `Bearer ${token}`;
@@ -40,7 +41,7 @@ apiClient.interceptors.response.use(
       // 处理规范中约定的 401, 403, 404, 409 等状态码
       if (error.response.status === 401) {
         // Token 过期或未登录，清理本地状态并跳转登录
-        localStorage.removeItem('authToken');
+        clearSession();
         window.location.href = '/login'; 
       }
       return Promise.reject(error.response.data); // 返回后端标准错误结构

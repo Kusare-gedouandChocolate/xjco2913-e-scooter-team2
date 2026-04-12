@@ -7,7 +7,7 @@ import type {
   AdminScooterRequest,
   AdminScooterResponse,
   PricingRuleUpdateRequest,
-  PricingRuleResponse, ScooterLocation, Feedback, Booking, User, WeeklyRevenueStatisticsResponse,
+  PricingRuleResponse, ScooterLocation, Feedback, Booking, User, WeeklyRevenueStatisticsResponse, PageResponse,
 } from '../types';
 
 // ==========================================
@@ -83,12 +83,12 @@ export const feedbackApi = {
     return apiClient.post('/feedback', data);
   },
   // 管理端：获取反馈列表
-  getAdminFeedback: (params?: { priority?: string; status?: string; page?: number }): Promise<ApiResponse<Feedback[]>> => {
+  getAdminFeedback: (params?: { priority?: 'HIGH' | 'LOW'; status?: 'SUBMITTED' | 'IN_PROGRESS' | 'RESOLVED'; page?: number; size?: number }): Promise<ApiResponse<PageResponse<Feedback>>> => {
     return apiClient.get('/admin/feedback', { params });
   },
   // 管理端：修改优先级
-  updatePriority: (issueId: string, data: { priority: 'high' | 'low'; reason?: string }): Promise<ApiResponse<Feedback>> => {
-    return apiClient.patch(`/admin/feedback/${issueId}/priority`, data);
+  updatePriority: (feedbackId: string, data: { priority: 'HIGH' | 'LOW' }): Promise<ApiResponse<Feedback>> => {
+    return apiClient.patch(`/admin/feedback/${feedbackId}/priority`, data);
   }
 };
 

@@ -1,56 +1,59 @@
-// src/App.tsx
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Link, useNavigate } from 'react-router-dom';
 
-// 引入我们刚才写好的三个核心页面 [cite: 203-207]
 import { AuthPage } from './pages/AuthPage';
 import { ScooterPage } from './pages/ScooterPage';
 import { BookingPage } from './pages/BookingPage';
 import { ReportPage } from './pages/ReportPage';
 import { FeedbackPage } from './pages/FeedbackPage';
 import { AdminPage } from './pages/AdminPage';
+import { clearSession, getAuthUser, isAuthenticated, isManager } from './utils/auth';
 
-// --- 简单的路由守卫组件 ---
-// 作用：如果没有 Token，就拦截并重定向到登录页
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const isAuthenticated = !!localStorage.getItem('authToken');
-  if (!isAuthenticated) {
+  if (!isAuthenticated()) {
     return <Navigate to="/login" replace />;
   }
   return <>{children}</>;
 };
 
-// --- 全局导航栏组件 ---
-// 作用：提供页面间的跳转，并展示石绿色的品牌视觉
+const ManagerRoute = ({ children }: { children: React.ReactNode }) => {
+  if (!isAuthenticated()) {
+    return <Navigate to="/login" replace />;
+  }
+  if (!isManager()) {
+    return <Navigate to="/scooters" replace />;
+  }
+  return <>{children}</>;
+};
+
 const Navbar = () => {
   const navigate = useNavigate();
-  const isAuthenticated = !!localStorage.getItem('authToken');
+  const user = getAuthUser();
+
+  if (!isAuthenticated()) return null;
 
   const handleLogout = () => {
-    localStorage.removeItem('authToken');
+    clearSession();
     navigate('/login');
   };
 
-  // 如果未登录，不展示导航栏（因为全屏展示 AuthPage 的卡片更好看）
-  if (!isAuthenticated) return null;
+  const manager = user?.role === 'manager';
 
   return (
     <nav style={styles.navbar}>
       <div style={styles.navContainer}>
-        {/* 品牌 Logo */}
         <div style={styles.brand} onClick={() => navigate('/scooters')}>
-          <span style={styles.logoIcon}>🛴</span>
+          <span style={styles.logoIcon}>Scooter</span>
           <span style={styles.brandName}>E-Scooter</span>
+          {manager && <span style={styles.managerBadge}>Admin</span>}
         </div>
 
-        {/* 导航链接 */}
         <div style={styles.navLinks}>
           <Link to="/scooters" style={styles.link}>Nearby vehicles</Link>
           <Link to="/bookings" style={styles.link}>My journey</Link>
-          <Link to="/reports" style={styles.link}>统计报表</Link>
-          <Link to="/feedback" style={styles.link}>客服反馈</Link>
-          <Link to="/admin" style={styles.link}>系统配置</Link>
-          {/* 退出按钮：带有悬浮交互的石绿按钮 */}
+          <Link to="/feedback" style={styles.link}>Customer feedback</Link>
+          {manager && <Link to="/reports" style={styles.link}>Reports</Link>}
+          {manager && <Link to="/admin" style={styles.link}>System config</Link>}
           <button style={styles.logoutBtn} onClick={handleLogout}>
             Log out
           </button>
@@ -60,46 +63,30 @@ const Navbar = () => {
   );
 };
 
-// --- 根组件 ---
 export const App: React.FC = () => {
   return (
     <BrowserRouter>
-      {/* 导航栏挂载在路由内部，以便使用 useNavigate 和 Link */}
       <Navbar />
-      
-      {/* 核心内容区 */}
       <main style={styles.mainContent}>
         <Routes>
-          {/* 公开路由：注册/登录 */}
           <Route path="/login" element={<AuthPage />} />
 
-          {/* 受保护路由：车辆浏览与预订 */}
-          <Route 
-            path="/scooters" 
+          <Route
+            path="/scooters"
             element={
               <ProtectedRoute>
                 <ScooterPage />
               </ProtectedRoute>
-            } 
+            }
           />
 
-          {/* 受保护路由：预订记录 */}
-          <Route 
-            path="/bookings" 
+          <Route
+            path="/bookings"
             element={
               <ProtectedRoute>
                 <BookingPage />
               </ProtectedRoute>
-            } 
-          />
-
-          <Route 
-            path="/reports" 
-            element={
-              <ProtectedRoute>
-              <ReportPage />
-              </ProtectedRoute>
-            }        
+            }
           />
 
           <Route
@@ -112,25 +99,34 @@ export const App: React.FC = () => {
           />
 
           <Route
-            path="/admin"
+            path="/reports"
             element={
-              <ProtectedRoute>
-                <AdminPage />
-              </ProtectedRoute>
+              <ManagerRoute>
+                <ReportPage />
+              </ManagerRoute>
             }
           />
 
-          {/* 默认重定向：访问根目录时，自动去车辆页（守卫会判断是否需要去登录） */}
+          <Route
+            path="/admin"
+            element={
+              <ManagerRoute>
+                <AdminPage />
+              </ManagerRoute>
+            }
+          />
+
           <Route path="/" element={<Navigate to="/scooters" replace />} />
-          
-          {/* 404 处理 */}
-          <Route path="*" element={
-            <div style={{ textAlign: 'center', marginTop: '100px', color: 'var(--color-text-muted)' }}>
-              <h2>404 - 页面未找到</h2>
-              <Link to="/" style={{ color: 'var(--color-primary)', textDecoration: 'none' }}>返回首页</Link>
-            </div>
-          } />
-          
+
+          <Route
+            path="*"
+            element={
+              <div style={{ textAlign: 'center', marginTop: '100px', color: 'var(--color-text-muted)' }}>
+                <h2>404 - Page not found</h2>
+                <Link to="/" style={{ color: 'var(--color-primary)', textDecoration: 'none' }}>Back to home</Link>
+              </div>
+            }
+          />
         </Routes>
       </main>
     </BrowserRouter>
@@ -139,7 +135,6 @@ export const App: React.FC = () => {
 
 export default App;
 
-// --- 内联样式字典 ---
 const styles = {
   navbar: {
     backgroundColor: 'var(--color-surface)',
@@ -147,36 +142,51 @@ const styles = {
     boxShadow: 'var(--shadow-sm)',
     position: 'sticky' as const,
     top: 0,
-    zIndex: 100, // 确保导航栏在最上层
+    zIndex: 100,
   },
   navContainer: {
     maxWidth: '1200px',
     margin: '0 auto',
     padding: '0 24px',
-    height: '64px',
+    minHeight: '64px',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
+    gap: '16px',
   },
   brand: {
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
     cursor: 'pointer',
+    flexWrap: 'wrap' as const,
   },
   logoIcon: {
-    fontSize: '1.5rem',
+    fontSize: '1.1rem',
+    fontWeight: 700,
   },
   brandName: {
     fontSize: '1.25rem',
     fontWeight: 800,
-    color: 'var(--color-primary)', // 石绿品牌色
+    color: 'var(--color-primary)',
     letterSpacing: '-0.5px',
+  },
+  managerBadge: {
+    padding: '4px 10px',
+    borderRadius: '999px',
+    backgroundColor: '#fff1f2',
+    color: 'var(--color-accent)',
+    fontSize: '0.75rem',
+    fontWeight: 700,
+    textTransform: 'uppercase' as const,
+    letterSpacing: '0.5px',
   },
   navLinks: {
     display: 'flex',
     alignItems: 'center',
     gap: '24px',
+    flexWrap: 'wrap' as const,
+    justifyContent: 'flex-end',
   },
   link: {
     textDecoration: 'none',
@@ -195,6 +205,6 @@ const styles = {
     transition: 'all 0.2s',
   },
   mainContent: {
-    minHeight: 'calc(100vh - 64px)', // 减去导航栏高度
-  }
+    minHeight: 'calc(100vh - 64px)',
+  },
 };

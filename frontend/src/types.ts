@@ -15,7 +15,7 @@ export interface ApiResponse<T = unknown> {
 export interface User {
   userId: string;
   email: string;
-  role: 'Customer' | 'Manager' | 'Staff';
+  role: 'customer' | 'manager' | 'staff';
 }
 
 export interface CustomerProfile {
@@ -70,15 +70,26 @@ export interface ScooterLocation {
 }
 
 // 用户反馈模型 
+export interface PageResponse<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;
+  first: boolean;
+  last: boolean;
+  empty: boolean;
+}
+
 export interface Feedback {
-  issueId: string;
+  feedbackId: string;
   scooterId?: string;
   bookingId?: string;
   userId: string;
-  priority: 'high' | 'low';
-  severity: 'critical' | 'major' | 'minor';
-  status: 'open' | 'inProgress' | 'resolved' | 'closed';
-  description: string;
+  category: 'BUG_REPORT' | 'COMPLAINT' | 'SUGGESTION' | 'OTHER';
+  priority: 'HIGH' | 'LOW';
+  status: 'SUBMITTED' | 'IN_PROGRESS' | 'RESOLVED';
+  content: string;
   createdAt: string;
 }
 
