@@ -15,7 +15,7 @@ export interface ApiResponse<T = unknown> {
 export interface User {
   userId: string;
   email: string;
-  role: 'customer' | 'manager' | 'staff';
+  role: string;
 }
 
 export interface CustomerProfile {

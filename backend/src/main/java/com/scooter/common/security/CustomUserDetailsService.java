@@ -34,6 +34,19 @@ public class CustomUserDetailsService implements UserDetailsService {
         return new org.springframework.security.core.userdetails.User(
                 user.getUserId().toString(),
                 user.getPasswordHash(),
-                Collections.singletonList(new SimpleGrantedAuthority(user.getRole())));
+                Collections.singletonList(new SimpleGrantedAuthority(normalizeRole(user.getRole()))));
+    }
+
+    private String normalizeRole(String rawRole) {
+        if (rawRole == null || rawRole.isBlank()) {
+            return "customer";
+        }
+
+        String normalizedRole = rawRole.trim().toLowerCase();
+        if ("admin".equals(normalizedRole) || "manager".equals(normalizedRole)) {
+            return "manager";
+        }
+
+        return "customer";
     }
 }

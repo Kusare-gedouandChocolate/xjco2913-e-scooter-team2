@@ -38,7 +38,7 @@ public class AuthServiceImpl implements AuthService {
         User user = User.builder()
                 .email(email)
                 .passwordHash(encodedPassword)
-                .role(request.getRole() != null ? request.getRole() : "customer")
+                .role(normalizeRole(request.getRole()))
                 .fullName(request.getFullName())
                 .phone(request.getPhone())
                 .build();
@@ -48,7 +48,7 @@ public class AuthServiceImpl implements AuthService {
         return UserResponse.builder()
                 .userId(savedUser.getUserId())
                 .email(savedUser.getEmail())
-                .role(savedUser.getRole())
+                .role(normalizeRole(savedUser.getRole()))
                 .build();
     }
 
@@ -62,7 +62,7 @@ public class AuthServiceImpl implements AuthService {
             throw new BusinessException("AUTH_INVALID_CREDENTIALS", "Invalid credentials");
         }
 
-        return jwtUtils.generateToken(user.getUserId(), user.getEmail(), user.getRole());
+        return jwtUtils.generateToken(user.getUserId(), user.getEmail(), normalizeRole(user.getRole()));
     }
 
     @Override
@@ -72,7 +72,7 @@ public class AuthServiceImpl implements AuthService {
         return UserResponse.builder()
                 .userId(user.getUserId())
                 .email(user.getEmail())
-                .role(user.getRole())
+                .role(normalizeRole(user.getRole()))
                 .build();
     }
 
@@ -80,6 +80,19 @@ public class AuthServiceImpl implements AuthService {
     public String generateToken(UUID userId) {
         User user = userRepository.findById(Objects.requireNonNull(userId, "User ID must not be null"))
                 .orElseThrow(() -> new BusinessException("USER_NOT_FOUND", "User not found"));
-        return jwtUtils.generateToken(user.getUserId(), user.getEmail(), user.getRole());
+        return jwtUtils.generateToken(user.getUserId(), user.getEmail(), normalizeRole(user.getRole()));
+    }
+
+    private String normalizeRole(String rawRole) {
+        if (rawRole == null || rawRole.isBlank()) {
+            return "customer";
+        }
+
+        String normalizedRole = rawRole.trim().toLowerCase();
+        if ("admin".equals(normalizedRole) || "manager".equals(normalizedRole)) {
+            return "manager";
+        }
+
+        return "customer";
     }
 }

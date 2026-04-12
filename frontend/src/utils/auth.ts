@@ -5,6 +5,12 @@ const AUTH_USER_KEY = 'authUser';
 
 export const getAuthToken = (): string | null => localStorage.getItem(AUTH_TOKEN_KEY);
 
+export const hasManagerRole = (role?: string | null): boolean => {
+  if (!role) return false;
+  const normalizedRole = role.trim().toLowerCase();
+  return normalizedRole === 'manager' || normalizedRole === 'admin';
+};
+
 export const getAuthUser = (): User | null => {
   const raw = localStorage.getItem(AUTH_USER_KEY);
   if (!raw) return null;
@@ -19,7 +25,7 @@ export const getAuthUser = (): User | null => {
 
 export const isAuthenticated = (): boolean => !!getAuthToken();
 
-export const isManager = (): boolean => getAuthUser()?.role === 'manager';
+export const isManager = (): boolean => hasManagerRole(getAuthUser()?.role);
 
 export const saveSession = (token: string, user: User): void => {
   localStorage.setItem(AUTH_TOKEN_KEY, token);
