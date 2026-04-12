@@ -128,3 +128,51 @@ Wiki 至少应包含以下页面并持续更新：
 ---
 
 如需调整本 README，请通过 PR 提交并说明修改原因，确保团队信息一致。
+
+## 11. Local Demo Data
+
+Backend startup now initializes repeatable local demo data automatically through:
+
+1. `schema-app.sql`
+2. `seed-app.sql`
+3. `seed-users.sql`
+4. `seed-demo-data.sql`
+
+After starting the backend, a fresh or existing local PostgreSQL
+database will be aligned with the baseline demo dataset.
+
+### 11.1 Default Accounts
+
+All seeded accounts use the same password:
+
+`Password123!`
+
+Available accounts:
+
+1. `alice@example.com` - customer
+2. `bob@example.com` - customer
+3. `charlie@example.com` - manager/admin
+4. `diana@example.com` - customer
+5. `eve@example.com` - customer
+
+### 11.2 Seeded Business Data
+
+The local demo dataset includes:
+
+1. rental options
+2. scooters
+3. bookings
+4. payments
+5. booking confirmations
+6. feedback records
+7. discount rules
+
+### 11.3 Notes
+
+1. The seed scripts are designed to be repeatable and should work on
+   both new and existing local databases.
+2. If login role changes are not reflected in the browser, sign out and
+   sign in again, and clear `localStorage` if needed.
+3. If PostgreSQL connection settings differ on another machine, update
+   `backend/src/main/resources/application.yml` before starting the
+   backend.
