@@ -1,48 +1,53 @@
 # XJCO2913 软件工程项目：电动滑板车租赁系统
 
 > 本仓库用于课程 `XJCO2913 Software Engineering Project` 小组作业开发与过程管理。  
-> 当前阶段：`Sprint 1 进行中（规划与基础搭建）`
+> 当前阶段：`Sprint 3 进行中（已确认 Walk-in and Rent 路线）`  
+> 状态说明：`Sprint 1 / Sprint 2 已完成，Sprint 4 用于最终版本封版与提交`
 
 ## 1. 项目简介
 
-本项目目标是开发一个基于 `B/S` 架构的电动滑板车租赁系统，覆盖客户端与管理端两个使用场景：
+本项目目标是开发一个基于 `B/S` 架构的电动滑板车租赁系统，覆盖客户端与管理端。
 
-1. 客户端：注册登录、查看车辆与价格、创建预订、模拟支付、查看记录、取消预订。  
-2. 管理端：配置车辆与价格、查看收入统计、处理反馈问题。  
-
-项目强调“功能实现 + 工程过程证据”并重，所有开发活动都在 GitHub 中可追踪（Issues、PR、Wiki、会议记录、测试记录）。
+当前已明确老师建议路线二选一中选择：`Walk-in and Rent`（不走 `Sharing Scooters` 路线）。
 
 ## 2. 课程与交付目标
 
-1. `CWK1`：完成团队自评与项目环境初始化（GitHub 仓库、Issue 管理、Wiki、Sprint 1 记录）。  
-2. `CWK2`：完成最终系统、演示与反思材料（代码质量、测试、文档、团队协作过程）。  
+1. `CWK1`：完成团队协作环境初始化（GitHub、Issue、Wiki、Sprint 证据）。  
+2. `CWK2`：完成最终系统、演示与反思材料（代码质量、测试、文档、团队协作过程）。
 
-## 3. 功能范围
+## 3. 当前功能范围（按 Walk-in 路线）
 
-## 3.1 Must Have
+## 3.1 已完成基础能力（Sprint 1 + Sprint 2）
 
 1. 账号注册与登录  
-2. 查看租赁选项与价格  
-3. 创建预订  
-4. 模拟支付  
-5. 预订确认与记录查看  
-6. 取消预订  
-7. 管理端配置车辆和价格  
-8. 周收入统计
+2. 查看车辆与价格  
+3. 创建/取消预订、模拟支付、预订确认  
+4. 管理端车辆与价格配置  
+5. 统计与反馈流程基础能力
 
-## 3.2 Should / Could Have
+## 3.2 Sprint 3 重点（Walk-in and Rent）
 
-1. 地图展示、可用性优化、折扣策略  
-2. 反馈分级处理  
-3. 并发能力增强、可访问性与响应式优化
+1. 到店租还流程（店员代录入 + 绑卡）  
+2. 远程下单到店取车核验  
+3. 还车结算（基础费 + 超时费 + 电量差 + 损坏费）  
+4. 超时提醒与自动扣费（模拟）  
+5. 免责条款同意约束与流程证据
+
+## 3.3 Sprint 4 重点（最终版本）
+
+1. 稳定性与缺陷收敛  
+2. 回归测试与最终测试报告  
+3. 用户手册（客户端/管理端）  
+4. 演示脚本、演示数据、故障兜底方案  
+5. 团队与个人反思材料整理
 
 ## 4. 技术路线与架构
 
 1. 架构：`B/S`（Browser + Server）  
-2. 数据层：关系型数据库（建议 PostgreSQL）  
-3. 前端：Web 客户端（建议 React + TypeScript）  
-4. 后端：REST API 服务（建议 NestJS / Spring Boot 等）  
-5. 测试：单元测试 + 接口测试 + 基础流程测试  
+2. 前端：`React + TypeScript + Vite`  
+3. 后端：`Spring Boot`  
+4. 数据层：关系型数据库（项目内 SQL 初始化脚本）  
+5. 测试：接口测试 + 关键 UI 流程测试 + 回归测试  
 6. 自动化：GitHub Actions（lint/test/build）
 
 详细见：
@@ -52,7 +57,7 @@
 
 ## 5. API 统一规范
 
-本项目 API 已统一约定，联调前请先阅读：
+联调前请先阅读最新 API 约束文档（已按 Walk-in 路线更新）：
 
 - [前后端API命名与使用规范.md](./前后端API命名与使用规范.md)
 
@@ -62,7 +67,8 @@
 2. URL 命名：名词复数 + 中划线，小写  
 3. 字段命名：`camelCase`  
 4. 响应结构：统一 `success/code/message/data/requestId/timestamp`  
-5. 错误码：统一业务错误码（如 `BOOKING_CONFLICT`）
+5. 角色与权限：`customer / clerk / admin`  
+6. Walk-in 关键接口：到店租还、取车核验、还车结算、超时任务
 
 ## 6. GitHub 协作规范
 
@@ -76,7 +82,7 @@
 
 1. 禁止直接向 `main` 提交。  
 2. 使用 `feature/*` 或 `fix/*` 分支开发。  
-3. 通过 PR 合并，PR 需关联 Issue（`Closes #xx`）。  
+3. 通过 PR 合并，PR 需关联 Issue（`Closes #xx`）。
 
 ## 6.3 提交信息建议
 
@@ -90,40 +96,37 @@
 - [团队成员GitHub使用与贡献说明.md](./团队成员GitHub使用与贡献说明.md)
 - [GitHub项目创建与使用详细指导（CWK版）.md](./GitHub项目创建与使用详细指导（CWK版）.md)
 
-## 7. Wiki 最低要求
+## 7. Sprint 文档索引（当前重点）
 
-Wiki 至少应包含以下页面并持续更新：
-
-1. `Sprint 1 Plan`  
-2. `Initial Design`  
-3. `Sprint 1 Outcomes`  
-4. `Meeting Minutes & Attendance`  
-5. `Testing Strategy`  
-6. `Backlog Status`
+1. [Wiki_Sprint2_Plan.md](./Wiki_Sprint2_Plan.md)  
+2. [Wiki_Sprint3_Sprint4_Plan.md](./Wiki_Sprint3_Sprint4_Plan.md)  
+3. [Sprint2_14条Issue清单（可复制）.md](./Sprint2_14条Issue清单（可复制）.md)  
+4. [Sprint3_12条Issue清单（可复制）.md](./Sprint3_12条Issue清单（可复制）.md)
 
 ## 8. 当前仓库文档索引
 
 1. [项目完成建议与大致规划.md](./项目完成建议与大致规划.md)  
 2. [CWK1_GitHub要求说明与操作清单.md](./CWK1_GitHub要求说明与操作清单.md)  
-3. [系统架构图草案.md](./系统架构图草案.md)  
-4. [项目UML图草案.md](./项目UML图草案.md)  
-5. [前后端API命名与使用规范.md](./前后端API命名与使用规范.md)  
+3. [前后端API命名与使用规范.md](./前后端API命名与使用规范.md)  
+4. [系统架构图草案.md](./系统架构图草案.md)  
+5. [项目UML图草案.md](./项目UML图草案.md)  
 6. [团队成员GitHub使用与贡献说明.md](./团队成员GitHub使用与贡献说明.md)
 
-## 9. 团队角色
+## 9. 团队角色（当前映射）
 
-1. Scrum Master（轮值）：`轮值`  
-2. Tech Lead - Frontend：`丁学治`  
-3. Tech Lead - Backend：`张凌屹`  
-4. Tech Lead - Merge and run `夏语程`  
-5. Testing Owner：`毛锦阳`  
-6. Documentation Owner：`龚名颂`
+1. Tech Lead - Frontend：`丁学治`  
+2. Tech Lead - Backend：`张凌屹`  
+3. Tech Lead - Merge and Run：`夏语程`  
+4. Testing Owner：`毛锦阳`  
+5. Documentation Owner：`龚名颂`  
+6. Scrum Master：`轮值`
 
-## 10. 下一步行动
+## 10. 下一步行动（按当前节奏）
 
-1. 在 GitHub 创建/完善 Sprint 1 Issues，并完成负责人分配。   (已完成)
-2. 在 Wiki 发布本 README 对应的核心页面（Plan、Design、Meetings、Outcomes）。   (已完成)
-3. 依据 API 规范启动前后端联调，优先打通“注册 -> 预订 -> 支付 -> 记录查询”主链路。   (已完成)
+1. 在 GitHub 创建并分配 Sprint 3 的 12 条 Issue。  
+2. 按 Walk-in API 规范冻结接口字段并开始联调。  
+3. 同步维护测试证据与 Wiki 记录，避免 Sprint 4 集中补文档。  
+4. 提前准备 Sprint 4 封版清单（测试报告、用户手册、演示脚本）。
 
 ---
 
