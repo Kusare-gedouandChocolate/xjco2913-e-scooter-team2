@@ -1,23 +1,20 @@
-/* src/index.css */
 @import 'leaflet/dist/leaflet.css';
 
 :root {
-  /* 核心配色 */
-  --color-primary: #57c2c0; /* 石绿：主色调，用于品牌露出、主要按钮、成功状态 */
-  --color-primary-hover: #46a3a1;
-  --color-accent: #fd4569;  /* 山茶红：强调色，用于注销、取消预订、报错、高亮金额 */
-  --color-accent-hover: #e03a58;
-
-  /* 中性色阶 (保证高对比度和现代感) */
-  --color-bg: #f8fafc;      /* 极浅灰背景 */
-  --color-surface: #ffffff; /* 卡片白 */
-  --color-text-main: #1e293b; /* 深灰正文 */
-  --color-text-muted: #64748b; /* 浅灰辅助文字 */
+  --color-primary: #0f766e;
+  --color-primary-hover: #115e59;
+  --color-primary-soft: #d7f3ee;
+  --color-accent: #e85d04;
+  --color-accent-hover: #c2410c;
+  --color-bg: #f6f4ee;
+  --color-bg-strong: #ebe6d7;
+  --color-surface: rgba(255, 255, 255, 0.9);
+  --color-surface-strong: #ffffff;
+  --color-text-main: #1f2937;
+  --color-text-muted: #5b6473;
   --color-border: #e2e8f0;
-
-  /* 阴影与圆角 (提升设计感) */
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+  --shadow-sm: 0 10px 30px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 18px 60px rgba(15, 23, 42, 0.1);
   --radius-lg: 12px;
   --radius-full: 9999px;
 }
@@ -28,15 +25,27 @@
   padding: 0;
 }
 
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
 body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Bahnschrift', 'Trebuchet MS', 'Segoe UI', sans-serif;
   background-color: var(--color-bg);
   color: var(--color-text-main);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  background-image:
+    radial-gradient(circle at top left, rgba(15, 118, 110, 0.12), transparent 32%),
+    radial-gradient(circle at bottom right, rgba(232, 93, 4, 0.12), transparent 28%);
 }
 
-/* 简单的全局按钮重置，方便后续组件化 */
+a {
+  color: inherit;
+}
+
 button {
   cursor: pointer;
   font-family: inherit;
@@ -44,7 +53,15 @@ button {
   outline: none;
 }
 
-input:focus {
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
   border-color: var(--color-primary) !important;
-  box-shadow: 0 0 0 3px rgba(87, 194, 192, 0.2) !important;
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.16) !important;
 }

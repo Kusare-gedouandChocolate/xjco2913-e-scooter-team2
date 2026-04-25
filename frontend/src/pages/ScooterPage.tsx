@@ -1,87 +1,66 @@
-// src/pages/ScooterPage.tsx
-import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import React, { useEffect, useState } from 'react';
+import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
 import L from 'leaflet';
-import { scootersApi, bookingsApi, mapsApi } from '../api';
-import type { Scooter, PricingRule, ScooterLocation } from '../types';
+
+import { bookingsApi, mapsApi, scootersApi } from '../api';
 import { StateWrapper } from '../components/StateWrapper';
+import type { PricingRule, Scooter, ScooterLocation, ScooterStatus } from '../types';
 import { formatPrice, getUTCTimeString } from '../utils/format';
+import { getScooterImage, getScooterSpecs } from '../utils/scooterVisual';
 
-// --- 自定义地图图标 (解决 Vite 默认图标路径 Bug，并融入石绿主题色) ---
-const createCustomIcon = (color: string) => L.divIcon({
-  className: 'custom-scooter-marker',
-  html: `<svg width="32" height="32" viewBox="0 0 24 24" fill="${color}" stroke="#ffffff" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><circle cx="12" cy="12" r="3" fill="#ffffff"></circle></svg>`,
-  iconSize: [32, 32],
-  iconAnchor: [16, 32],
-  popupAnchor: [0, -32],
-});
+const createIcon = (color: string) =>
+  L.divIcon({
+    className: 'custom-scooter-marker',
+    html: `<div style="width:18px;height:18px;border-radius:999px;background:${color};border:3px solid white;box-shadow:0 4px 14px rgba(15,23,42,.25)"></div>`,
+    iconSize: [18, 18],
+    iconAnchor: [9, 9],
+  });
 
-const availableIcon = createCustomIcon('#57c2c0'); // 石绿
-const unavailableIcon = createCustomIcon('#94a3b8'); // 灰色
+const availableIcon = createIcon('#0f766e');
+const offlineIcon = createIcon('#94a3b8');
 
-const statusLabelMap: Record<Scooter['status'], string> = {
-  available: '可租用',
-  in_use: '使用中',
-  maintenance: '维护中',
-  locked: '已锁定',
-};
-
-// --- 地图视角控制子组件 (用于列表点击联动地图) ---
-const MapController = ({ center }: { center: [number, number] | null }) => {
-  const map = useMap();
-  useEffect(() => {
-    if (center) {
-      map.flyTo(center, 15, { duration: 1.5 });
-    }
-  }, [center, map]);
-  return null;
+const statusText: Record<string, string> = {
+  available: 'Available',
+  reserved: 'Reserved',
+  unavailable: 'Unavailable',
+  maintenance: 'Maintenance',
+  in_use: 'In Use',
+  locked: 'Locked',
+  AVAILABLE: 'Available',
+  IN_USE: 'In Use',
+  MAINTENANCE: 'Maintenance',
+  LOCKED: 'Locked',
 };
 
 export const ScooterPage: React.FC = () => {
-  // --- 数据状态 ---
   const [scooters, setScooters] = useState<Scooter[]>([]);
   const [locations, setLocations] = useState<ScooterLocation[]>([]);
   const [rules, setRules] = useState<PricingRule[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
-  // --- 交互状态 ---
-  const [onlyAvailable, setOnlyAvailable] = useState(true); // 状态筛选
-  const [mapCenter, setMapCenter] = useState<[number, number]>([53.8, -1.55]);
-  const [mapError, setMapError] = useState(false); // 地图兜底文案标识
-
-  // --- 预订交互状态 ---
-  const [selectedScooter, setSelectedScooter] = useState<Scooter | null>(null);
-  const [selectedHireType, setSelectedHireType] = useState<string>('');
-  const [bookingStep, setBookingStep] = useState<'idle' | 'booking' | 'paying' | 'success'>('idle');
-  const [actionError, setActionError] = useState<string>('');
+  const [onlyAvailable, setOnlyAvailable] = useState(true);
+  const [selectedScooterId, setSelectedScooterId] = useState<string | null>(null);
+  const [selectedRuleId, setSelectedRuleId] = useState<string>('');
+  const [bookingState, setBookingState] = useState<'idle' | 'booking' | 'paying' | 'success'>('idle');
+  const [bookingError, setBookingError] = useState('');
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const fetchData = async () => {
     setLoading(true);
     setError(null);
     try {
-      const [scootersRes, rulesRes, locsRes] = await Promise.all([
+      const [scooterRes, locationRes, pricingRes] = await Promise.all([
         scootersApi.getScooters(),
+        mapsApi.getLocations(onlyAvailable),
         scootersApi.getPricingRules(),
-        mapsApi.getLocations(onlyAvailable)
       ]);
-      setScooters(scootersRes.data || []);
-      setRules(rulesRes.data || []);
-
-      const rawLocs = locsRes.data || [];
-      // 过滤掉无效坐标的位置点
-      const validLocs = rawLocs.filter(loc =>
-          loc.latitude != null && loc.longitude != null &&
-          !isNaN(loc.latitude) && !isNaN(loc.longitude)
-      );
-      setLocations(validLocs);
-      // 默认将地图中心设为第一辆车的位置
-      if (validLocs.length > 0) {
-        setMapCenter([validLocs[0].latitude, validLocs[0].longitude]);
-      }
-    } catch (err: unknown) {
-      const e = err as { message?: string };
-      setError(e.message || '获取车辆数据失败');
+      setScooters(scooterRes.data || []);
+      setLocations(locationRes.data || []);
+      setRules(pricingRes.data || []);
+      setSelectedRuleId((current) => current || pricingRes.data?.[0]?.ruleId || '');
+    } catch (err) {
+      const apiError = err as { message?: string };
+      setError(apiError.message || 'Failed to load scooter fleet.');
     } finally {
       setLoading(false);
     }
@@ -89,229 +68,348 @@ export const ScooterPage: React.FC = () => {
 
   useEffect(() => {
     fetchData();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onlyAvailable]); // 筛选条件变化时重新获取
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onlyAvailable]);
 
-  // 列表点击：联动地图居中
-  const handleLocateOnMap = (scooterId: string) => {
-    const loc = locations.find(l => l.scooterId === scooterId);
-    if (loc) {
-      setMapCenter([loc.latitude, loc.longitude]);
-      // 移动端体验优化：点击定位后稍微滚动页面让地图漏出来
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  };
+  const selectedScooter =
+    scooters.find((item) => item.scooterId === selectedScooterId) || null;
+  const selectedRule =
+    rules.find((item) => item.ruleId === selectedRuleId) || rules[0] || null;
+
+  const availableScooters = scooters.filter((item) => isAvailable(item.status));
+  const displayScooters = onlyAvailable ? availableScooters : scooters;
+  const featuredScooter = selectedScooter || displayScooters[0] || null;
+  const featuredSpecs = featuredScooter ? getScooterSpecs(featuredScooter) : null;
 
   const handleOpenBooking = (scooter: Scooter) => {
-    setSelectedScooter(scooter);
-    setSelectedHireType(rules[0]?.ruleId || '');
-    setBookingStep('idle');
-    setActionError('');
+    setSelectedScooterId(scooter.scooterId);
+    setSelectedRuleId((current) => current || rules[0]?.ruleId || '');
+    setBookingState('idle');
+    setBookingError('');
   };
 
   const handleConfirmBooking = async () => {
-    if (!selectedScooter || !selectedHireType) return;
-    setBookingStep('booking');
-    setActionError('');
+    if (!selectedScooter || !selectedRule) {
+      return;
+    }
+
+    setBookingError('');
+    setBookingState('booking');
+
     try {
-      const bookingRes = await bookingsApi.createBooking({
-        scooterId: Number(selectedScooter.scooterId),
-        rentalOptionId: Number(selectedHireType),
+      const bookingResponse = await bookingsApi.createBooking({
+        scooterId: selectedScooter.scooterId,
+        rentalOptionId: selectedRule.ruleId,
+        hireType: selectedRule.hireType,
         startTime: getUTCTimeString(),
       });
-      const bId = Number(bookingRes.data.bookingId);
-      setBookingStep('paying');
-      await bookingsApi.payBooking({ bookingId: bId, paymentMethod: 'CREDIT_CARD' });
-      setBookingStep('success');
-      fetchData(); // 支付成功后刷新地图和列表
-    } catch (err: unknown) {
-      const e = err as { message?: string };
-      setActionError(e.message || '操作失败，请重试');
-      setBookingStep('idle');
+
+      setBookingState('paying');
+      await bookingsApi.payBooking({
+        bookingId: bookingResponse.data.bookingId,
+        paymentMethod: 'CARD_ON_FILE',
+      });
+
+      setBookingState('success');
+      await fetchData();
+    } catch (err) {
+      const apiError = err as { message?: string };
+      setBookingError(apiError.message || 'Unable to create the booking right now.');
+      setBookingState('idle');
     }
   };
 
-  // 过滤要在列表显示的车辆
-  const displayScooters = onlyAvailable ? scooters.filter(s => s.status === 'available') : scooters;
-
   return (
-    <div style={styles.container}>
-      <header style={styles.header}>
-        <h1 style={{ color: 'var(--color-text-main)', fontSize: '1.8rem', marginBottom: '8px' }}>
-          寻找附近的滑板车
-        </h1>
-        {/* 状态筛选切换器 */}
-        <div style={styles.filterBar}>
-          <button 
-            style={styles.filterBtn(onlyAvailable)} 
-            onClick={() => setOnlyAvailable(true)}
-          >
-            仅看可用
-          </button>
-          <button 
-            style={styles.filterBtn(!onlyAvailable)} 
-            onClick={() => setOnlyAvailable(false)}
-          >
-            查看全部
-          </button>
+    <div style={styles.page}>
+      <section style={styles.hero}>
+        <div style={styles.heroText}>
+          <p style={styles.kicker}>Sprint 3 fleet experience</p>
+          <h1 style={styles.title}>Reserve the right scooter with a richer booking preview.</h1>
+          <p style={styles.subtitle}>
+            Browse live positions, compare performance, preview a larger product image,
+            and switch models before checkout while pricing updates instantly.
+          </p>
+          <div style={styles.filterGroup}>
+            <button
+              style={filterButton(onlyAvailable)}
+              onClick={() => setOnlyAvailable(true)}
+            >
+              Available only
+            </button>
+            <button
+              style={filterButton(!onlyAvailable)}
+              onClick={() => setOnlyAvailable(false)}
+            >
+              Full fleet
+            </button>
+          </div>
         </div>
-      </header>
 
-      <StateWrapper loading={loading} error={error} onRetry={fetchData}>
-        <div style={styles.contentLayout}>
-          
-          {/* 左侧/上方：地图展示区 */}
-          <div style={styles.mapSection}>
-            {mapError ? (
-              // 地图加载失败兜底文案
-              <div style={styles.mapFallback}>
-                <span style={{ fontSize: '2rem', marginBottom: '10px' }}>🗺️</span>
-                <p>地图组件加载失败，但您仍可通过下方列表预订车辆。</p>
+        {featuredScooter && featuredSpecs && (
+          <div style={styles.heroCard}>
+            <img
+              alt={featuredScooter.code}
+              src={getScooterImage(featuredScooter)}
+              style={styles.heroImage}
+            />
+            <div style={styles.heroOverlay}>
+              <div>
+                <p style={styles.heroLabel}>{featuredScooter.model || 'Urban Ride Series'}</p>
+                <h2 style={styles.heroName}>#{featuredScooter.code}</h2>
               </div>
-            ) : (
-                <MapContainer
-                    center={mapCenter}
-                    zoom={14}
-                    style={{ height: '100%', width: '100%', borderRadius: '16px', zIndex: 0 }}
-                    whenReady={() => setMapError(false)}
-                >
-                <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                  url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" // 使用现代感浅色地图底图
-                />
-                <MapController center={mapCenter} />
-                
-                {locations.map(loc => (
+              <button
+                style={styles.imageButton}
+                onClick={() => setPreviewImage(getScooterImage(featuredScooter))}
+              >
+                Expand image
+              </button>
+            </div>
+            <div style={styles.metricGrid}>
+              <Metric label="Battery" value={`${featuredSpecs.batteryLevel}%`} />
+              <Metric label="Top speed" value={`${featuredSpecs.topSpeedKph} km/h`} />
+              <Metric label="Range" value={`${featuredSpecs.rangeKm} km`} />
+              <Metric label="Motor" value={`${featuredSpecs.motorPowerW} W`} />
+            </div>
+          </div>
+        )}
+      </section>
 
-                  <Marker 
-                    key={loc.scooterId} 
-                    position={[loc.latitude, loc.longitude]}
-                    icon={loc.status === 'available' ? availableIcon : unavailableIcon}
-                    eventHandlers={{
-                      click: () => setMapCenter([loc.latitude, loc.longitude])
-                    }}
+      <StateWrapper
+        loading={loading}
+        error={error}
+        empty={displayScooters.length === 0}
+        emptyMessage="No scooters match this filter yet."
+        onRetry={fetchData}
+      >
+        <section style={styles.layout}>
+          <div style={styles.mapPanel}>
+            <div style={styles.sectionHeading}>
+              <div>
+                <p style={styles.sectionEyebrow}>Live pickup map</p>
+                <h2 style={styles.sectionTitle}>Store and curbside availability</h2>
+              </div>
+            </div>
+
+            <div style={styles.mapFrame}>
+              <MapContainer
+                center={locations[0] ? [locations[0].latitude, locations[0].longitude] : [53.8, -1.55]}
+                zoom={13}
+                style={{ height: '100%', width: '100%' }}
+              >
+                <TileLayer
+                  attribution='&copy; OpenStreetMap contributors'
+                  url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                />
+                {locations.map((location) => (
+                  <Marker
+                    key={location.scooterId}
+                    position={[location.latitude, location.longitude]}
+                    icon={isAvailable(location.status) ? availableIcon : offlineIcon}
                   >
                     <Popup>
-                      <div style={{ textAlign: 'center' as const, minWidth: '120px' }}>
-                        <h4 style={{ margin: '0 0 8px 0', fontSize: '1.1rem' }}>#{loc.code}</h4>
-                        <span style={styles.badge(loc.status === 'available')}>
-                          {loc.status === 'available' ? '当前可用' : statusLabelMap[loc.status]}
-                        </span>
-                        {loc.status === 'available' && (
-                          <button 
-                            style={styles.miniBookBtn}
-                            onClick={() => {
-                              const target = scooters.find(s => s.scooterId === loc.scooterId);
-                              if (target) handleOpenBooking(target);
-                            }}
-                          >
-                            在此下单
-                          </button>
-                        )}
+                      <div style={{ minWidth: '160px' }}>
+                        <strong>#{location.code}</strong>
+                        <p>{location.locationZone}</p>
+                        <p>{statusText[location.status] || location.status}</p>
                       </div>
                     </Popup>
                   </Marker>
                 ))}
               </MapContainer>
-            )}
+            </div>
           </div>
 
-          {/* 右侧/下方：车辆列表区 */}
-          <div style={styles.listSection}>
-            {displayScooters.length === 0 ? (
-              <div style={{ textAlign: 'center' as const, padding: '40px', color: 'var(--color-text-muted)' }}>
-                当前筛选条件下无可用车辆
+          <div style={styles.listPanel}>
+            <div style={styles.sectionHeading}>
+              <div>
+                <p style={styles.sectionEyebrow}>Book with confidence</p>
+                <h2 style={styles.sectionTitle}>Vehicle cards with richer detail</h2>
               </div>
-            ) : (
-              displayScooters.map((scooter) => (
-                <div key={scooter.scooterId} style={styles.card}>
-                  <div style={styles.cardHeader}>
-                    <span style={styles.scooterCode}>🛴 #{scooter.code}</span>
-                    <span style={styles.badge(scooter.status === 'available')}>
-                      {statusLabelMap[scooter.status]}
-                    </span>
-                  </div>
-                  
-                  <div style={styles.cardBody}>
-                    <p style={styles.locationInfo}>
-                      <span>📍 {scooter.location}</span>
-                      {/* 点击联动地图 */}
-                      <button style={styles.locateBtn} onClick={() => handleLocateOnMap(scooter.scooterId)}>
-                        在地图中定位
-                      </button>
-                    </p>
-                    <div style={styles.priceRow}>
-                      <span style={styles.priceLabel}>基础费率</span>
-                      <span style={styles.priceValue}>{formatPrice(scooter.basePrice)}/次</span>
-                    </div>
-                  </div>
+            </div>
 
-                  <button 
-                    style={styles.bookBtn(scooter.status === 'available')}
-                    disabled={scooter.status !== 'available'}
-                    onClick={() => handleOpenBooking(scooter)}
-                  >
-                    立即预订
-                  </button>
-                </div>
-              ))
-            )}
+            <div style={styles.cardGrid}>
+              {displayScooters.map((scooter) => {
+                const specs = getScooterSpecs(scooter);
+                const available = isAvailable(scooter.status);
+                return (
+                  <article key={scooter.scooterId} style={styles.scooterCard}>
+                    <img
+                      alt={scooter.code}
+                      src={getScooterImage(scooter)}
+                      style={styles.cardImage}
+                    />
+                    <div style={styles.cardContent}>
+                      <div style={styles.cardHeader}>
+                        <div>
+                          <p style={styles.cardModel}>{scooter.model || 'RideFlow Urban'}</p>
+                          <h3 style={styles.cardCode}>#{scooter.code}</h3>
+                        </div>
+                        <span style={statusBadge(available)}>
+                          {statusText[scooter.status] || scooter.status}
+                        </span>
+                      </div>
+
+                      <p style={styles.locationLine}>{scooter.location}</p>
+                      <p style={styles.note}>{specs.performanceNote}</p>
+
+                      <div style={styles.specRow}>
+                        <span>{specs.topSpeedKph} km/h</span>
+                        <span>{specs.rangeKm} km range</span>
+                        <span>{specs.batteryLevel}% battery</span>
+                      </div>
+
+                      <div style={styles.priceBand}>
+                        <span>Base ride rate</span>
+                        <strong>{formatPrice(scooter.basePrice)}</strong>
+                      </div>
+
+                      <div style={styles.cardActions}>
+                        <button
+                          style={styles.secondaryButton}
+                          onClick={() => setPreviewImage(getScooterImage(scooter))}
+                        >
+                          Preview
+                        </button>
+                        <button
+                          style={primaryButton(available)}
+                          disabled={!available}
+                          onClick={() => handleOpenBooking(scooter)}
+                        >
+                          Reserve
+                        </button>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        </section>
       </StateWrapper>
 
-      {/* 预订与支付弹窗 (保留原有逻辑，仅调整 TS 严格限制) */}
-      {selectedScooter && (
-        <div style={styles.modalOverlay}>
-          <div style={styles.modalContent}>
-            {bookingStep === 'success' ? (
-              <div style={{ textAlign: 'center' as const, padding: '20px 0' }}>
-                <div style={styles.successIcon}>✓</div>
-                <h2 style={{ color: 'var(--color-primary)', marginBottom: '10px' }}>支付成功！</h2>
-                <p style={{ color: 'var(--color-text-muted)', marginBottom: '24px' }}>车辆解锁码已发送，请安全骑行。</p>
-                <button style={styles.primaryBtn} onClick={() => setSelectedScooter(null)}>
-                  完成并关闭
+      {selectedScooter && selectedRule && (
+        <div style={styles.modalBackdrop}>
+          <div style={styles.modal}>
+            <div style={styles.modalTop}>
+              <div>
+                <p style={styles.sectionEyebrow}>Sprint 3 booking panel</p>
+                <h3 style={styles.modalTitle}>Switch scooter model before checkout</h3>
+              </div>
+              <button style={styles.closeButton} onClick={() => setSelectedScooterId(null)}>
+                Close
+              </button>
+            </div>
+
+            <div style={styles.modalLayout}>
+              <div>
+                <img
+                  alt={selectedScooter.code}
+                  src={getScooterImage(selectedScooter)}
+                  style={styles.modalImage}
+                />
+                <button
+                  style={{ ...styles.imageButton, marginTop: '12px' }}
+                  onClick={() => setPreviewImage(getScooterImage(selectedScooter))}
+                >
+                  Expand product image
                 </button>
               </div>
-            ) : (
-              <>
-                <h2 style={{ marginBottom: '16px' }}>确认预订</h2>
-                <p style={{ marginBottom: '20px', color: 'var(--color-text-muted)' }}>
-                  您正在预订车辆 <strong>#{selectedScooter.code}</strong>
-                </p>
 
-                {actionError && <div style={styles.errorBox}>{actionError}</div>}
-
-                <div style={{ marginBottom: '24px' }}>
-                  <label style={styles.label}>请选择租赁时长套餐：</label>
-                  <div style={styles.radioGroup}>
-                    {rules.map((rule) => (
-                      <label key={rule.ruleId} style={styles.radioOption(selectedHireType === rule.ruleId)}>
-                        <input 
-                          type="radio" 
-                          name="hireType" 
-                          value={rule.ruleId}
-                          checked={selectedHireType === rule.ruleId}
-                          onChange={(e) => setSelectedHireType(e.target.value)}
-                          style={{ display: 'none' }} 
-                        />
-                        <span style={{ fontWeight: 600 }}>{rule.hireType} 套餐</span>
-                        <span style={{ color: 'var(--color-accent)', fontWeight: 700 }}>{formatPrice(rule.price)}</span>
-                      </label>
+              <div style={styles.modalBody}>
+                <div style={styles.modalBlock}>
+                  <p style={styles.fieldLabel}>Selected scooter</p>
+                  <div style={styles.optionGrid}>
+                    {availableScooters.map((scooter) => (
+                      <button
+                        key={scooter.scooterId}
+                        style={optionButton(selectedScooter.scooterId === scooter.scooterId)}
+                        onClick={() => {
+                          const confirmed = window.confirm(
+                            `Switch booking preview to scooter #${scooter.code}?`,
+                          );
+                          if (confirmed) {
+                            setSelectedScooterId(scooter.scooterId);
+                          }
+                        }}
+                      >
+                        <strong>#{scooter.code}</strong>
+                        <span>{scooter.model || 'Urban Ride'}</span>
+                      </button>
                     ))}
                   </div>
                 </div>
 
-                <div style={styles.modalActions}>
-                  <button style={styles.cancelBtn} onClick={() => setSelectedScooter(null)} disabled={bookingStep !== 'idle'}>
-                    取消
-                  </button>
-                  <button style={styles.confirmBtn} onClick={handleConfirmBooking} disabled={bookingStep !== 'idle'}>
-                    {bookingStep === 'booking' ? '正在锁单...' : bookingStep === 'paying' ? '正在扣款...' : '确认并支付'}
-                  </button>
+                <div style={styles.modalBlock}>
+                  <p style={styles.fieldLabel}>Hire type</p>
+                  <div style={styles.optionGrid}>
+                    {rules.map((rule) => (
+                      <button
+                        key={rule.ruleId}
+                        style={optionButton(selectedRule.ruleId === rule.ruleId)}
+                        onClick={() => setSelectedRuleId(rule.ruleId)}
+                      >
+                        <strong>{rule.hireType}</strong>
+                        <span>{formatPrice(rule.price)}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </>
-            )}
+
+                <div style={styles.summaryBox}>
+                  <p style={styles.fieldLabel}>Pricing preview</p>
+                  <div style={styles.summaryRow}>
+                    <span>Model</span>
+                    <strong>{selectedScooter.model || `Scooter #${selectedScooter.code}`}</strong>
+                  </div>
+                  <div style={styles.summaryRow}>
+                    <span>Hire package</span>
+                    <strong>{selectedRule.hireType}</strong>
+                  </div>
+                  <div style={styles.summaryRow}>
+                    <span>Estimated fare</span>
+                    <strong>{formatPrice(selectedRule.price)}</strong>
+                  </div>
+                </div>
+
+                {bookingError && <div style={styles.errorBox}>{bookingError}</div>}
+
+                {bookingState === 'success' ? (
+                  <div style={styles.successPanel}>
+                    <h4>Booking created</h4>
+                    <p>Your selection and payment have been confirmed successfully.</p>
+                    <button style={styles.successButton} onClick={() => setSelectedScooterId(null)}>
+                      Finish
+                    </button>
+                  </div>
+                ) : (
+                  <div style={styles.footerActions}>
+                    <button style={styles.ghostButton} onClick={() => setSelectedScooterId(null)}>
+                      Cancel
+                    </button>
+                    <button
+                      style={styles.successButton}
+                      onClick={handleConfirmBooking}
+                      disabled={bookingState !== 'idle'}
+                    >
+                      {bookingState === 'booking'
+                        ? 'Creating booking...'
+                        : bookingState === 'paying'
+                          ? 'Processing payment...'
+                          : 'Confirm and pay'}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {previewImage && (
+        <div style={styles.modalBackdrop} onClick={() => setPreviewImage(null)}>
+          <div style={styles.lightbox} onClick={(event) => event.stopPropagation()}>
+            <img alt="Expanded scooter preview" src={previewImage} style={styles.lightboxImage} />
+            <button style={styles.closeButton} onClick={() => setPreviewImage(null)}>Close</button>
           </div>
         </div>
       )}
@@ -319,149 +417,389 @@ export const ScooterPage: React.FC = () => {
   );
 };
 
-// --- 内联样式字典 ---
+const Metric = ({ label, value }: { label: string; value: string }) => {
+  return (
+    <div style={styles.metricCard}>
+      <span style={styles.metricLabel}>{label}</span>
+      <strong style={styles.metricValue}>{value}</strong>
+    </div>
+  );
+};
+
+const isAvailable = (status: ScooterStatus): boolean => {
+  return String(status).toLowerCase() === 'available';
+};
+
+const filterButton = (active: boolean) => ({
+  padding: '10px 16px',
+  borderRadius: '999px',
+  backgroundColor: active ? '#1f2937' : 'rgba(255,255,255,0.72)',
+  color: active ? '#ffffff' : 'var(--color-text-main)',
+  fontWeight: 700,
+  boxShadow: active ? 'var(--shadow-sm)' : 'none',
+});
+
+const statusBadge = (available: boolean) => ({
+  padding: '6px 10px',
+  borderRadius: '999px',
+  backgroundColor: available ? 'var(--color-primary-soft)' : '#eef2f7',
+  color: available ? 'var(--color-primary)' : 'var(--color-text-muted)',
+  fontSize: '0.8rem',
+  fontWeight: 700,
+});
+
+const primaryButton = (enabled: boolean) => ({
+  flex: 1,
+  padding: '12px 16px',
+  borderRadius: '14px',
+  backgroundColor: enabled ? 'var(--color-primary)' : '#cbd5e1',
+  color: '#ffffff',
+  fontWeight: 700,
+});
+
+const optionButton = (selected: boolean) => ({
+  padding: '14px',
+  borderRadius: '16px',
+  display: 'flex',
+  flexDirection: 'column' as const,
+  gap: '6px',
+  alignItems: 'flex-start',
+  textAlign: 'left' as const,
+  backgroundColor: selected ? '#effcf8' : '#f8fafc',
+  border: `1px solid ${selected ? 'var(--color-primary)' : 'var(--color-border)'}`,
+});
+
 const styles = {
-  container: {
-    padding: '24px',
-    maxWidth: '1400px', // 放宽最大宽度容纳地图
+  page: {
+    maxWidth: '1240px',
     margin: '0 auto',
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: '28px',
   },
-  header: {
+  hero: {
+    display: 'grid',
+    gridTemplateColumns: 'minmax(0, 1.1fr) minmax(0, 0.9fr)',
+    gap: '24px',
+    alignItems: 'stretch',
+  },
+  heroText: {
+    padding: '24px 4px',
+  },
+  kicker: {
+    color: 'var(--color-accent)',
+    fontSize: '0.82rem',
+    fontWeight: 800,
+    letterSpacing: '0.12em',
+    textTransform: 'uppercase' as const,
+    marginBottom: '12px',
+  },
+  title: {
+    fontSize: 'clamp(2.2rem, 4vw, 4.1rem)',
+    lineHeight: 1.02,
+    letterSpacing: '-0.04em',
+    marginBottom: '16px',
+  },
+  subtitle: {
+    color: 'var(--color-text-muted)',
+    maxWidth: '620px',
+    fontSize: '1.04rem',
+  },
+  filterGroup: {
+    display: 'flex',
+    gap: '12px',
+    marginTop: '24px',
+    flexWrap: 'wrap' as const,
+  },
+  heroCard: {
+    backgroundColor: 'var(--color-surface-strong)',
+    borderRadius: '28px',
+    padding: '18px',
+    boxShadow: 'var(--shadow-md)',
+  },
+  heroImage: {
+    width: '100%',
+    aspectRatio: '16 / 10',
+    objectFit: 'cover' as const,
+    borderRadius: '22px',
+  },
+  heroOverlay: {
     display: 'flex',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '24px',
-    flexWrap: 'wrap' as const,
     gap: '16px',
-  },
-  filterBar: {
-    display: 'flex',
-    backgroundColor: '#f1f5f9',
-    borderRadius: '8px',
-    padding: '4px',
-  },
-  filterBtn: (isActive: boolean) => ({
-    padding: '8px 16px',
-    borderRadius: '6px',
-    border: 'none',
-    fontWeight: 600,
-    fontSize: '0.9rem',
-    backgroundColor: isActive ? '#ffffff' : 'transparent',
-    color: isActive ? 'var(--color-primary)' : 'var(--color-text-muted)',
-    boxShadow: isActive ? 'var(--shadow-sm)' : 'none',
-    transition: 'all 0.2s',
-  }),
-  contentLayout: {
-    display: 'flex',
-    gap: '24px',
-    flexDirection: window.innerWidth < 768 ? 'column' as const : 'row' as const, // 响应式布局：手机上下，电脑左右
-  },
-  mapSection: {
-    flex: '1.5',
-    height: window.innerWidth < 768 ? '350px' : '600px', // 移动端地图高度自适应
-    backgroundColor: 'var(--color-surface)',
-    borderRadius: '16px',
-    boxShadow: 'var(--shadow-md)',
-    overflow: 'hidden',
-    position: 'relative' as const,
-  },
-  mapFallback: {
-    display: 'flex',
-    flexDirection: 'column' as const,
     alignItems: 'center',
-    justifyContent: 'center',
-    height: '100%',
-    padding: '20px',
-    textAlign: 'center' as const,
+    marginTop: '14px',
+  },
+  heroLabel: {
     color: 'var(--color-text-muted)',
-    backgroundColor: '#f8fafc',
   },
-  listSection: {
-    flex: '1',
+  heroName: {
+    fontSize: '1.6rem',
+  },
+  imageButton: {
+    padding: '10px 14px',
+    borderRadius: '999px',
+    backgroundColor: '#111827',
+    color: '#ffffff',
+    fontWeight: 700,
+  },
+  metricGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+    gap: '12px',
+    marginTop: '16px',
+  },
+  metricCard: {
+    padding: '14px',
+    borderRadius: '18px',
+    backgroundColor: '#f8fafc',
     display: 'flex',
     flexDirection: 'column' as const,
-    gap: '16px',
-    maxHeight: '600px',
-    overflowY: 'auto' as const, // 列表过长时支持内部滚动
-    paddingRight: '4px',
+    gap: '4px',
   },
-  card: {
-    backgroundColor: 'var(--color-surface)',
-    borderRadius: '12px',
-    padding: '16px',
+  metricLabel: {
+    color: 'var(--color-text-muted)',
+    fontSize: '0.82rem',
+    textTransform: 'uppercase' as const,
+    letterSpacing: '0.06em',
+  },
+  metricValue: {
+    fontSize: '1.1rem',
+  },
+  layout: {
+    display: 'grid',
+    gridTemplateColumns: 'minmax(0, 0.85fr) minmax(0, 1.15fr)',
+    gap: '24px',
+  },
+  mapPanel: {
+    padding: '22px',
+    borderRadius: '28px',
+    backgroundColor: 'var(--color-surface-strong)',
     boxShadow: 'var(--shadow-sm)',
+    minHeight: '620px',
+  },
+  listPanel: {
+    padding: '22px',
+    borderRadius: '28px',
+    backgroundColor: 'var(--color-surface-strong)',
+    boxShadow: 'var(--shadow-sm)',
+  },
+  sectionHeading: {
+    marginBottom: '18px',
+  },
+  sectionEyebrow: {
+    color: 'var(--color-accent)',
+    fontSize: '0.78rem',
+    fontWeight: 800,
+    letterSpacing: '0.12em',
+    textTransform: 'uppercase' as const,
+  },
+  sectionTitle: {
+    marginTop: '4px',
+    fontSize: '1.4rem',
+  },
+  mapFrame: {
+    overflow: 'hidden',
+    borderRadius: '22px',
+    height: '540px',
+  },
+  cardGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+    gap: '18px',
+  },
+  scooterCard: {
+    overflow: 'hidden',
+    borderRadius: '24px',
+    backgroundColor: '#fcfcfb',
     border: '1px solid var(--color-border)',
+  },
+  cardImage: {
+    width: '100%',
+    aspectRatio: '16 / 10',
+    objectFit: 'cover' as const,
+  },
+  cardContent: {
+    padding: '18px',
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: '12px',
   },
   cardHeader: {
     display: 'flex',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '12px',
+    gap: '14px',
+    alignItems: 'flex-start',
   },
-  scooterCode: { fontSize: '1.1rem', fontWeight: 700 },
-  badge: (isAvailable: boolean) => ({
-    padding: '4px 8px',
-    borderRadius: '12px',
-    fontSize: '0.75rem',
-    fontWeight: 700,
-    backgroundColor: isAvailable ? '#e6f7f6' : '#f1f5f9',
-    color: isAvailable ? 'var(--color-primary)' : 'var(--color-text-muted)',
-  }),
-  cardBody: { marginBottom: '16px' },
-  locationInfo: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  cardModel: {
     color: 'var(--color-text-muted)',
-    fontSize: '0.9rem',
-    marginBottom: '12px',
+    fontSize: '0.88rem',
   },
-  locateBtn: {
-    background: 'none',
-    border: 'none',
-    color: 'var(--color-primary)',
-    fontSize: '0.85rem',
-    textDecoration: 'underline',
-    cursor: 'pointer',
+  cardCode: {
+    fontSize: '1.28rem',
   },
-  priceRow: {
+  locationLine: {
+    fontWeight: 700,
+  },
+  note: {
+    color: 'var(--color-text-muted)',
+    fontSize: '0.94rem',
+  },
+  specRow: {
+    display: 'flex',
+    flexWrap: 'wrap' as const,
+    gap: '8px',
+    color: 'var(--color-text-muted)',
+    fontSize: '0.88rem',
+  },
+  priceBand: {
     display: 'flex',
     justifyContent: 'space-between',
-    backgroundColor: 'var(--color-bg)',
-    padding: '8px 12px',
-    borderRadius: '6px',
+    alignItems: 'center',
+    padding: '14px 16px',
+    borderRadius: '16px',
+    backgroundColor: '#f7f4eb',
   },
-  priceLabel: { fontSize: '0.85rem', color: 'var(--color-text-muted)' },
-  priceValue: { fontSize: '1rem', fontWeight: 700, color: 'var(--color-text-main)' },
-  bookBtn: (isAvailable: boolean) => ({
+  cardActions: {
+    display: 'flex',
+    gap: '10px',
+  },
+  secondaryButton: {
+    padding: '12px 16px',
+    borderRadius: '14px',
+    backgroundColor: '#eef2f7',
+    color: 'var(--color-text-main)',
+    fontWeight: 700,
+  },
+  modalBackdrop: {
+    position: 'fixed' as const,
+    inset: 0,
+    backgroundColor: 'rgba(15, 23, 42, 0.6)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '20px',
+    zIndex: 80,
+  },
+  modal: {
+    width: 'min(1040px, 100%)',
+    maxHeight: '90vh',
+    overflow: 'auto' as const,
+    borderRadius: '30px',
+    backgroundColor: 'var(--color-surface-strong)',
+    boxShadow: 'var(--shadow-md)',
+    padding: '24px',
+  },
+  modalTop: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    gap: '16px',
+    alignItems: 'center',
+    marginBottom: '20px',
+  },
+  modalTitle: {
+    fontSize: '1.5rem',
+  },
+  closeButton: {
+    padding: '10px 14px',
+    borderRadius: '999px',
+    backgroundColor: '#eef2f7',
+    fontWeight: 700,
+  },
+  modalLayout: {
+    display: 'grid',
+    gridTemplateColumns: 'minmax(0, 0.9fr) minmax(0, 1.1fr)',
+    gap: '22px',
+  },
+  modalImage: {
     width: '100%',
-    padding: '10px',
-    borderRadius: '6px',
-    fontWeight: 600,
-    backgroundColor: isAvailable ? 'var(--color-primary)' : '#e2e8f0',
-    color: isAvailable ? '#fff' : '#94a3b8',
-    cursor: isAvailable ? 'pointer' : 'not-allowed',
-  }),
-  miniBookBtn: {
-    marginTop: '12px',
-    padding: '6px 12px',
-    width: '100%',
+    borderRadius: '24px',
+    aspectRatio: '16 / 10',
+    objectFit: 'cover' as const,
+  },
+  modalBody: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: '18px',
+  },
+  modalBlock: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: '10px',
+  },
+  fieldLabel: {
+    fontSize: '0.82rem',
+    fontWeight: 800,
+    color: 'var(--color-text-muted)',
+    textTransform: 'uppercase' as const,
+    letterSpacing: '0.08em',
+  },
+  optionGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+    gap: '10px',
+  },
+  summaryBox: {
+    padding: '18px',
+    borderRadius: '22px',
+    backgroundColor: '#f8fafc',
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: '12px',
+  },
+  summaryRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    gap: '16px',
+  },
+  errorBox: {
+    padding: '14px 16px',
+    borderRadius: '16px',
+    backgroundColor: '#fff7ed',
+    color: 'var(--color-accent)',
+    fontWeight: 700,
+  },
+  footerActions: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    gap: '12px',
+  },
+  ghostButton: {
+    padding: '12px 16px',
+    borderRadius: '14px',
+    backgroundColor: '#eef2f7',
+    fontWeight: 700,
+  },
+  successButton: {
+    padding: '12px 18px',
+    borderRadius: '14px',
     backgroundColor: 'var(--color-primary)',
-    color: '#fff',
-    borderRadius: '4px',
-    fontSize: '0.85rem',
-    fontWeight: 'bold',
+    color: '#ffffff',
+    fontWeight: 700,
   },
-  // Modal 样式保持不变 (合并保留之前的样式)
-  modalOverlay: { position: 'fixed' as const, top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(15, 23, 42, 0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' },
-  modalContent: { backgroundColor: 'var(--color-surface)', borderRadius: '20px', padding: '32px', width: '90%', maxWidth: '440px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' },
-  label: { display: 'block', fontSize: '0.95rem', fontWeight: 600, marginBottom: '12px' },
-  radioGroup: { display: 'flex', flexDirection: 'column' as const, gap: '12px' },
-  radioOption: (isSelected: boolean) => ({ display: 'flex', justifyContent: 'space-between', padding: '16px', borderRadius: '12px', border: `2px solid ${isSelected ? 'var(--color-primary)' : 'var(--color-border)'}`, backgroundColor: isSelected ? '#f0fafa' : '#fff', cursor: 'pointer' }),
-  modalActions: { display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '16px' },
-  cancelBtn: { padding: '10px 20px', borderRadius: '8px', backgroundColor: '#f1f5f9', color: 'var(--color-text-main)', fontWeight: 600 },
-  confirmBtn: { padding: '10px 20px', borderRadius: '8px', backgroundColor: 'var(--color-primary)', color: '#fff', fontWeight: 600 },
-  primaryBtn: { width: '100%', padding: '12px', borderRadius: '8px', backgroundColor: 'var(--color-primary)', color: '#fff', fontWeight: 600 },
-  successIcon: { width: '64px', height: '64px', lineHeight: '64px', backgroundColor: '#e6f7f6', color: 'var(--color-primary)', borderRadius: '50%', fontSize: '32px', margin: '0 auto 16px', fontWeight: 'bold' },
-  errorBox: { padding: '12px', backgroundColor: '#fff1f2', color: 'var(--color-accent)', borderRadius: '8px', marginBottom: '16px', fontSize: '0.9rem', fontWeight: 500 },
+  successPanel: {
+    padding: '20px',
+    borderRadius: '22px',
+    backgroundColor: '#effcf8',
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: '10px',
+  },
+  lightbox: {
+    width: 'min(980px, 100%)',
+    borderRadius: '28px',
+    overflow: 'hidden',
+    backgroundColor: '#ffffff',
+    padding: '18px',
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: '14px',
+  },
+  lightboxImage: {
+    width: '100%',
+    maxHeight: '75vh',
+    objectFit: 'contain' as const,
+    borderRadius: '20px',
+    backgroundColor: '#0f172a',
+  },
 };
