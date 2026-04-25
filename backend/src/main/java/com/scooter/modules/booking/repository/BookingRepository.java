@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.UUID;
+import com.scooter.modules.booking.entity.BookingStatus;
 
 /**
  * Repository for Booking entity.
@@ -20,4 +21,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     boolean existsByScooter_Id(Long scooterId);
 
     long countByUserIdAndStatusIn(UUID userId, List<com.scooter.modules.booking.entity.BookingStatus> statuses);
+
+    List<Booking> findByStatus(BookingStatus status);
 }

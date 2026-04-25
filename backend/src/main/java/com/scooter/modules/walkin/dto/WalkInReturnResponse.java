@@ -1,22 +1,19 @@
-package com.scooter.modules.booking.dto;
+package com.scooter.modules.walkin.dto;
 
+import lombok.Builder;
 import lombok.Data;
 
 @Data
-public class BookingCreateResponse {
+@Builder
+public class WalkInReturnResponse {
     private String bookingId;
-    private String status;
+    private String bookingStatus;
+    private String scooterStatus;
     private String totalCost;
-    private String originalCost;
-    private String discountAmount;
     private String baseRentalFee;
     private String overtimeFee;
     private String batteryUsageFee;
     private String damageFee;
-    private String appliedDiscountType;
-    private String appliedDiscountRate;
-    private String pickupCode;
-    private String pickupCodeExpiresAt;
     private Integer pickupBatteryLevel;
     private Integer returnBatteryLevel;
     private Integer batteryLevelDelta;

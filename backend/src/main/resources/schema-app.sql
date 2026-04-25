@@ -5,6 +5,8 @@ CREATE TABLE IF NOT EXISTS users (
     role VARCHAR(32) NOT NULL,
     full_name VARCHAR(100),
     phone VARCHAR(30),
+    card_token VARCHAR(128),
+    walk_in_customer BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
@@ -78,11 +80,104 @@ CREATE TABLE IF NOT EXISTS feedback (
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS reminder_record (
+    id BIGSERIAL PRIMARY KEY,
+    booking_id BIGINT NOT NULL,
+    reminder_type VARCHAR(50) NOT NULL,
+    message VARCHAR(1000) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_reminder_booking FOREIGN KEY (booking_id) REFERENCES booking(id)
+);
+
+CREATE TABLE IF NOT EXISTS overdue_charge_execution_log (
+    id BIGSERIAL PRIMARY KEY,
+    booking_id BIGINT NOT NULL,
+    trigger_type VARCHAR(20) NOT NULL,
+    attempt_no INT NOT NULL,
+    charge_amount NUMERIC(10, 2) NOT NULL,
+    payment_method VARCHAR(50) NOT NULL,
+    status VARCHAR(20) NOT NULL,
+    failure_reason VARCHAR(1000),
+    next_retry_at TIMESTAMP,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_overdue_charge_booking FOREIGN KEY (booking_id) REFERENCES booking(id)
+);
+
+CREATE TABLE IF NOT EXISTS overdue_task_execution_log (
+    id BIGSERIAL PRIMARY KEY,
+    trigger_type VARCHAR(20) NOT NULL,
+    started_at TIMESTAMP NOT NULL,
+    finished_at TIMESTAMP,
+    scanned_count INT NOT NULL DEFAULT 0,
+    overdue_count INT NOT NULL DEFAULT 0,
+    success_count INT NOT NULL DEFAULT 0,
+    failure_count INT NOT NULL DEFAULT 0,
+    skipped_count INT NOT NULL DEFAULT 0,
+    status VARCHAR(20) NOT NULL,
+    error_message VARCHAR(1000)
+);
+
+CREATE TABLE IF NOT EXISTS damage_event (
+    id BIGSERIAL PRIMARY KEY,
+    booking_id BIGINT NOT NULL UNIQUE,
+    scooter_id BIGINT NOT NULL,
+    reported_by_user_id VARCHAR(36),
+    damage_level VARCHAR(20),
+    description VARCHAR(2000) NOT NULL,
+    image_url VARCHAR(1000),
+    damage_fee NUMERIC(10, 2) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_damage_event_booking FOREIGN KEY (booking_id) REFERENCES booking(id),
+    CONSTRAINT fk_damage_event_scooter FOREIGN KEY (scooter_id) REFERENCES scooter(id)
+);
+
 ALTER TABLE booking ADD COLUMN IF NOT EXISTS original_price NUMERIC(10, 2);
 ALTER TABLE booking ADD COLUMN IF NOT EXISTS discount_amount NUMERIC(10, 2);
+ALTER TABLE booking ADD COLUMN IF NOT EXISTS base_rental_fee NUMERIC(10, 2);
+ALTER TABLE booking ADD COLUMN IF NOT EXISTS overtime_fee NUMERIC(10, 2);
+ALTER TABLE booking ADD COLUMN IF NOT EXISTS battery_usage_fee NUMERIC(10, 2);
+ALTER TABLE booking ADD COLUMN IF NOT EXISTS damage_fee NUMERIC(10, 2);
+ALTER TABLE booking ADD COLUMN IF NOT EXISTS overtime_minutes BIGINT;
+ALTER TABLE booking ADD COLUMN IF NOT EXISTS battery_usage_percent INT;
+ALTER TABLE booking ADD COLUMN IF NOT EXISTS damage_reported BOOLEAN;
+ALTER TABLE booking ADD COLUMN IF NOT EXISTS auto_charged_amount NUMERIC(10, 2);
+ALTER TABLE booking ADD COLUMN IF NOT EXISTS last_overdue_reminder_at TIMESTAMP;
 ALTER TABLE booking ADD COLUMN IF NOT EXISTS applied_discount_type VARCHAR(50);
 ALTER TABLE booking ADD COLUMN IF NOT EXISTS applied_discount_rate NUMERIC(5, 2);
 ALTER TABLE booking ADD COLUMN IF NOT EXISTS completed_at TIMESTAMP;
+ALTER TABLE booking ADD COLUMN IF NOT EXISTS pickup_code VARCHAR(32);
+ALTER TABLE booking ADD COLUMN IF NOT EXISTS pickup_code_expires_at TIMESTAMP;
+ALTER TABLE booking ADD COLUMN IF NOT EXISTS picked_up_at TIMESTAMP;
+ALTER TABLE booking ADD COLUMN IF NOT EXISTS pickup_battery_level INT;
+ALTER TABLE booking ADD COLUMN IF NOT EXISTS return_battery_level INT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS card_token VARCHAR(128);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS walk_in_customer BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE booking_confirmation ADD COLUMN IF NOT EXISTS pickup_code VARCHAR(32);
+ALTER TABLE booking_confirmation ADD COLUMN IF NOT EXISTS pickup_code_expires_at TIMESTAMP;
+ALTER TABLE booking DROP CONSTRAINT IF EXISTS chk_booking_pickup_battery_level;
+ALTER TABLE booking DROP CONSTRAINT IF EXISTS chk_booking_return_battery_level;
+ALTER TABLE booking ADD CONSTRAINT chk_booking_pickup_battery_level
+    CHECK (pickup_battery_level IS NULL OR (pickup_battery_level >= 0 AND pickup_battery_level <= 100));
+ALTER TABLE booking ADD CONSTRAINT chk_booking_return_battery_level
+    CHECK (return_battery_level IS NULL OR (return_battery_level >= 0 AND return_battery_level <= 100));
+
+UPDATE booking
+SET base_rental_fee = COALESCE(original_price, total_price, 0) - COALESCE(discount_amount, 0)
+WHERE base_rental_fee IS NULL;
+
+UPDATE booking
+SET overtime_fee = COALESCE(overtime_fee, 0),
+    battery_usage_fee = COALESCE(battery_usage_fee, 0),
+    damage_fee = COALESCE(damage_fee, 0),
+    overtime_minutes = COALESCE(overtime_minutes, 0),
+    damage_reported = COALESCE(damage_reported, FALSE),
+    auto_charged_amount = COALESCE(auto_charged_amount, 0),
+    battery_usage_percent = COALESCE(battery_usage_percent,
+        CASE
+            WHEN pickup_battery_level IS NOT NULL AND return_battery_level IS NOT NULL
+                THEN GREATEST(pickup_battery_level - return_battery_level, 0)
+            ELSE 0
+        END);
 
 ALTER TABLE feedback ADD COLUMN IF NOT EXISTS priority VARCHAR(20);
 ALTER TABLE feedback ADD COLUMN IF NOT EXISTS status VARCHAR(20);
@@ -102,4 +197,9 @@ CREATE INDEX IF NOT EXISTS idx_feedback_booking_id ON feedback(booking_id);
 CREATE INDEX IF NOT EXISTS idx_feedback_scooter_id ON feedback(scooter_id);
 CREATE INDEX IF NOT EXISTS idx_discount_rule_enabled ON discount_rule(enabled);
 CREATE INDEX IF NOT EXISTS idx_discount_rule_created_at ON discount_rule(created_at);
+CREATE INDEX IF NOT EXISTS idx_reminder_record_booking_created_at ON reminder_record(booking_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_overdue_charge_log_booking_created_at ON overdue_charge_execution_log(booking_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_overdue_task_log_started_at ON overdue_task_execution_log(started_at DESC);
+CREATE INDEX IF NOT EXISTS idx_damage_event_created_at ON damage_event(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_damage_event_booking_id ON damage_event(booking_id);
 CREATE UNIQUE INDEX IF NOT EXISTS uk_discount_rule_rule_type ON discount_rule(rule_type);

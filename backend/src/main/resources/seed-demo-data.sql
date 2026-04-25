@@ -50,6 +50,11 @@ INSERT INTO booking (
     total_price,
     original_price,
     discount_amount,
+    base_rental_fee,
+    overtime_fee,
+    battery_usage_fee,
+    overtime_minutes,
+    battery_usage_percent,
     applied_discount_type,
     applied_discount_rate,
     start_time,
@@ -61,12 +66,19 @@ SELECT
     1,
     1,
     'COMPLETED',
-    500.00,
+    740.00,
     500.00,
     0.00,
+    500.00,
+    0.00,
+    240.00,
+    0,
+    12,
     NULL,
     NULL,
     '2026-03-20 10:00:00',
+    85,
+    71,
     '2026-03-20 09:45:00'
 WHERE NOT EXISTS (SELECT 1 FROM booking WHERE id = 1);
 
@@ -79,9 +91,16 @@ INSERT INTO booking (
     total_price,
     original_price,
     discount_amount,
+    base_rental_fee,
+    overtime_fee,
+    battery_usage_fee,
+    overtime_minutes,
+    battery_usage_percent,
     applied_discount_type,
     applied_discount_rate,
     start_time,
+    pickup_code,
+    pickup_code_expires_at,
     created_at
 )
 SELECT
@@ -89,13 +108,20 @@ SELECT
     '22222222-2222-2222-2222-222222222222',
     2,
     2,
-    'PAID',
+    'AWAITING_PICKUP',
     1800.00,
     1800.00,
     0.00,
+    1800.00,
+    0.00,
+    0.00,
+    0,
+    0,
     NULL,
     NULL,
     '2026-03-21 08:30:00',
+    '220002',
+    '2026-03-21 10:05:00',
     '2026-03-21 08:00:00'
 WHERE NOT EXISTS (SELECT 1 FROM booking WHERE id = 2);
 
@@ -108,6 +134,11 @@ INSERT INTO booking (
     total_price,
     original_price,
     discount_amount,
+    base_rental_fee,
+    overtime_fee,
+    battery_usage_fee,
+    overtime_minutes,
+    battery_usage_percent,
     applied_discount_type,
     applied_discount_rate,
     start_time,
@@ -122,6 +153,11 @@ SELECT
     29750.00,
     35000.00,
     5250.00,
+    29750.00,
+    0.00,
+    0.00,
+    0,
+    0,
     'FREQUENT_USER',
     15.00,
     '2026-03-25 12:00:00',
@@ -137,9 +173,16 @@ INSERT INTO booking (
     total_price,
     original_price,
     discount_amount,
+    base_rental_fee,
+    overtime_fee,
+    battery_usage_fee,
+    overtime_minutes,
+    battery_usage_percent,
     applied_discount_type,
     applied_discount_rate,
     start_time,
+    pickup_battery_level,
+    return_battery_level,
     created_at
 )
 SELECT
@@ -151,6 +194,11 @@ SELECT
     6000.00,
     6000.00,
     0.00,
+    6000.00,
+    0.00,
+    0.00,
+    0,
+    0,
     NULL,
     NULL,
     '2026-03-22 14:00:00',
@@ -166,9 +214,16 @@ INSERT INTO booking (
     total_price,
     original_price,
     discount_amount,
+    base_rental_fee,
+    overtime_fee,
+    battery_usage_fee,
+    overtime_minutes,
+    battery_usage_percent,
     applied_discount_type,
     applied_discount_rate,
     start_time,
+    pickup_battery_level,
+    return_battery_level,
     created_at
 )
 SELECT
@@ -177,12 +232,19 @@ SELECT
     5,
     2,
     'COMPLETED',
-    1800.00,
+    2535.00,
     1800.00,
     0.00,
+    1800.00,
+    135.00,
+    600.00,
+    18,
+    30,
     NULL,
     NULL,
     '2026-03-28 18:30:00',
+    93,
+    58,
     '2026-03-28 18:00:00'
 WHERE NOT EXISTS (SELECT 1 FROM booking WHERE id = 5);
 
@@ -195,9 +257,18 @@ INSERT INTO booking (
     total_price,
     original_price,
     discount_amount,
+    base_rental_fee,
+    overtime_fee,
+    battery_usage_fee,
+    overtime_minutes,
+    battery_usage_percent,
     applied_discount_type,
     applied_discount_rate,
     start_time,
+    pickup_code,
+    pickup_code_expires_at,
+    picked_up_at,
+    pickup_battery_level,
     created_at
 )
 SELECT
@@ -205,18 +276,27 @@ SELECT
     '33333333-3333-3333-3333-333333333333',
     1,
     1,
-    'PAID',
+    'IN_PROGRESS',
     500.00,
     500.00,
     0.00,
+    500.00,
+    0.00,
+    0.00,
+    0,
+    0,
     NULL,
     NULL,
     '2026-03-29 09:00:00',
+    '220006',
+    '2026-03-29 10:50:00',
+    '2026-03-29 09:00:00',
+    81,
     '2026-03-29 08:45:00'
 WHERE NOT EXISTS (SELECT 1 FROM booking WHERE id = 6);
 
 INSERT INTO payment (id, booking_id, user_id, amount, payment_method, payment_status, transaction_no, paid_at, created_at)
-SELECT 1, 1, '11111111-1111-1111-1111-111111111111', 500.00, 'CARD', 'SUCCESS', 'TXN-20260320-0001', '2026-03-20 09:50:00', '2026-03-20 09:50:00'
+SELECT 1, 1, '11111111-1111-1111-1111-111111111111', 740.00, 'CARD', 'SUCCESS', 'TXN-20260320-0001', '2026-03-20 09:50:00', '2026-03-20 09:50:00'
 WHERE NOT EXISTS (SELECT 1 FROM payment WHERE id = 1);
 
 INSERT INTO payment (id, booking_id, user_id, amount, payment_method, payment_status, transaction_no, paid_at, created_at)
@@ -224,27 +304,27 @@ SELECT 2, 2, '22222222-2222-2222-2222-222222222222', 1800.00, 'WALLET', 'SUCCESS
 WHERE NOT EXISTS (SELECT 1 FROM payment WHERE id = 2);
 
 INSERT INTO payment (id, booking_id, user_id, amount, payment_method, payment_status, transaction_no, paid_at, created_at)
-SELECT 3, 5, '11111111-1111-1111-1111-111111111111', 1800.00, 'CARD', 'SUCCESS', 'TXN-20260328-0003', '2026-03-28 18:05:00', '2026-03-28 18:05:00'
+SELECT 3, 5, '11111111-1111-1111-1111-111111111111', 2535.00, 'CARD', 'SUCCESS', 'TXN-20260328-0003', '2026-03-28 18:05:00', '2026-03-28 18:05:00'
 WHERE NOT EXISTS (SELECT 1 FROM payment WHERE id = 3);
 
 INSERT INTO payment (id, booking_id, user_id, amount, payment_method, payment_status, transaction_no, paid_at, created_at)
 SELECT 4, 6, '33333333-3333-3333-3333-333333333333', 500.00, 'CARD', 'SUCCESS', 'TXN-20260329-0004', '2026-03-29 08:50:00', '2026-03-29 08:50:00'
 WHERE NOT EXISTS (SELECT 1 FROM payment WHERE id = 4);
 
-INSERT INTO booking_confirmation (id, booking_id, confirmation_number, confirmed_at)
-SELECT 1, 1, 'CONF-20260320-1001', '2026-03-20 09:51:00'
+INSERT INTO booking_confirmation (id, booking_id, confirmation_number, confirmed_at, pickup_code, pickup_code_expires_at)
+SELECT 1, 1, 'CONF-20260320-1001', '2026-03-20 09:51:00', '220001', '2026-03-20 11:50:00'
 WHERE NOT EXISTS (SELECT 1 FROM booking_confirmation WHERE id = 1);
 
-INSERT INTO booking_confirmation (id, booking_id, confirmation_number, confirmed_at)
-SELECT 2, 2, 'CONF-20260321-1002', '2026-03-21 08:06:00'
+INSERT INTO booking_confirmation (id, booking_id, confirmation_number, confirmed_at, pickup_code, pickup_code_expires_at)
+SELECT 2, 2, 'CONF-20260321-1002', '2026-03-21 08:06:00', '220002', '2026-03-21 10:05:00'
 WHERE NOT EXISTS (SELECT 1 FROM booking_confirmation WHERE id = 2);
 
-INSERT INTO booking_confirmation (id, booking_id, confirmation_number, confirmed_at)
-SELECT 3, 5, 'CONF-20260328-1003', '2026-03-28 18:06:00'
+INSERT INTO booking_confirmation (id, booking_id, confirmation_number, confirmed_at, pickup_code, pickup_code_expires_at)
+SELECT 3, 5, 'CONF-20260328-1003', '2026-03-28 18:06:00', '220005', '2026-03-28 20:05:00'
 WHERE NOT EXISTS (SELECT 1 FROM booking_confirmation WHERE id = 3);
 
-INSERT INTO booking_confirmation (id, booking_id, confirmation_number, confirmed_at)
-SELECT 4, 6, 'CONF-20260329-1004', '2026-03-29 08:51:00'
+INSERT INTO booking_confirmation (id, booking_id, confirmation_number, confirmed_at, pickup_code, pickup_code_expires_at)
+SELECT 4, 6, 'CONF-20260329-1004', '2026-03-29 08:51:00', '220006', '2026-03-29 10:50:00'
 WHERE NOT EXISTS (SELECT 1 FROM booking_confirmation WHERE id = 4);
 
 INSERT INTO feedback (id, user_id, category, content, booking_id, scooter_id, priority, status, created_at)

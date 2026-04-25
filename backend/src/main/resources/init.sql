@@ -65,10 +65,22 @@ CREATE TABLE booking (
     user_uuid UUID GENERATED ALWAYS AS (user_id::uuid) STORED,
     scooter_id BIGINT NOT NULL,
     rental_option_id BIGINT NOT NULL,
-    status VARCHAR(32) NOT NULL CHECK (status IN ('PENDING_PAYMENT', 'PAID', 'CANCELLED', 'COMPLETED')),
+    status VARCHAR(32) NOT NULL CHECK (status IN ('PENDING_PAYMENT', 'AWAITING_PICKUP', 'IN_PROGRESS', 'CANCELLED', 'COMPLETED')),
     total_price NUMERIC(10, 2),
+    original_price NUMERIC(10, 2),
+    discount_amount NUMERIC(10, 2),
+    base_rental_fee NUMERIC(10, 2),
+    overtime_fee NUMERIC(10, 2),
+    battery_usage_fee NUMERIC(10, 2),
+    overtime_minutes BIGINT,
+    battery_usage_percent INT,
     start_time TIMESTAMP,
     end_time TIMESTAMP,
+    pickup_code VARCHAR(32),
+    pickup_code_expires_at TIMESTAMP,
+    picked_up_at TIMESTAMP,
+    pickup_battery_level INT CHECK (pickup_battery_level >= 0 AND pickup_battery_level <= 100),
+    return_battery_level INT CHECK (return_battery_level >= 0 AND return_battery_level <= 100),
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     CONSTRAINT fk_booking_user FOREIGN KEY (user_uuid) REFERENCES users(user_id),
     CONSTRAINT fk_booking_scooter FOREIGN KEY (scooter_id) REFERENCES scooter(id),
@@ -104,6 +116,8 @@ CREATE TABLE booking_confirmation (
     booking_id BIGINT NOT NULL UNIQUE,
     confirmation_number VARCHAR(100) NOT NULL UNIQUE,
     confirmed_at TIMESTAMP NOT NULL,
+    pickup_code VARCHAR(32),
+    pickup_code_expires_at TIMESTAMP,
     CONSTRAINT fk_confirmation_booking FOREIGN KEY (booking_id) REFERENCES booking(id)
 );
 
@@ -146,25 +160,30 @@ INSERT INTO rental_option (id, duration_label, duration_hours, price) VALUES
 (3, '1day', 24, 6000.00),
 (4, '1week',168,35000.00);
 
-INSERT INTO booking (id, user_id, scooter_id, rental_option_id, status, total_price, start_time, end_time, created_at) VALUES
-(1, '11111111-1111-1111-1111-111111111111', 1, 2, 'PAID',            1800.00, '2026-03-20 10:00:00', '2026-03-20 14:00:00', '2026-03-20 09:50:00'),
-(2, '22222222-2222-2222-2222-222222222222', 2, 1, 'COMPLETED',        500.00, '2026-03-18 08:00:00', '2026-03-18 09:00:00', '2026-03-18 07:50:00'),
-(3, '33333333-3333-3333-3333-333333333333', 3, 4, 'PENDING_PAYMENT', 35000.00, '2026-03-25 12:00:00', '2026-04-01 12:00:00', '2026-03-25 11:45:00'),
-(4, '44444444-4444-4444-4444-444444444444', 4, 3, 'CANCELLED',       6000.00, '2026-03-17 15:00:00', '2026-03-18 15:00:00', '2026-03-17 14:40:00'),
-(5, '11111111-1111-1111-1111-111111111111', 5, 2, 'PAID',            1800.00, '2026-03-28 18:30:00', '2026-03-28 22:30:00', '2026-03-28 18:15:00'),
-(6, '22222222-2222-2222-2222-222222222222', 2, 1, 'COMPLETED',        500.00, '2026-03-29 09:00:00', '2026-03-29 10:00:00', '2026-03-29 08:45:00');
+INSERT INTO booking (
+    id, user_id, scooter_id, rental_option_id, status, total_price, original_price, discount_amount,
+    base_rental_fee, overtime_fee, battery_usage_fee, overtime_minutes, battery_usage_percent,
+    start_time, end_time, pickup_code, pickup_code_expires_at, picked_up_at, pickup_battery_level,
+    return_battery_level, created_at
+) VALUES
+(1, '11111111-1111-1111-1111-111111111111', 1, 2, 'IN_PROGRESS',      1800.00, 1800.00, 0.00, 1800.00, 0.00, 0.00, 0, 0, '2026-03-20 10:00:00', '2026-03-20 14:00:00', '183201', '2026-03-20 11:55:00', '2026-03-20 10:00:00', 82, NULL, '2026-03-20 09:50:00'),
+(2, '22222222-2222-2222-2222-222222222222', 2, 1, 'COMPLETED',        820.00, 500.00, 0.00, 500.00, 20.00, 300.00, 2, 15, '2026-03-18 08:00:00', '2026-03-18 09:00:00', '183202', '2026-03-18 09:55:00', '2026-03-18 08:00:00', 90, 75, '2026-03-18 07:50:00'),
+(3, '33333333-3333-3333-3333-333333333333', 3, 4, 'PENDING_PAYMENT', 35000.00, 35000.00, 0.00, 35000.00, 0.00, 0.00, 0, 0, '2026-03-25 12:00:00', '2026-04-01 12:00:00', NULL, NULL, NULL, NULL, NULL, '2026-03-25 11:45:00'),
+(4, '44444444-4444-4444-4444-444444444444', 4, 3, 'CANCELLED',       6000.00, 6000.00, 0.00, 6000.00, 0.00, 0.00, 0, 0, '2026-03-17 15:00:00', '2026-03-18 15:00:00', NULL, NULL, NULL, NULL, NULL, '2026-03-17 14:40:00'),
+(5, '11111111-1111-1111-1111-111111111111', 5, 2, 'AWAITING_PICKUP', 1800.00, 1800.00, 0.00, 1800.00, 0.00, 0.00, 0, 0, '2026-03-28 18:30:00', '2026-03-28 22:30:00', '183205', '2026-03-28 20:15:00', NULL, NULL, NULL, '2026-03-28 18:15:00'),
+(6, '22222222-2222-2222-2222-222222222222', 2, 1, 'COMPLETED',        880.00, 500.00, 0.00, 500.00, 40.00, 340.00, 5, 17, '2026-03-29 09:00:00', '2026-03-29 10:00:00', '183206', '2026-03-29 10:50:00', '2026-03-29 09:00:00', 88, 71, '2026-03-29 08:45:00');
 
 INSERT INTO payment (id, booking_id, user_id, amount, payment_method, payment_status, transaction_no, paid_at, created_at) VALUES
 (1, 1, '11111111-1111-1111-1111-111111111111', 1800.00, 'CARD',   'SUCCESS', 'TXN-20260320-0001', '2026-03-20 09:55:00', '2026-03-20 09:55:00'),
-(2, 2, '22222222-2222-2222-2222-222222222222',  500.00, 'WALLET', 'SUCCESS', 'TXN-20260318-0002', '2026-03-18 07:55:00', '2026-03-18 07:55:00'),
+(2, 2, '22222222-2222-2222-2222-222222222222',  820.00, 'WALLET', 'SUCCESS', 'TXN-20260318-0002', '2026-03-18 07:55:00', '2026-03-18 07:55:00'),
 (3, 5, '11111111-1111-1111-1111-111111111111', 1800.00, 'CARD',   'SUCCESS', 'TXN-20260328-0003', '2026-03-28 18:20:00', '2026-03-28 18:20:00'),
-(4, 6, '22222222-2222-2222-2222-222222222222',  500.00, 'WALLET', 'SUCCESS', 'TXN-20260329-0004', '2026-03-29 08:50:00', '2026-03-29 08:50:00');
+(4, 6, '22222222-2222-2222-2222-222222222222',  880.00, 'WALLET', 'SUCCESS', 'TXN-20260329-0004', '2026-03-29 08:50:00', '2026-03-29 08:50:00');
 
-INSERT INTO booking_confirmation (id, booking_id, confirmation_number, confirmed_at) VALUES
-(1, 1, 'CONF-20260320-1001', '2026-03-20 09:56:00'),
-(2, 2, 'CONF-20260318-1002', '2026-03-18 07:56:00'),
-(3, 5, 'CONF-20260328-1003', '2026-03-28 18:21:00'),
-(4, 6, 'CONF-20260329-1004', '2026-03-29 08:51:00');
+INSERT INTO booking_confirmation (id, booking_id, confirmation_number, confirmed_at, pickup_code, pickup_code_expires_at) VALUES
+(1, 1, 'CONF-20260320-1001', '2026-03-20 09:56:00', '183201', '2026-03-20 11:55:00'),
+(2, 2, 'CONF-20260318-1002', '2026-03-18 07:56:00', '183202', '2026-03-18 09:55:00'),
+(3, 5, 'CONF-20260328-1003', '2026-03-28 18:21:00', '183205', '2026-03-28 20:15:00'),
+(4, 6, 'CONF-20260329-1004', '2026-03-29 08:51:00', '183206', '2026-03-29 10:50:00');
 
 -- 保证序列与手动插入 ID 对齐，避免后续插入出现主键冲突
 SELECT setval('scooter_id_seq', (SELECT MAX(id) FROM scooter));

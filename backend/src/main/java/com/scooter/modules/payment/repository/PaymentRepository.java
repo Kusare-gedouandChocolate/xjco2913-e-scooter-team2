@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
     List<Payment> findByPaymentStatusAndPaidAtBetweenOrderByPaidAtAsc(PaymentStatus paymentStatus,
@@ -17,4 +18,6 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
             BookingStatus bookingStatus,
             LocalDateTime start,
             LocalDateTime end);
+
+    Optional<Payment> findByBooking_Id(Long bookingId);
 }
