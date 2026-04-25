@@ -40,11 +40,34 @@ public class SecurityUtils {
         }
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-        boolean isManager = authorities != null
-                && authorities.stream().map(GrantedAuthority::getAuthority).anyMatch("manager"::equalsIgnoreCase);
+        boolean isManager = hasAnyAuthority(authorities, RoleUtils::isManagerOrAdmin);
 
         if (!isManager) {
             throw new BusinessException("ACCESS_FORBIDDEN", "Manager role is required");
         }
+    }
+
+    public static void requireStaffOrAdminRole() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()
+                || authentication instanceof AnonymousAuthenticationToken) {
+            throw new BusinessException("AUTH_REQUIRED", "User not authenticated");
+        }
+
+        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+        boolean isPrivileged = hasAnyAuthority(authorities, RoleUtils::isStaffOrAdmin);
+
+        if (!isPrivileged) {
+            throw new BusinessException("ACCESS_FORBIDDEN", "Staff or admin role is required");
+        }
+    }
+
+    private static boolean hasAnyAuthority(Collection<? extends GrantedAuthority> authorities,
+            java.util.function.Predicate<String> predicate) {
+        return authorities != null
+                && authorities.stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .map(RoleUtils::normalizeRole)
+                        .anyMatch(predicate);
     }
 }

@@ -2,7 +2,8 @@ package com.scooter.modules.booking.entity;
 
 public enum BookingStatus {
     PENDING_PAYMENT,
-    PAID,
+    AWAITING_PICKUP,
+    IN_PROGRESS,
     CANCELLED,
     COMPLETED
 }

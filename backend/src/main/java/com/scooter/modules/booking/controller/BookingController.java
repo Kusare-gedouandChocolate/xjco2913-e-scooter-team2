@@ -5,6 +5,8 @@ import com.scooter.common.security.SecurityUtils;
 import com.scooter.modules.booking.dto.BookingCreateResponse;
 import com.scooter.modules.booking.dto.BookingRequest;
 import com.scooter.modules.booking.dto.BookingResponse;
+import com.scooter.modules.booking.dto.PickupVerificationRequest;
+import com.scooter.modules.booking.dto.PickupVerificationResponse;
 import com.scooter.modules.booking.entity.Booking;
 import com.scooter.modules.booking.service.BookingService;
 import jakarta.validation.Valid;
@@ -49,5 +51,13 @@ public class BookingController {
     public Result<Void> completeBooking(@PathVariable Long bookingId) {
         bookingService.completeBooking(bookingId);
         return Result.success(null);
+    }
+
+    @PostMapping("/{bookingId}/pickup-verification")
+    public Result<PickupVerificationResponse> verifyPickupCode(
+            @PathVariable Long bookingId,
+            @Valid @RequestBody PickupVerificationRequest request) {
+        SecurityUtils.requireStaffOrAdminRole();
+        return Result.success(bookingService.verifyPickupCode(bookingId, request.getPickupCode()));
     }
 }

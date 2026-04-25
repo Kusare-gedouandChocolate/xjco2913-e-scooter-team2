@@ -46,6 +46,13 @@ public class User {
 
     private String phone;
 
+    @Column(name = "card_token")
+    private String cardToken;
+
+    @Column(name = "walk_in_customer", nullable = false)
+    @Builder.Default
+    private Boolean walkInCustomer = Boolean.FALSE;
+
     @Column(updatable = false)
     private LocalDateTime createdAt;
 

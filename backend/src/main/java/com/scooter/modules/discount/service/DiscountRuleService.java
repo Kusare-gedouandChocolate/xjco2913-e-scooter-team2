@@ -121,7 +121,7 @@ public class DiscountRuleService {
 
     private boolean hasEnoughCompletedBookings(UUID userId, Integer minimum) {
         long completedBookings = bookingRepository.countByUserIdAndStatusIn(userId,
-                List.of(BookingStatus.PAID, BookingStatus.COMPLETED));
+                List.of(BookingStatus.AWAITING_PICKUP, BookingStatus.IN_PROGRESS, BookingStatus.COMPLETED));
         return completedBookings >= minimum;
     }
 
@@ -151,7 +151,7 @@ public class DiscountRuleService {
 
     private String buildEligibilityDescription(DiscountRule rule) {
         return switch (rule.getRuleType()) {
-            case FREQUENT_USER -> "Applies when paid or completed bookings are at least "
+            case FREQUENT_USER -> "Applies when paid, picked-up, or completed bookings are at least "
                     + rule.getMinCompletedBookings();
             case STUDENT -> "Applies when the user email ends with .edu";
             case SENIOR -> "Applies when the user email contains senior or elder";

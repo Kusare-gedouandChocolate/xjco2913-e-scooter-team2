@@ -2,6 +2,7 @@ package com.scooter.modules.auth.service.impl;
 
 import com.scooter.common.exception.BusinessException;
 import com.scooter.common.security.JwtUtils;
+import com.scooter.common.security.RoleUtils;
 import com.scooter.modules.auth.dto.LoginRequest;
 import com.scooter.modules.auth.dto.RegisterRequest;
 import com.scooter.modules.auth.dto.UserResponse;
@@ -38,7 +39,7 @@ public class AuthServiceImpl implements AuthService {
         User user = User.builder()
                 .email(email)
                 .passwordHash(encodedPassword)
-                .role(normalizeRole(request.getRole()))
+                .role(RoleUtils.normalizeRole(request.getRole()))
                 .fullName(request.getFullName())
                 .phone(request.getPhone())
                 .build();
@@ -48,7 +49,7 @@ public class AuthServiceImpl implements AuthService {
         return UserResponse.builder()
                 .userId(savedUser.getUserId())
                 .email(savedUser.getEmail())
-                .role(normalizeRole(savedUser.getRole()))
+                .role(RoleUtils.normalizeRole(savedUser.getRole()))
                 .build();
     }
 
@@ -62,7 +63,7 @@ public class AuthServiceImpl implements AuthService {
             throw new BusinessException("AUTH_INVALID_CREDENTIALS", "Invalid credentials");
         }
 
-        return jwtUtils.generateToken(user.getUserId(), user.getEmail(), normalizeRole(user.getRole()));
+        return jwtUtils.generateToken(user.getUserId(), user.getEmail(), RoleUtils.normalizeRole(user.getRole()));
     }
 
     @Override
@@ -72,7 +73,7 @@ public class AuthServiceImpl implements AuthService {
         return UserResponse.builder()
                 .userId(user.getUserId())
                 .email(user.getEmail())
-                .role(normalizeRole(user.getRole()))
+                .role(RoleUtils.normalizeRole(user.getRole()))
                 .build();
     }
 
@@ -80,19 +81,6 @@ public class AuthServiceImpl implements AuthService {
     public String generateToken(UUID userId) {
         User user = userRepository.findById(Objects.requireNonNull(userId, "User ID must not be null"))
                 .orElseThrow(() -> new BusinessException("USER_NOT_FOUND", "User not found"));
-        return jwtUtils.generateToken(user.getUserId(), user.getEmail(), normalizeRole(user.getRole()));
-    }
-
-    private String normalizeRole(String rawRole) {
-        if (rawRole == null || rawRole.isBlank()) {
-            return "customer";
-        }
-
-        String normalizedRole = rawRole.trim().toLowerCase();
-        if ("admin".equals(normalizedRole) || "manager".equals(normalizedRole)) {
-            return "manager";
-        }
-
-        return "customer";
+        return jwtUtils.generateToken(user.getUserId(), user.getEmail(), RoleUtils.normalizeRole(user.getRole()));
     }
 }

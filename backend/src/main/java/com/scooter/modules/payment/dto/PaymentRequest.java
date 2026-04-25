@@ -11,5 +11,6 @@ public class PaymentRequest {
     @NotNull(message = "Booking ID is required")
     private Long bookingId;
     private String paymentMethod; // e.g., "CREDIT_CARD", "WALLET"
+    private String cardToken;
     private Boolean simulateSuccess; // Used to simulate success or failure scenarios
 }

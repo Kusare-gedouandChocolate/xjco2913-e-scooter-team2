@@ -14,4 +14,6 @@ public class BookingConfirmation {
     private Long bookingId;
     private String confirmationNumber; // Unique code for the user
     private LocalDateTime confirmedAt;
+    private String pickupCode;
+    private LocalDateTime pickupCodeExpiresAt;
 }
