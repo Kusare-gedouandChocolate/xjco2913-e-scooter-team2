@@ -196,7 +196,8 @@ Sprint 3 扩展参数：
 
 ## 8. 核心枚举定义（Sprint 3）
 
-1. `booking.status`：`pendingPayment`、`pendingPickup`、`active`、`completed`、`cancelled`
+1. `booking.status`：`pendingPayment`、`pendingPickup`、`active`、
+   `completed`、`cancelled`
 2. `hireMode`：`walkIn`、`remote`
 3. `pickup.status`：`pending`、`verified`、`expired`
 4. `scooter.status`：`available`、`reserved`、`unavailable`、`maintenance`
@@ -277,7 +278,9 @@ Sprint 3 扩展参数：
 1. 前后端在 Sprint 开始前确认接口清单和字段。
 2. 后端先提供 mock 或接口契约文档。
 3. 前端按契约开发，不等待后端全部完成。
-4. 联调顺序建议：`auth -> scooters/pricing -> bookings -> walk-in -> payments -> admin -> reports/feedback`。
+4. 联调顺序建议：
+   `auth -> scooters/pricing -> bookings -> walk-in -> payments ->
+   admin -> reports/feedback`。
 5. 每个接口至少覆盖成功、参数错、权限错、业务冲突四类测试。
 
 ## 15. Sprint 3 示例接口（Walk-in）
@@ -352,4 +355,5 @@ Sprint 3 扩展参数：
 
 ---
 
-执行建议：先在组会上确认本规范，再同步到 Wiki 的 `API Contract` 页面；确认后按模块推进接口实现与测试，避免 Sprint 3 后期集中返工。
+执行建议：先在组会上确认本规范，再同步到 Wiki 的 `API Contract`
+页面；确认后按模块推进接口实现与测试，避免 Sprint 3 后期集中返工。
