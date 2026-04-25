@@ -1,13 +1,23 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate, Link, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Link, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 
-import { AuthPage } from './pages/AuthPage';
-import { ScooterPage } from './pages/ScooterPage';
-import { BookingPage } from './pages/BookingPage';
-import { ReportPage } from './pages/ReportPage';
-import { FeedbackPage } from './pages/FeedbackPage';
 import { AdminPage } from './pages/AdminPage';
-import { clearSession, getAuthUser, hasManagerRole, isAuthenticated, isManager } from './utils/auth';
+import { AuthPage } from './pages/AuthPage';
+import { BookingPage } from './pages/BookingPage';
+import { ClerkPage } from './pages/ClerkPage';
+import { FeedbackPage } from './pages/FeedbackPage';
+import { PickupVerificationPage } from './pages/PickupVerificationPage';
+import { ReportPage } from './pages/ReportPage';
+import { ScooterPage } from './pages/ScooterPage';
+import {
+  clearSession,
+  getAuthUser,
+  hasClerkRole,
+  hasManagerRole,
+  isAuthenticated,
+  isClerk,
+  isManager,
+} from './utils/auth';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   if (!isAuthenticated()) {
@@ -26,35 +36,52 @@ const ManagerRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+const ClerkRoute = ({ children }: { children: React.ReactNode }) => {
+  if (!isAuthenticated()) {
+    return <Navigate to="/login" replace />;
+  }
+  if (!isClerk()) {
+    return <Navigate to="/scooters" replace />;
+  }
+  return <>{children}</>;
+};
+
 const Navbar = () => {
   const navigate = useNavigate();
   const user = getAuthUser();
 
-  if (!isAuthenticated()) return null;
-
-  const handleLogout = () => {
-    clearSession();
-    navigate('/login');
-  };
+  if (!isAuthenticated()) {
+    return null;
+  }
 
   const manager = hasManagerRole(user?.role);
+  const clerk = hasClerkRole(user?.role);
 
   return (
     <nav style={styles.navbar}>
-      <div style={styles.navContainer}>
-        <div style={styles.brand} onClick={() => navigate('/scooters')}>
-          <span style={styles.logoIcon}>Scooter</span>
-          <span style={styles.brandName}>E-Scooter</span>
+      <div style={styles.navShell}>
+        <button style={styles.brand} onClick={() => navigate('/scooters')}>
+          <span style={styles.brandMark}>RideFlow</span>
+          <span style={styles.brandSub}>e-scooter sprint3</span>
           {manager && <span style={styles.managerBadge}>Admin</span>}
-        </div>
+          {clerk && <span style={styles.clerkBadge}>Clerk</span>}
+        </button>
 
-        <div style={styles.navLinks}>
-          <Link to="/scooters" style={styles.link}>Nearby vehicles</Link>
-          <Link to="/bookings" style={styles.link}>My journey</Link>
-          <Link to="/feedback" style={styles.link}>Customer feedback</Link>
-          {manager && <Link to="/reports" style={styles.link}>Reports</Link>}
-          {manager && <Link to="/admin" style={styles.link}>System config</Link>}
-          <button style={styles.logoutBtn} onClick={handleLogout}>
+        <div style={styles.links}>
+          <Link style={styles.link} to="/scooters">Fleet</Link>
+          <Link style={styles.link} to="/bookings">Bookings</Link>
+          <Link style={styles.link} to="/feedback">Feedback</Link>
+          {clerk && <Link style={styles.link} to="/clerk">Desk</Link>}
+          {clerk && <Link style={styles.link} to="/pickup-verification">Pickup Verify</Link>}
+          {manager && <Link style={styles.link} to="/reports">Reports</Link>}
+          {manager && <Link style={styles.link} to="/admin">Admin</Link>}
+          <button
+            style={styles.logout}
+            onClick={() => {
+              clearSession();
+              navigate('/login');
+            }}
+          >
             Log out
           </button>
         </div>
@@ -67,10 +94,10 @@ export const App: React.FC = () => {
   return (
     <BrowserRouter>
       <Navbar />
-      <main style={styles.mainContent}>
+      <main style={styles.main}>
         <Routes>
           <Route path="/login" element={<AuthPage />} />
-
+          <Route path="/" element={<Navigate to="/scooters" replace />} />
           <Route
             path="/scooters"
             element={
@@ -79,7 +106,6 @@ export const App: React.FC = () => {
               </ProtectedRoute>
             }
           />
-
           <Route
             path="/bookings"
             element={
@@ -88,7 +114,6 @@ export const App: React.FC = () => {
               </ProtectedRoute>
             }
           />
-
           <Route
             path="/feedback"
             element={
@@ -97,7 +122,22 @@ export const App: React.FC = () => {
               </ProtectedRoute>
             }
           />
-
+          <Route
+            path="/clerk"
+            element={
+              <ClerkRoute>
+                <ClerkPage />
+              </ClerkRoute>
+            }
+          />
+          <Route
+            path="/pickup-verification"
+            element={
+              <ClerkRoute>
+                <PickupVerificationPage />
+              </ClerkRoute>
+            }
+          />
           <Route
             path="/reports"
             element={
@@ -106,7 +146,6 @@ export const App: React.FC = () => {
               </ManagerRoute>
             }
           />
-
           <Route
             path="/admin"
             element={
@@ -115,15 +154,12 @@ export const App: React.FC = () => {
               </ManagerRoute>
             }
           />
-
-          <Route path="/" element={<Navigate to="/scooters" replace />} />
-
           <Route
             path="*"
             element={
-              <div style={{ textAlign: 'center', marginTop: '100px', color: 'var(--color-text-muted)' }}>
-                <h2>404 - Page not found</h2>
-                <Link to="/" style={{ color: 'var(--color-primary)', textDecoration: 'none' }}>Back to home</Link>
+              <div style={styles.notFound}>
+                <h2>Page not found</h2>
+                <Link to="/scooters" style={styles.backLink}>Return to fleet</Link>
               </div>
             }
           />
@@ -137,74 +173,100 @@ export default App;
 
 const styles = {
   navbar: {
-    backgroundColor: 'var(--color-surface)',
-    borderBottom: '1px solid var(--color-border)',
-    boxShadow: 'var(--shadow-sm)',
     position: 'sticky' as const,
     top: 0,
-    zIndex: 100,
+    zIndex: 50,
+    padding: '18px 20px 0',
   },
-  navContainer: {
-    maxWidth: '1200px',
+  navShell: {
+    maxWidth: '1240px',
     margin: '0 auto',
-    padding: '0 24px',
-    minHeight: '64px',
     display: 'flex',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'space-between',
     gap: '16px',
+    padding: '16px 20px',
+    borderRadius: '22px',
+    background: 'rgba(255, 255, 255, 0.78)',
+    backdropFilter: 'blur(14px)',
+    boxShadow: 'var(--shadow-sm)',
+    border: '1px solid rgba(255, 255, 255, 0.65)',
+    flexWrap: 'wrap' as const,
   },
   brand: {
     display: 'flex',
     alignItems: 'center',
-    gap: '8px',
-    cursor: 'pointer',
+    gap: '10px',
+    background: 'transparent',
     flexWrap: 'wrap' as const,
   },
-  logoIcon: {
-    fontSize: '1.1rem',
-    fontWeight: 700,
-  },
-  brandName: {
-    fontSize: '1.25rem',
+  brandMark: {
+    fontSize: '1.4rem',
     fontWeight: 800,
     color: 'var(--color-primary)',
-    letterSpacing: '-0.5px',
+    textTransform: 'uppercase' as const,
+    letterSpacing: '0.04em',
+  },
+  brandSub: {
+    color: 'var(--color-text-muted)',
+    fontSize: '0.86rem',
   },
   managerBadge: {
-    padding: '4px 10px',
+    padding: '5px 10px',
     borderRadius: '999px',
-    backgroundColor: '#fff1f2',
+    backgroundColor: '#fff7ed',
     color: 'var(--color-accent)',
-    fontSize: '0.75rem',
+    fontSize: '0.72rem',
     fontWeight: 700,
+    letterSpacing: '0.05em',
     textTransform: 'uppercase' as const,
-    letterSpacing: '0.5px',
   },
-  navLinks: {
+  clerkBadge: {
+    padding: '5px 10px',
+    borderRadius: '999px',
+    backgroundColor: 'var(--color-primary-soft)',
+    color: 'var(--color-primary)',
+    fontSize: '0.72rem',
+    fontWeight: 700,
+    letterSpacing: '0.05em',
+    textTransform: 'uppercase' as const,
+  },
+  links: {
     display: 'flex',
     alignItems: 'center',
-    gap: '24px',
+    gap: '14px',
     flexWrap: 'wrap' as const,
-    justifyContent: 'flex-end',
   },
   link: {
     textDecoration: 'none',
     color: 'var(--color-text-main)',
-    fontWeight: 600,
+    fontWeight: 700,
     fontSize: '0.95rem',
-    transition: 'color 0.2s',
   },
-  logoutBtn: {
-    padding: '8px 16px',
-    borderRadius: 'var(--radius-full)',
-    backgroundColor: '#f1f5f9',
-    color: 'var(--color-text-main)',
-    fontWeight: 600,
-    fontSize: '0.9rem',
-    transition: 'all 0.2s',
+  logout: {
+    padding: '10px 16px',
+    borderRadius: '999px',
+    backgroundColor: '#1f2937',
+    color: '#ffffff',
+    fontWeight: 700,
   },
-  mainContent: {
-    minHeight: 'calc(100vh - 64px)',
+  main: {
+    minHeight: 'calc(100vh - 96px)',
+    padding: '20px',
+  },
+  notFound: {
+    maxWidth: '680px',
+    margin: '80px auto',
+    padding: '48px',
+    borderRadius: '28px',
+    backgroundColor: 'var(--color-surface-strong)',
+    boxShadow: 'var(--shadow-md)',
+    textAlign: 'center' as const,
+  },
+  backLink: {
+    display: 'inline-block',
+    marginTop: '14px',
+    color: 'var(--color-primary)',
+    fontWeight: 700,
   },
 };

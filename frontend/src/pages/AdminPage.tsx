@@ -4,7 +4,7 @@ import { adminApi } from '../api';
 import type {
   AdminScooterResponse,
   AdminScooterRequest,
-  ScooterStatus,
+  AdminScooterStatus,
   PricingRuleResponse,
   PricingRuleUpdateRequest,
 } from '../types';
@@ -128,8 +128,8 @@ export const AdminPage: React.FC = () => {
   };
 
   // 辅助函数：获取状态对应的中文显示
-  const getStatusLabel = (status: ScooterStatus): string => {
-    const map: Record<ScooterStatus, string> = {
+  const getStatusLabel = (status: AdminScooterStatus): string => {
+    const map: Record<AdminScooterStatus, string> = {
       AVAILABLE: '可用',
       IN_USE: '使用中',
       MAINTENANCE: '维护',
@@ -272,7 +272,7 @@ export const AdminPage: React.FC = () => {
                         onChange={(e) =>
                             setScooterForm({
                               ...scooterForm,
-                              status: e.target.value as ScooterStatus,
+                              status: e.target.value as AdminScooterStatus,
                             })
                         }
                     >
@@ -477,8 +477,8 @@ const styles = {
     alignItems: 'center',
     marginBottom: '16px',
   },
-  badge: (status: ScooterStatus) => {
-    const colorMap: Record<ScooterStatus, { bg: string; color: string }> = {
+  badge: (status: AdminScooterStatus) => {
+    const colorMap: Record<AdminScooterStatus, { bg: string; color: string }> = {
       AVAILABLE: { bg: '#e6f7f6', color: 'var(--color-primary)' },
       IN_USE: { bg: '#dbeafe', color: '#2563eb' },
       MAINTENANCE: { bg: '#fef3c7', color: '#d97706' },

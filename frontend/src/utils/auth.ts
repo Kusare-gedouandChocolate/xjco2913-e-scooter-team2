@@ -11,6 +11,11 @@ export const hasManagerRole = (role?: string | null): boolean => {
   return normalizedRole === 'manager' || normalizedRole === 'admin';
 };
 
+export const hasClerkRole = (role?: string | null): boolean => {
+  if (!role) return false;
+  return role.trim().toLowerCase() === 'clerk';
+};
+
 export const getAuthUser = (): User | null => {
   const raw = localStorage.getItem(AUTH_USER_KEY);
   if (!raw) return null;
@@ -26,6 +31,8 @@ export const getAuthUser = (): User | null => {
 export const isAuthenticated = (): boolean => !!getAuthToken();
 
 export const isManager = (): boolean => hasManagerRole(getAuthUser()?.role);
+
+export const isClerk = (): boolean => hasClerkRole(getAuthUser()?.role);
 
 export const saveSession = (token: string, user: User): void => {
   localStorage.setItem(AUTH_TOKEN_KEY, token);
