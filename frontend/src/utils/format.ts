@@ -1,4 +1,4 @@
-const normalizeCents = (value?: number | string | null): number => {
+const normalizeMoney = (value?: number | string | null): number => {
   if (value == null || value === '') {
     return 0;
   }
@@ -11,12 +11,18 @@ const normalizeCents = (value?: number | string | null): number => {
   return Number.isFinite(parsed) ? parsed : 0;
 };
 
-export const formatPrice = (cents: number | string | null | undefined): string => {
-  return `£${(normalizeCents(cents) / 100).toFixed(2)}`;
+export const formatPrice = (yuan: number | string | null | undefined): string => {
+  return `¥${normalizeMoney(yuan).toFixed(2)}`;
+};
+
+export const formatPriceFromCents = (
+  cents: number | string | null | undefined,
+): string => {
+  return `¥${(normalizeMoney(cents) / 100).toFixed(2)}`;
 };
 
 export const formatPercent = (value?: number | string | null): string => {
-  const normalized = normalizeCents(value);
+  const normalized = normalizeMoney(value);
   return `${normalized.toFixed(0)}%`;
 };
 
@@ -30,11 +36,13 @@ export const formatDateTime = (value?: string | null): string => {
     return '--';
   }
 
-  return date.toLocaleString([], {
-    month: 'short',
-    day: 'numeric',
+  return date.toLocaleString('en-GB', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
     hour: '2-digit',
     minute: '2-digit',
+    hour12: false,
   });
 };
 

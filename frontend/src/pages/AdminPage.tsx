@@ -1,62 +1,66 @@
-// src/pages/AdminPage.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+
 import { adminApi } from '../api';
+import { StateWrapper } from '../components/StateWrapper';
 import type {
-  AdminScooterResponse,
   AdminScooterRequest,
+  AdminScooterResponse,
   AdminScooterStatus,
   PricingRuleResponse,
   PricingRuleUpdateRequest,
 } from '../types';
-import { StateWrapper } from '../components/StateWrapper';
 import { formatPrice } from '../utils/format';
 
+type AdminTab = 'scooters' | 'pricing';
+
+const scooterStatusLabels: Record<AdminScooterStatus, string> = {
+  AVAILABLE: 'Available',
+  IN_USE: 'In Use',
+  MAINTENANCE: 'Maintenance',
+  LOCKED: 'Locked',
+};
+
 export const AdminPage: React.FC = () => {
-  // --- 视图与加载状态 ---
-  const [activeTab, setActiveTab] = useState<'scooters' | 'pricing'>('scooters');
+  const [activeTab, setActiveTab] = useState<AdminTab>('scooters');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // --- 数据源 (使用后端对齐的类型) ---
   const [scooters, setScooters] = useState<AdminScooterResponse[]>([]);
   const [rules, setRules] = useState<PricingRuleResponse[]>([]);
 
-  // --- 编辑弹窗状态 ---
   const [editingScooter, setEditingScooter] = useState<AdminScooterResponse | null>(null);
   const [editingRule, setEditingRule] = useState<PricingRuleResponse | null>(null);
-  const [editFormError, setEditFormError] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
+  const [formError, setFormError] = useState('');
+  const [formSuccess, setFormSuccess] = useState('');
 
-  // 车辆编辑表单临时状态
   const [scooterForm, setScooterForm] = useState<AdminScooterRequest>({
     model: '',
     status: 'AVAILABLE',
     batteryLevel: 100,
     currentLocation: '',
   });
-
-  // 价格规则编辑表单临时状态
   const [ruleForm, setRuleForm] = useState<PricingRuleUpdateRequest>({
     hireType: '',
     durationHours: 1,
     price: 0,
   });
 
-  // --- 获取数据 ---
   const fetchData = async () => {
     setLoading(true);
     setError(null);
+
     try {
       if (activeTab === 'scooters') {
-        const res = await adminApi.getAllScooters();
-        setScooters(res.data || []);
+        const response = await adminApi.getAllScooters();
+        setScooters(response.data || []);
       } else {
-        const res = await adminApi.getPricingRules();
-        setRules(res.data || []);
+        const response = await adminApi.getPricingRules();
+        setRules(response.data || []);
       }
-    } catch (err: unknown) {
-      const e = err as { message?: string };
-      setError(e.message || '获取管理数据失败');
+    } catch (err) {
+      const apiError = err as { message?: string };
+      setError(apiError.message || 'Failed to load admin data.');
     } finally {
       setLoading(false);
     }
@@ -64,528 +68,537 @@ export const AdminPage: React.FC = () => {
 
   useEffect(() => {
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
-  // --- 打开编辑车辆弹窗 ---
-  const handleEditScooter = (scooter: AdminScooterResponse) => {
+  const openScooterEditor = (scooter: AdminScooterResponse) => {
     setEditingScooter(scooter);
+    setEditingRule(null);
+    setFormError('');
+    setFormSuccess('');
     setScooterForm({
       model: scooter.model,
       status: scooter.status,
       batteryLevel: scooter.batteryLevel,
       currentLocation: scooter.currentLocation,
     });
-    setEditFormError('');
   };
 
-  // --- 提交车辆更新 (PUT) ---
-  const handleSaveScooter = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingScooter) return;
-    setActionLoading(true);
-    setEditFormError('');
-    try {
-      await adminApi.updateScooter(editingScooter.scooterId, scooterForm);
-      setEditingScooter(null);
-      fetchData();
-    } catch (err: unknown) {
-      const e = err as { message?: string };
-      setEditFormError(e.message || '更新车辆失败');
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  // --- 打开编辑价格弹窗 ---
-  const handleEditRule = (rule: PricingRuleResponse) => {
+  const openRuleEditor = (rule: PricingRuleResponse) => {
     setEditingRule(rule);
-    // 注意：后端 PricingRuleResponse 没有 durationHours，此处需根据 hireType 预设，或由用户手动填写
+    setEditingScooter(null);
+    setFormError('');
+    setFormSuccess('');
     setRuleForm({
       hireType: rule.hireType,
-      durationHours: (rule as PricingRuleResponse & { durationHours: number }).durationHours,
+      durationHours: rule.durationHours ?? 1,
       price: rule.price,
     });
-    setEditFormError('');
   };
 
-  // --- 提交价格更新 (PUT) ---
-  const handleSaveRule = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingRule) return;
+  const closeModal = () => {
+    setEditingScooter(null);
+    setEditingRule(null);
+    setFormError('');
+    setFormSuccess('');
+  };
+
+  const handleSaveScooter = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!editingScooter) {
+      return;
+    }
+
     setActionLoading(true);
-    setEditFormError('');
+    setFormError('');
+    setFormSuccess('');
+
     try {
-      await adminApi.updatePricingRule(editingRule.ruleId, ruleForm);
-      setEditingRule(null);
+      await adminApi.updateScooter(editingScooter.scooterId, scooterForm);
+      closeModal();
+      setFormSuccess('Scooter updated successfully.');
       fetchData();
-    } catch (err: unknown) {
-      const e = err as { message?: string };
-      setEditFormError(e.message || '更新价格失败');
+    } catch (err) {
+      const apiError = err as { message?: string };
+      setFormError(apiError.message || 'Failed to update scooter.');
     } finally {
       setActionLoading(false);
     }
   };
 
-  // 辅助函数：获取状态对应的中文显示
-  const getStatusLabel = (status: AdminScooterStatus): string => {
-    const map: Record<AdminScooterStatus, string> = {
-      AVAILABLE: '可用',
-      IN_USE: '使用中',
-      MAINTENANCE: '维护',
-      LOCKED: '锁定',
-    };
-    return map[status] || status;
+  const handleSaveRule = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!editingRule) {
+      return;
+    }
+
+    setActionLoading(true);
+    setFormError('');
+    setFormSuccess('');
+
+    try {
+      await adminApi.updatePricingRule(editingRule.ruleId, ruleForm);
+      closeModal();
+      setFormSuccess('Pricing rule updated successfully.');
+      fetchData();
+    } catch (err) {
+      const apiError = err as { message?: string };
+      setFormError(apiError.message || 'Failed to update pricing rule.');
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   return (
-      <div style={styles.container}>
-        <header style={styles.header}>
-          <h1 style={{ color: 'var(--color-text-main)', fontSize: '1.8rem' }}>⚙️ 系统配置中心</h1>
-          <p style={{ color: 'var(--color-text-muted)', marginTop: '8px' }}>
-            管理全部车辆状态与全局价格参数
+    <div style={styles.page}>
+      <section style={styles.hero} className="responsive-hero">
+        <div>
+          <p style={styles.kicker}>Admin Center</p>
+          <h1 style={styles.title}>Fleet and pricing configuration.</h1>
+          <p style={styles.subtitle}>
+            Manage scooters and pricing rules with a single layout that works on desktop and mobile.
           </p>
-        </header>
-
-        {/* 标签页导航 */}
-        <div style={styles.tabs}>
-          <button
-              style={styles.tab(activeTab === 'scooters')}
-              onClick={() => setActiveTab('scooters')}
-          >
-            🛴 车辆管理
-          </button>
-          <button
-              style={styles.tab(activeTab === 'pricing')}
-              onClick={() => setActiveTab('pricing')}
-          >
-            💰 价格与套餐
-          </button>
         </div>
 
-        <StateWrapper loading={loading} error={error} onRetry={fetchData}>
-          {/* ============================== */}
-          {/* 面板 A：车辆管理 */}
-          {/* ============================== */}
-          {activeTab === 'scooters' && (
-              <div style={styles.grid}>
-                {scooters.map((scooter) => (
-                    <div key={scooter.scooterId} style={styles.card}>
-                      <div style={styles.cardHeader}>
-                  <span style={{ fontWeight: 700, fontSize: '1.1rem' }}>
-                    {scooter.model}
-                  </span>
-                        <span style={styles.badge(scooter.status)}>
-                    {getStatusLabel(scooter.status)}
-                  </span>
-                      </div>
-                      <div style={styles.cardBody}>
-                        <p>
-                          位置: <strong>{scooter.currentLocation}</strong>
-                        </p>
-                        <p>
-                          电量: <strong>{scooter.batteryLevel}%</strong>
-                        </p>
-                        <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
-                          创建于: {new Date(scooter.createdAt).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <button style={styles.editBtn} onClick={() => handleEditScooter(scooter)}>
-                        配置车辆
-                      </button>
-                    </div>
-                ))}
-              </div>
-          )}
+        <div style={styles.tabRow} className="responsive-admin-tabs">
+          <button
+            type="button"
+            style={tabButton(activeTab === 'scooters')}
+            onClick={() => setActiveTab('scooters')}
+          >
+            Scooters
+          </button>
+          <button
+            type="button"
+            style={tabButton(activeTab === 'pricing')}
+            onClick={() => setActiveTab('pricing')}
+          >
+            Pricing
+          </button>
+        </div>
+      </section>
 
-          {/* ============================== */}
-          {/* 面板 B：价格与套餐管理 */}
-          {/* ============================== */}
-          {activeTab === 'pricing' && (
-              <div style={styles.grid}>
-                {rules.map((rule) => (
-                    <div key={rule.ruleId} style={styles.card}>
-                      <div style={styles.cardHeader}>
-                  <span
-                      style={{
-                        fontWeight: 700,
-                        fontSize: '1.2rem',
-                        color: 'var(--color-primary)',
-                      }}
+      {formSuccess && (
+        <div style={styles.successBox} role="status" aria-live="polite">
+          {formSuccess}
+        </div>
+      )}
+
+      <StateWrapper
+        loading={loading}
+        error={error}
+        onRetry={fetchData}
+        empty={activeTab === 'scooters' ? scooters.length === 0 : rules.length === 0}
+        emptyMessage={activeTab === 'scooters' ? 'No scooters found.' : 'No pricing rules found.'}
+      >
+        {activeTab === 'scooters' ? (
+          <div style={styles.grid} className="responsive-admin-grid">
+            {scooters.map((scooter) => (
+              <article key={scooter.scooterId} style={styles.card}>
+                <div style={styles.cardHeader}>
+                  <div>
+                    <p style={styles.cardLabel}>Scooter</p>
+                    <h2 style={styles.cardTitle}>{scooter.model}</h2>
+                  </div>
+                  <span style={statusBadge(scooter.status)}>
+                    {scooterStatusLabels[scooter.status]}
+                  </span>
+                </div>
+
+                <div style={styles.cardBody}>
+                  <InfoRow label="Battery" value={`${scooter.batteryLevel}%`} />
+                  <InfoRow label="Location" value={scooter.currentLocation} />
+                  <InfoRow label="Created" value={new Date(scooter.createdAt).toLocaleDateString('en-GB')} />
+                </div>
+
+                <button type="button" style={styles.primaryButton} onClick={() => openScooterEditor(scooter)}>
+                  Edit scooter
+                </button>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div style={styles.grid} className="responsive-admin-grid">
+            {rules.map((rule) => (
+              <article key={rule.ruleId} style={styles.card}>
+                <div style={styles.cardHeader}>
+                  <div>
+                    <p style={styles.cardLabel}>Pricing Rule</p>
+                    <h2 style={styles.cardTitle}>{rule.hireType}</h2>
+                  </div>
+                  <span style={styles.ruleBadge}>
+                    {rule.discountEnabled ? 'Discount Enabled' : 'Standard'}
+                  </span>
+                </div>
+
+                <div style={styles.cardBody}>
+                  <InfoRow label="Duration" value={`${rule.durationHours ?? 1} h`} />
+                  <InfoRow label="Price" value={formatPrice(rule.price)} />
+                  <InfoRow label="Discount" value={rule.discountEnabled ? 'Yes' : 'No'} />
+                </div>
+
+                <button type="button" style={styles.primaryButton} onClick={() => openRuleEditor(rule)}>
+                  Edit pricing
+                </button>
+              </article>
+            ))}
+          </div>
+        )}
+      </StateWrapper>
+
+      {(editingScooter || editingRule) && (
+        <div style={styles.modalOverlay} onClick={closeModal}>
+          <div
+            style={styles.modal}
+            className="responsive-modal"
+            onClick={(event) => event.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={editingScooter ? 'admin-scooter-title' : 'admin-rule-title'}
+          >
+            {editingScooter && (
+              <form onSubmit={handleSaveScooter} style={styles.modalForm} aria-busy={actionLoading}>
+                <div>
+                  <p style={styles.cardLabel}>Scooter Editor</p>
+                  <h2 id="admin-scooter-title" style={styles.modalTitle}>
+                    Edit {editingScooter.model}
+                  </h2>
+                </div>
+
+                <label style={styles.field} htmlFor="admin-scooter-model">
+                  <span>Model</span>
+                  <input
+                    id="admin-scooter-model"
+                    style={styles.input}
+                    value={scooterForm.model}
+                    onChange={(event) => setScooterForm({ ...scooterForm, model: event.target.value })}
+                  />
+                </label>
+
+                <label style={styles.field} htmlFor="admin-scooter-status">
+                  <span>Status</span>
+                  <select
+                    id="admin-scooter-status"
+                    style={styles.input}
+                    value={scooterForm.status}
+                    onChange={(event) => {
+                      setScooterForm({ ...scooterForm, status: event.target.value as AdminScooterStatus });
+                    }}
                   >
-                    {rule.hireType} 套餐
-                  </span>
-                        {rule.discountEnabled && <span style={styles.discountBadge}>惠</span>}
-                      </div>
-                      <div style={styles.cardBody}>
-                        <p style={{ fontSize: '1.5rem', fontWeight: 800, margin: '16px 0' }}>
-                          {formatPrice(rule.price)}
-                        </p>
-                        <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>
-                          允许折扣: {rule.discountEnabled ? '是' : '否'}
-                        </p>
-                      </div>
-                      <button style={styles.editBtn} onClick={() => handleEditRule(rule)}>
-                        修改定价
-                      </button>
-                    </div>
-                ))}
-              </div>
-          )}
-        </StateWrapper>
+                    <option value="AVAILABLE">Available</option>
+                    <option value="IN_USE">In Use</option>
+                    <option value="MAINTENANCE">Maintenance</option>
+                    <option value="LOCKED">Locked</option>
+                  </select>
+                </label>
 
-        {/* ============================== */}
-        {/* 弹窗 A：编辑车辆 */}
-        {/* ============================== */}
-        {editingScooter && (
-            <div style={styles.modalOverlay}>
-              <div style={styles.modalContent}>
-                <h2>配置车辆 {editingScooter.model}</h2>
-                {editFormError && <div style={styles.errorBox}>{editFormError}</div>}
-
-                <form
-                    onSubmit={handleSaveScooter}
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column' as const,
-                      gap: '16px',
-                      marginTop: '20px',
+                <label style={styles.field} htmlFor="admin-scooter-battery">
+                  <span>Battery Level</span>
+                  <input
+                    id="admin-scooter-battery"
+                    type="number"
+                    min="0"
+                    max="100"
+                    style={styles.input}
+                    value={scooterForm.batteryLevel}
+                    onChange={(event) => {
+                      setScooterForm({ ...scooterForm, batteryLevel: Number(event.target.value) || 0 });
                     }}
-                >
-                  <div>
-                    <label style={styles.label}>型号</label>
-                    <input
-                        style={styles.input}
-                        value={scooterForm.model}
-                        onChange={(e) =>
-                            setScooterForm({ ...scooterForm, model: e.target.value })
-                        }
-                        required
-                    />
-                  </div>
+                  />
+                </label>
 
-                  <div>
-                    <label style={styles.label}>状态</label>
-                    <select
-                        style={styles.input}
-                        value={scooterForm.status}
-                        onChange={(e) =>
-                            setScooterForm({
-                              ...scooterForm,
-                              status: e.target.value as AdminScooterStatus,
-                            })
-                        }
-                    >
-                      <option value="AVAILABLE">可用 (Available)</option>
-                      <option value="IN_USE">使用中 (In Use)</option>
-                      <option value="MAINTENANCE">维护中 (Maintenance)</option>
-                      <option value="LOCKED">锁定 (Locked)</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label style={styles.label}>电量 (%)</label>
-                    <input
-                        type="number"
-                        min="0"
-                        max="100"
-                        style={styles.input}
-                        value={scooterForm.batteryLevel}
-                        onChange={(e) =>
-                            setScooterForm({
-                              ...scooterForm,
-                              batteryLevel: parseInt(e.target.value) || 0,
-                            })
-                        }
-                        required
-                    />
-                  </div>
-
-                  <div>
-                    <label style={styles.label}>当前位置</label>
-                    <input
-                        style={styles.input}
-                        value={scooterForm.currentLocation}
-                        onChange={(e) =>
-                            setScooterForm({
-                              ...scooterForm,
-                              currentLocation: e.target.value,
-                            })
-                        }
-                        required
-                    />
-                  </div>
-
-                  <div style={styles.modalActions}>
-                    <button
-                        type="button"
-                        style={styles.cancelBtn}
-                        onClick={() => setEditingScooter(null)}
-                    >
-                      取消
-                    </button>
-                    <button
-                        type="submit"
-                        style={styles.confirmBtn}
-                        disabled={actionLoading}
-                    >
-                      {actionLoading ? '保存中...' : '保存更改'}
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-        )}
-
-        {/* ============================== */}
-        {/* 弹窗 B：编辑价格 */}
-        {/* ============================== */}
-        {editingRule && (
-            <div style={styles.modalOverlay}>
-              <div style={styles.modalContent}>
-                <h2>修改定价: {editingRule.hireType} 套餐</h2>
-                {editFormError && <div style={styles.errorBox}>{editFormError}</div>}
-
-                <form
-                    onSubmit={handleSaveRule}
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column' as const,
-                      gap: '16px',
-                      marginTop: '20px',
+                <label style={styles.field} htmlFor="admin-scooter-location">
+                  <span>Current Location</span>
+                  <input
+                    id="admin-scooter-location"
+                    style={styles.input}
+                    value={scooterForm.currentLocation}
+                    onChange={(event) => {
+                      setScooterForm({ ...scooterForm, currentLocation: event.target.value });
                     }}
-                >
-                  <div>
-                    <label style={styles.label}>套餐名称 (hireType)</label>
-                    <input
-                        style={styles.input}
-                        value={ruleForm.hireType}
-                        onChange={(e) =>
-                            setRuleForm({ ...ruleForm, hireType: e.target.value })
-                        }
-                        required
-                    />
-                  </div>
+                  />
+                </label>
 
-                  <div>
-                    <label style={styles.label}>时长 (小时)</label>
-                    <input
-                        type="number"
-                        min="1"
-                        style={styles.input}
-                        value={ruleForm.durationHours}
-                        onChange={(e) =>
-                            setRuleForm({
-                              ...ruleForm,
-                              durationHours: parseInt(e.target.value) || 1,
-                            })
-                        }
-                        required
-                    />
-                  </div>
+                {formError && <div style={styles.errorBox} role="alert">{formError}</div>}
 
-                  <div>
-                    <label style={styles.label}>价格 (单位: 分)</label>
-                    <input
-                        type="number"
-                        min="0"
-                        style={styles.input}
-                        value={ruleForm.price}
-                        onChange={(e) =>
-                            setRuleForm({
-                              ...ruleForm,
-                              price: parseInt(e.target.value) || 0,
-                            })
-                        }
-                        required
-                    />
-                    <p
-                        style={{
-                          fontSize: '0.85rem',
-                          color: 'var(--color-text-muted)',
-                          marginTop: '8px',
-                        }}
-                    >
-                      当前输入等值于 {formatPrice(ruleForm.price)}
-                    </p>
-                  </div>
+                <div style={styles.modalActions} className="responsive-admin-actions">
+                  <button type="button" style={styles.secondaryButton} onClick={closeModal}>
+                    Cancel
+                  </button>
+                  <button type="submit" style={styles.primaryButton} disabled={actionLoading}>
+                    {actionLoading ? 'Saving...' : 'Save scooter'}
+                  </button>
+                </div>
+              </form>
+            )}
 
-                  <div style={styles.modalActions}>
-                    <button
-                        type="button"
-                        style={styles.cancelBtn}
-                        onClick={() => setEditingRule(null)}
-                    >
-                      取消
-                    </button>
-                    <button
-                        type="submit"
-                        style={styles.confirmBtn}
-                        disabled={actionLoading}
-                    >
-                      {actionLoading ? '保存中...' : '保存价格'}
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-        )}
-      </div>
+            {editingRule && (
+              <form onSubmit={handleSaveRule} style={styles.modalForm} aria-busy={actionLoading}>
+                <div>
+                  <p style={styles.cardLabel}>Pricing Editor</p>
+                  <h2 id="admin-rule-title" style={styles.modalTitle}>
+                    Edit {editingRule.hireType}
+                  </h2>
+                </div>
+
+                <label style={styles.field} htmlFor="admin-rule-name">
+                  <span>Hire Type</span>
+                  <input
+                    id="admin-rule-name"
+                    style={styles.input}
+                    value={ruleForm.hireType}
+                    onChange={(event) => setRuleForm({ ...ruleForm, hireType: event.target.value })}
+                  />
+                </label>
+
+                <label style={styles.field} htmlFor="admin-rule-duration">
+                  <span>Duration Hours</span>
+                  <input
+                    id="admin-rule-duration"
+                    type="number"
+                    min="1"
+                    style={styles.input}
+                    value={ruleForm.durationHours}
+                    onChange={(event) => {
+                      setRuleForm({ ...ruleForm, durationHours: Number(event.target.value) || 1 });
+                    }}
+                  />
+                </label>
+
+                <label style={styles.field} htmlFor="admin-rule-price">
+                  <span>Price</span>
+                  <input
+                    id="admin-rule-price"
+                    type="number"
+                    min="0"
+                    style={styles.input}
+                    value={ruleForm.price}
+                    onChange={(event) => {
+                      setRuleForm({ ...ruleForm, price: Number(event.target.value) || 0 });
+                    }}
+                  />
+                  <span style={styles.helperText}>Preview: {formatPrice(ruleForm.price)}</span>
+                </label>
+
+                {formError && <div style={styles.errorBox} role="alert">{formError}</div>}
+
+                <div style={styles.modalActions} className="responsive-admin-actions">
+                  <button type="button" style={styles.secondaryButton} onClick={closeModal}>
+                    Cancel
+                  </button>
+                  <button type="submit" style={styles.primaryButton} disabled={actionLoading}>
+                    {actionLoading ? 'Saving...' : 'Save pricing'}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 
-// --- 内联样式字典 (保持不变) ---
+const InfoRow = ({ label, value }: { label: string; value: string }) => (
+  <div style={styles.infoRow}>
+    <span style={styles.infoLabel}>{label}</span>
+    <strong>{value}</strong>
+  </div>
+);
+
+const tabButton = (active: boolean) => ({
+  padding: '12px 18px',
+  borderRadius: '14px',
+  backgroundColor: active ? 'var(--color-primary)' : '#e2e8f0',
+  color: active ? '#ffffff' : 'var(--color-text-main)',
+  fontWeight: 700,
+});
+
+const statusBadge = (status: AdminScooterStatus) => ({
+  padding: '8px 12px',
+  borderRadius: '999px',
+  backgroundColor:
+    status === 'AVAILABLE'
+      ? '#d7f3ee'
+      : status === 'IN_USE'
+        ? '#dbeafe'
+        : status === 'MAINTENANCE'
+          ? '#fef3c7'
+          : '#e2e8f0',
+  color:
+    status === 'AVAILABLE'
+      ? 'var(--color-primary)'
+      : status === 'IN_USE'
+        ? '#1d4ed8'
+        : status === 'MAINTENANCE'
+          ? '#92400e'
+          : 'var(--color-text-main)',
+  fontWeight: 700,
+  fontSize: '0.82rem',
+});
+
 const styles = {
-  container: { padding: '24px', maxWidth: '1200px', margin: '0 auto' },
-  header: { marginBottom: '32px' },
-  tabs: {
-    display: 'flex',
-    gap: '12px',
-    marginBottom: '24px',
-    borderBottom: '2px solid var(--color-border)',
-    paddingBottom: '12px',
-  },
-  tab: (isActive: boolean) => ({
-    padding: '10px 24px',
-    borderRadius: '8px',
-    border: 'none',
-    fontWeight: 700,
-    fontSize: '1.05rem',
-    cursor: 'pointer',
-    transition: 'all 0.2s',
-    backgroundColor: isActive ? 'var(--color-primary)' : '#f1f5f9',
-    color: isActive ? '#fff' : 'var(--color-text-muted)',
-  }),
-  grid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-    gap: '20px',
-  },
-  card: {
-    backgroundColor: 'var(--color-surface)',
-    padding: '20px',
-    borderRadius: '12px',
-    boxShadow: 'var(--shadow-sm)',
-    border: '1px solid var(--color-border)',
+  page: {
+    maxWidth: '1180px',
+    margin: '0 auto',
     display: 'flex',
     flexDirection: 'column' as const,
+    gap: '22px',
+  },
+  hero: {
+    display: 'flex',
     justifyContent: 'space-between',
+    gap: '16px',
+    alignItems: 'flex-start',
+    flexWrap: 'wrap' as const,
+  },
+  kicker: {
+    color: 'var(--color-accent)',
+    fontSize: '0.82rem',
+    fontWeight: 800,
+    letterSpacing: '0.12em',
+    textTransform: 'uppercase' as const,
+    marginBottom: '10px',
+  },
+  title: {
+    fontSize: 'clamp(2rem, 3vw, 3.2rem)',
+    lineHeight: 1.05,
+    letterSpacing: '-0.04em',
+    marginBottom: '12px',
+  },
+  subtitle: {
+    color: 'var(--color-text-muted)',
+    maxWidth: '640px',
+  },
+  tabRow: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+    gap: '10px',
+    minWidth: '280px',
+  },
+  grid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+    gap: '16px',
+  },
+  card: {
+    padding: '22px',
+    borderRadius: '24px',
+    backgroundColor: 'var(--color-surface-strong)',
+    boxShadow: 'var(--shadow-sm)',
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: '16px',
   },
   cardHeader: {
     display: 'flex',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '16px',
+    gap: '12px',
+    alignItems: 'flex-start',
   },
-  badge: (status: AdminScooterStatus) => {
-    const colorMap: Record<AdminScooterStatus, { bg: string; color: string }> = {
-      AVAILABLE: { bg: '#e6f7f6', color: 'var(--color-primary)' },
-      IN_USE: { bg: '#dbeafe', color: '#2563eb' },
-      MAINTENANCE: { bg: '#fef3c7', color: '#d97706' },
-      LOCKED: { bg: '#f1f5f9', color: 'var(--color-text-muted)' },
-    };
-    const style = colorMap[status] || { bg: '#f1f5f9', color: 'var(--color-text-muted)' };
-    return {
-      padding: '4px 8px',
-      borderRadius: '6px',
-      fontSize: '0.75rem',
-      fontWeight: 700,
-      backgroundColor: style.bg,
-      color: style.color,
-    };
-  },
-  discountBadge: {
-    padding: '2px 6px',
-    backgroundColor: '#fee2e2',
-    color: 'var(--color-accent)',
-    borderRadius: '4px',
+  cardLabel: {
+    color: 'var(--color-text-muted)',
     fontSize: '0.8rem',
-    fontWeight: 'bold',
+    fontWeight: 800,
+    textTransform: 'uppercase' as const,
+    letterSpacing: '0.08em',
+  },
+  cardTitle: {
+    fontSize: '1.3rem',
   },
   cardBody: {
-    color: 'var(--color-text-main)',
-    fontSize: '0.95rem',
-    lineHeight: '1.6',
-    marginBottom: '20px',
+    display: 'grid',
+    gap: '10px',
   },
-  editBtn: {
-    width: '100%',
-    padding: '10px',
-    borderRadius: '6px',
+  infoRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    gap: '12px',
+  },
+  infoLabel: {
+    color: 'var(--color-text-muted)',
+  },
+  ruleBadge: {
+    padding: '8px 12px',
+    borderRadius: '999px',
     backgroundColor: '#f8fafc',
+    color: 'var(--color-text-main)',
+    fontWeight: 700,
+    fontSize: '0.82rem',
+  },
+  primaryButton: {
+    padding: '12px 16px',
+    borderRadius: '14px',
+    backgroundColor: 'var(--color-primary)',
+    color: '#ffffff',
+    fontWeight: 700,
+  },
+  secondaryButton: {
+    padding: '12px 16px',
+    borderRadius: '14px',
+    backgroundColor: '#e2e8f0',
+    color: 'var(--color-text-main)',
+    fontWeight: 700,
+  },
+  successBox: {
+    padding: '14px 16px',
+    borderRadius: '16px',
+    backgroundColor: '#effcf8',
     color: 'var(--color-primary)',
-    border: '1px solid #cbd5e1',
-    fontWeight: 600,
-    cursor: 'pointer',
-    transition: 'all 0.2s',
+    fontWeight: 700,
+  },
+  errorBox: {
+    padding: '14px 16px',
+    borderRadius: '16px',
+    backgroundColor: '#fff7ed',
+    color: '#9a3412',
+    fontWeight: 700,
   },
   modalOverlay: {
     position: 'fixed' as const,
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(15, 23, 42, 0.6)',
+    inset: 0,
+    backgroundColor: 'rgba(15, 23, 42, 0.62)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 1000,
-    backdropFilter: 'blur(4px)',
+    padding: '20px',
+    zIndex: 100,
   },
-  modalContent: {
-    backgroundColor: 'var(--color-surface)',
-    borderRadius: '20px',
-    padding: '32px',
-    width: '90%',
-    maxWidth: '440px',
-    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+  modal: {
+    width: 'min(520px, 100%)',
+    backgroundColor: 'var(--color-surface-strong)',
+    borderRadius: '28px',
+    boxShadow: 'var(--shadow-md)',
+    padding: '24px',
   },
-  label: {
-    display: 'block',
-    fontSize: '0.95rem',
-    fontWeight: 600,
-    marginBottom: '8px',
+  modalForm: {
+    display: 'grid',
+    gap: '14px',
+  },
+  modalTitle: {
+    fontSize: '1.4rem',
+  },
+  field: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: '8px',
+    fontWeight: 700,
   },
   input: {
     width: '100%',
-    padding: '12px',
-    borderRadius: '8px',
+    padding: '12px 14px',
+    borderRadius: '14px',
     border: '1px solid var(--color-border)',
-    fontSize: '1rem',
-    outline: 'none',
-    boxSizing: 'border-box' as const,
+    backgroundColor: '#ffffff',
+  },
+  helperText: {
+    color: 'var(--color-text-muted)',
+    fontSize: '0.88rem',
   },
   modalActions: {
     display: 'flex',
     justifyContent: 'flex-end',
     gap: '12px',
-    marginTop: '24px',
-  },
-  cancelBtn: {
-    padding: '10px 20px',
-    borderRadius: '8px',
-    backgroundColor: '#f1f5f9',
-    color: 'var(--color-text-main)',
-    fontWeight: 600,
-    border: 'none',
-    cursor: 'pointer',
-  },
-  confirmBtn: {
-    padding: '10px 20px',
-    borderRadius: '8px',
-    backgroundColor: 'var(--color-primary)',
-    color: '#fff',
-    fontWeight: 600,
-    border: 'none',
-    cursor: 'pointer',
-  },
-  errorBox: {
-    padding: '12px',
-    backgroundColor: '#fff1f2',
-    color: 'var(--color-accent)',
-    borderRadius: '8px',
-    marginTop: '16px',
-    fontSize: '0.9rem',
-    fontWeight: 500,
   },
 };
+
+export default AdminPage;

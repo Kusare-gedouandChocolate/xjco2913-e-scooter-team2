@@ -42,6 +42,10 @@ body {
     radial-gradient(circle at bottom right, rgba(232, 93, 4, 0.12), transparent 28%);
 }
 
+#root {
+  isolation: isolate;
+}
+
 a {
   color: inherit;
 }
@@ -50,18 +54,120 @@ button {
   cursor: pointer;
   font-family: inherit;
   border: none;
-  outline: none;
+  min-height: 44px;
 }
 
 input,
 select,
 textarea {
   font: inherit;
+  min-height: 44px;
+}
+
+button:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgba(15, 118, 110, 0.24);
+  outline-offset: 2px;
 }
 
 input:focus,
 select:focus,
-textarea:focus {
+textarea:focus,
+button:focus-visible {
   border-color: var(--color-primary) !important;
   box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.16) !important;
+}
+
+.responsive-hero,
+.responsive-links,
+.responsive-actions,
+.responsive-inline-field,
+.responsive-step-row,
+.responsive-preview-grid,
+.responsive-bill-grid,
+.responsive-timeline-grid,
+.responsive-admin-tabs,
+.responsive-admin-grid,
+.responsive-admin-actions {
+  width: 100%;
+}
+
+.status-live {
+  scroll-margin-top: 16px;
+}
+
+.leaflet-container {
+  position: relative;
+  z-index: 0 !important;
+}
+
+.leaflet-pane,
+.leaflet-top,
+.leaflet-bottom,
+.leaflet-control,
+.leaflet-popup,
+.leaflet-tooltip {
+  z-index: 1 !important;
+}
+
+.leaflet-overlay-pane,
+.leaflet-marker-pane,
+.leaflet-popup-pane {
+  z-index: 2 !important;
+}
+
+@media (max-width: 768px) {
+  body {
+    background-image:
+      radial-gradient(circle at top left, rgba(15, 118, 110, 0.1), transparent 38%),
+      radial-gradient(circle at bottom right, rgba(232, 93, 4, 0.1), transparent 34%);
+  }
+
+  .responsive-hero,
+  .responsive-links,
+  .responsive-actions,
+  .responsive-admin-actions {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .responsive-inline-field,
+  .responsive-step-row,
+  .responsive-preview-grid,
+  .responsive-bill-grid,
+  .responsive-timeline-grid,
+  .responsive-admin-grid,
+  .responsive-admin-tabs {
+    grid-template-columns: 1fr !important;
+  }
+
+  .responsive-links > *,
+  .responsive-actions > *,
+  .responsive-admin-actions > * {
+    width: 100%;
+    text-align: center;
+  }
+
+  .responsive-page-card {
+    padding: 18px !important;
+    border-radius: 22px !important;
+  }
+
+  .responsive-modal {
+    width: min(100%, 560px) !important;
+    max-height: 92vh !important;
+    overflow: auto !important;
+    padding: 20px !important;
+  }
 }

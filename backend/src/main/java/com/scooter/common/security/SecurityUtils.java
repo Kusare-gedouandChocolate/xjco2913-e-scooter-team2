@@ -55,7 +55,8 @@ public class SecurityUtils {
         }
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-        boolean isPrivileged = hasAnyAuthority(authorities, RoleUtils::isStaffOrAdmin);
+        boolean isPrivileged = hasAnyAuthority(authorities, role ->
+                role.equals("admin") || role.equals("manager") || role.equals("clerk"));
 
         if (!isPrivileged) {
             throw new BusinessException("ACCESS_FORBIDDEN", "Staff or admin role is required");

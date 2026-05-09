@@ -1,6 +1,10 @@
 package com.scooter.config;
 
 import com.scooter.common.security.JwtAuthenticationFilter;
+import com.scooter.common.response.Result;
+import com.scooter.common.web.RequestContext;
+import com.scooter.common.web.RequestIdFilter;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,6 +33,12 @@ public class SecurityConfig {
 
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @Autowired
+    private RequestIdFilter requestIdFilter;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     /**
      * Define the password encoder for the application (BCrypt)
@@ -79,6 +89,7 @@ public class SecurityConfig {
                 .anonymous(anonymous -> anonymous.disable())
 
                 // Add JWT filter before the standard UsernamePassword filter
+                .addFilterBefore(requestIdFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -86,14 +97,26 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationEntryPoint authenticationEntryPoint() {
-        return (request, response, authException) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
-                "Unauthorized");
+        return (request, response, authException) -> {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            response.setHeader(RequestContext.REQUEST_ID_HEADER, RequestContext.getOrCreateRequestId());
+            objectMapper.writeValue(response.getWriter(),
+                    Result.error("AUTH_REQUIRED", "User not authenticated"));
+        };
     }
 
     @Bean
     public AccessDeniedHandler accessDeniedHandler() {
-        return (request, response, accessDeniedException) -> response.sendError(HttpServletResponse.SC_FORBIDDEN,
-                "Forbidden");
+        return (request, response, accessDeniedException) -> {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            response.setHeader(RequestContext.REQUEST_ID_HEADER, RequestContext.getOrCreateRequestId());
+            objectMapper.writeValue(response.getWriter(),
+                    Result.error("ACCESS_FORBIDDEN", "Access is forbidden for the current role"));
+        };
     }
 
     /**

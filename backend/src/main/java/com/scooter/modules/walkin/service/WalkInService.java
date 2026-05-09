@@ -2,6 +2,7 @@ package com.scooter.modules.walkin.service;
 
 import com.scooter.common.exception.BusinessException;
 import com.scooter.common.security.RoleUtils;
+import com.scooter.common.web.RequestContext;
 import com.scooter.modules.auth.entity.User;
 import com.scooter.modules.auth.repository.UserRepository;
 import com.scooter.modules.booking.dto.BookingCreateResponse;
@@ -18,6 +19,8 @@ import com.scooter.modules.walkin.dto.WalkInPickupRequest;
 import com.scooter.modules.walkin.dto.WalkInPickupResponse;
 import com.scooter.modules.walkin.dto.WalkInReturnRequest;
 import com.scooter.modules.walkin.dto.WalkInReturnResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -27,6 +30,8 @@ import java.util.UUID;
 
 @Service
 public class WalkInService {
+
+    private static final Logger log = LoggerFactory.getLogger(WalkInService.class);
 
     @Autowired
     private UserRepository userRepository;
@@ -55,6 +60,8 @@ public class WalkInService {
                 .build();
 
         User savedUser = userRepository.save(user);
+        log.info("requestId={} walkInCustomerCreated userId={} phone={}",
+                RequestContext.getOrCreateRequestId(), savedUser.getUserId(), savedUser.getPhone());
         return WalkInCustomerResponse.builder()
                 .userId(savedUser.getUserId())
                 .fullName(savedUser.getFullName())
@@ -66,6 +73,7 @@ public class WalkInService {
 
     @Transactional
     public WalkInPickupResponse pickupScooter(WalkInPickupRequest request) {
+        validateWalkInPickupRequest(request);
         User customer = getWalkInCustomer(request.getCustomerId());
 
         BookingRequest bookingRequest = new BookingRequest();
@@ -84,21 +92,27 @@ public class WalkInService {
         BookingConfirmation confirmation = bookingService.processPayment(paymentRequest);
         bookingService.activateWalkInPickup(Long.valueOf(bookingResponse.getBookingId()));
 
+        String resolvedPaymentMethod = paymentRequest.getPaymentMethod() != null
+                ? paymentRequest.getPaymentMethod()
+                : "CREDIT_CARD";
+        log.info("requestId={} walkInPickupCompleted bookingId={} customerId={} scooterId={} paymentMethod={} status=IN_PROGRESS",
+                RequestContext.getOrCreateRequestId(), bookingResponse.getBookingId(), customer.getUserId(),
+                request.getScooterId(), resolvedPaymentMethod);
+
         return WalkInPickupResponse.builder()
                 .customerId(customer.getUserId().toString())
                 .bookingId(bookingResponse.getBookingId())
                 .bookingStatus("IN_PROGRESS")
                 .totalCost(bookingResponse.getTotalCost())
                 .confirmationNumber(confirmation.getConfirmationNumber())
-                .paymentMethod(paymentRequest.getPaymentMethod() != null
-                        ? paymentRequest.getPaymentMethod()
-                        : "CREDIT_CARD")
+                .paymentMethod(resolvedPaymentMethod)
                 .build();
     }
 
     @Transactional
     public WalkInReturnResponse returnScooter(WalkInReturnRequest request) {
-        Booking booking = bookingService.getBookingById(request.getBookingId());
+        validateWalkInReturnRequest(request);
+        Booking booking = bookingService.getBookingEntityById(request.getBookingId());
         User customer = userRepository.findById(booking.getUserId())
                 .orElseThrow(() -> new BusinessException("USER_NOT_FOUND", "User not found"));
 
@@ -113,7 +127,10 @@ public class WalkInService {
                 request.getDamageImageUrl(),
                 request.getDamageLevel(),
                 customer.getUserId().toString());
-        Booking completedBooking = bookingService.getBookingById(request.getBookingId());
+        Booking completedBooking = bookingService.getBookingEntityById(request.getBookingId());
+        log.info("requestId={} walkInReturnCompleted bookingId={} customerId={} status={} damageReported={}",
+                RequestContext.getOrCreateRequestId(), completedBooking.getId(), customer.getUserId(),
+                completedBooking.getStatus(), completedBooking.getDamageReported());
 
         return WalkInReturnResponse.builder()
                 .bookingId(completedBooking.getId().toString())
@@ -155,5 +172,24 @@ public class WalkInService {
 
     private String generateWalkInEmail() {
         return "walkin+" + UUID.randomUUID() + "@local.staff";
+    }
+
+    private void validateWalkInPickupRequest(WalkInPickupRequest request) {
+        if (request.getScooterId() != null && request.getScooterId() <= 0) {
+            throw new BusinessException("INVALID_REQUEST_PARAMETER", "Scooter ID must be a positive number");
+        }
+        if (request.getRentalOptionId() != null && request.getRentalOptionId() <= 0) {
+            throw new BusinessException("INVALID_REQUEST_PARAMETER", "Rental option ID must be a positive number");
+        }
+    }
+
+    private void validateWalkInReturnRequest(WalkInReturnRequest request) {
+        if (Boolean.TRUE.equals(request.getDamaged())) {
+            String description = request.getDamageDescription() == null ? "" : request.getDamageDescription().trim();
+            if (description.isEmpty()) {
+                throw new BusinessException("DAMAGE_DESCRIPTION_REQUIRED",
+                        "Damage description is required when damage is reported");
+            }
+        }
     }
 }

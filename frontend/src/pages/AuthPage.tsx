@@ -1,5 +1,5 @@
-// src/pages/AuthPage.tsx
 import React, { useState } from 'react';
+
 import { authApi, type RegisterPayload } from '../api';
 import { saveSession } from '../utils/auth';
 
@@ -7,8 +7,6 @@ export const AuthPage: React.FC = () => {
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-
-  // 表单状态
   const [formData, setFormData] = useState<RegisterPayload>({
     email: '',
     password: '',
@@ -16,35 +14,31 @@ export const AuthPage: React.FC = () => {
     phone: '',
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [event.target.name]: event.target.value });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     setLoading(true);
     setErrorMsg('');
 
     try {
       if (isLoginMode) {
-        // 调用登录 API [cite: 391]
         const res = await authApi.login({
           email: formData.email,
           password: formData.password,
         });
         saveSession(res.data.token, res.data.user);
-        // TODO: 跳转到车辆浏览页面
         window.location.href = '/scooters';
       } else {
-        // 调用注册 API [cite: 390]
         const res = await authApi.register(formData);
         saveSession(res.data.token, res.data.user);
         window.location.href = '/scooters';
       }
     } catch (err: unknown) {
-        const error = err as { message?: string };
-        // 捕获 API 拦截器抛出的标准错误结构 
-        setErrorMsg(error.message || 'Network or server error. Please try again later.');
+      const error = err as { message?: string };
+      setErrorMsg(error.message || 'Network or server error. Please try again later.');
     } finally {
       setLoading(false);
     }
@@ -53,12 +47,13 @@ export const AuthPage: React.FC = () => {
   return (
     <div style={styles.pageContainer}>
       <div style={styles.card}>
-        {/* 顶部品牌与标题区 */}
         <div style={styles.header}>
-          <div style={styles.logo}>🛴 E-Scooter</div>
-          <h2 style={styles.title}>{isLoginMode ? 'welcome back' : 'Create a new account'}</h2>
+          <div style={styles.logo}>E-Scooter</div>
+          <h2 style={styles.title}>{isLoginMode ? 'Welcome back' : 'Create a new account'}</h2>
           <p style={styles.subtitle}>
-            {isLoginMode ? 'Log in to continue your cycling journey' : 'Join us and embark on a green journey!'}
+            {isLoginMode
+              ? 'Log in to continue your journey.'
+              : 'Create an account to start riding.'}
           </p>
           {isLoginMode && (
             <div style={styles.accountTips}>
@@ -68,22 +63,25 @@ export const AuthPage: React.FC = () => {
           )}
         </div>
 
-        {/* 错误提示区 (使用山茶红) */}
         {errorMsg && (
           <div style={styles.errorBox}>
             <svg style={styles.errorIcon} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
             </svg>
             <span>{errorMsg}</span>
           </div>
         )}
 
-        {/* 核心表单区 */}
         <form onSubmit={handleSubmit} style={styles.form}>
           {!isLoginMode && (
             <>
               <div style={styles.inputGroup}>
-                <label style={styles.label}>姓名</label>
+                <label style={styles.label}>Full name</label>
                 <input
                   required
                   name="fullName"
@@ -95,7 +93,7 @@ export const AuthPage: React.FC = () => {
                 />
               </div>
               <div style={styles.inputGroup}>
-                <label style={styles.label}>phone number</label>
+                <label style={styles.label}>Phone number</label>
                 <input
                   required
                   name="phone"
@@ -110,7 +108,7 @@ export const AuthPage: React.FC = () => {
           )}
 
           <div style={styles.inputGroup}>
-            <label style={styles.label}>email address</label>
+            <label style={styles.label}>Email address</label>
             <input
               required
               name="email"
@@ -123,38 +121,36 @@ export const AuthPage: React.FC = () => {
           </div>
 
           <div style={styles.inputGroup}>
-            <label style={styles.label}>passwords</label>
+            <label style={styles.label}>Password</label>
             <input
               required
               name="password"
               type="password"
-              placeholder="enter your PIN"
+              placeholder="Enter your password"
               value={formData.password}
               onChange={handleChange}
               style={styles.input}
             />
           </div>
 
-          {/* 提交按钮 (使用石绿主色调，自带加载态) */}
           <button type="submit" disabled={loading} style={styles.submitBtn(loading)}>
-            {loading ? 'Processing...' : (isLoginMode ? 'Log in' : 'register')}
+            {loading ? 'Processing...' : isLoginMode ? 'Log in' : 'Register'}
           </button>
         </form>
 
-        {/* 模式切换区 */}
         <div style={styles.footer}>
           <span style={{ color: 'var(--color-text-muted)' }}>
-            {isLoginMode ? 'No account?' : 'already have an account?'}
+            {isLoginMode ? 'No account yet?' : 'Already have an account?'}
           </span>
-          <button 
-            type="button" 
+          <button
+            type="button"
             onClick={() => {
               setIsLoginMode(!isLoginMode);
               setErrorMsg('');
-            }} 
+            }}
             style={styles.switchBtn}
           >
-            {isLoginMode ? 'registration' : 'login'}
+            {isLoginMode ? 'Register' : 'Log in'}
           </button>
         </div>
       </div>
@@ -162,7 +158,6 @@ export const AuthPage: React.FC = () => {
   );
 };
 
-// --- 内联样式字典 (利用全局 CSS 变量) ---
 const styles = {
   pageContainer: {
     minHeight: '100vh',
@@ -188,7 +183,8 @@ const styles = {
   logo: {
     fontSize: '2.5rem',
     marginBottom: '16px',
-    color: 'var(--color-primary)', // 石绿 Logo
+    color: 'var(--color-primary)',
+    fontWeight: 800,
   },
   title: {
     fontSize: '1.75rem',
@@ -225,8 +221,8 @@ const styles = {
   errorBox: {
     display: 'flex',
     alignItems: 'center',
-    backgroundColor: '#fff1f2', // 极浅的山茶红背景
-    color: 'var(--color-accent)', // 山茶红文字
+    backgroundColor: '#fff1f2',
+    color: 'var(--color-accent)',
     padding: '12px 16px',
     borderRadius: '8px',
     marginBottom: '24px',
@@ -267,12 +263,12 @@ const styles = {
     fontSize: '1rem',
     fontWeight: 600,
     color: '#ffffff',
-    backgroundColor: loading ? '#94d8d7' : 'var(--color-primary)', // 石绿主按钮
+    backgroundColor: loading ? '#94d8d7' : 'var(--color-primary)',
     border: 'none',
     borderRadius: '8px',
     cursor: loading ? 'not-allowed' : 'pointer',
     transition: 'background-color 0.2s, transform 0.1s',
-    boxShadow: '0 4px 6px -1px rgba(87, 194, 192, 0.3)', // 石绿阴影
+    boxShadow: '0 4px 6px -1px rgba(87, 194, 192, 0.3)',
   }),
   footer: {
     marginTop: '32px',
@@ -282,10 +278,12 @@ const styles = {
   switchBtn: {
     background: 'none',
     border: 'none',
-    color: 'var(--color-primary)', // 石绿文字按钮
+    color: 'var(--color-primary)',
     fontWeight: 600,
     marginLeft: '8px',
     cursor: 'pointer',
     textDecoration: 'none',
-  }
+  },
 };
+
+export default AuthPage;

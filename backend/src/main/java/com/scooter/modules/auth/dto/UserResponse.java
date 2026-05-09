@@ -10,4 +10,6 @@ public class UserResponse {
     private UUID userId;
     private String email;
     private String role;
+    private String fullName;
+    private String phone;
 }

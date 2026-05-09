@@ -1,13 +1,11 @@
 package com.scooter.modules.booking.service;
 
 import com.scooter.common.exception.BusinessException;
+import com.scooter.common.web.RequestContext;
 import com.scooter.modules.auth.entity.User;
 import com.scooter.modules.auth.repository.UserRepository;
-import com.scooter.modules.booking.dto.BookingCreateResponse;
-import com.scooter.modules.booking.dto.BookingRequest;
-import com.scooter.modules.booking.dto.BookingResponse;
-import com.scooter.modules.booking.dto.PickupVerificationResponse;
-import com.scooter.modules.payment.dto.PaymentRequest; // New Import
+import com.scooter.modules.booking.dto.*;
+import com.scooter.modules.payment.dto.PaymentRequest;
 import com.scooter.modules.payment.entity.Payment;
 import com.scooter.modules.payment.entity.PaymentStatus;
 import com.scooter.modules.payment.repository.PaymentRepository;
@@ -15,8 +13,8 @@ import com.scooter.modules.payment.service.CardTokenService;
 import com.scooter.modules.booking.entity.Booking;
 import com.scooter.modules.booking.entity.BookingStatus;
 import com.scooter.modules.booking.repository.BookingRepository;
-import com.scooter.modules.confirmation.entity.BookingConfirmation; // New Import
-import com.scooter.modules.confirmation.repository.ConfirmationRepository; // New Import
+import com.scooter.modules.confirmation.entity.BookingConfirmation;
+import com.scooter.modules.confirmation.repository.ConfirmationRepository;
 import com.scooter.modules.damage.entity.DamageEvent;
 import com.scooter.modules.damage.entity.DamageLevel;
 import com.scooter.modules.damage.repository.DamageEventRepository;
@@ -26,8 +24,10 @@ import com.scooter.modules.discount.service.DiscountRuleService.AppliedDiscount;
 import com.scooter.modules.scooter.entity.RentalOption;
 import com.scooter.modules.scooter.entity.Scooter;
 import com.scooter.modules.scooter.entity.ScooterStatus;
-import com.scooter.modules.scooter.repository.ScooterRepository;
 import com.scooter.modules.scooter.repository.RentalOptionRepository;
+import com.scooter.modules.scooter.repository.ScooterRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -45,9 +45,11 @@ import java.util.UUID;
 @Service
 public class BookingService {
 
+    private static final Logger log = LoggerFactory.getLogger(BookingService.class);
     private static final Duration PICKUP_CODE_VALIDITY = Duration.ofHours(2);
     private static final int PICKUP_CODE_LENGTH = 6;
     private static final Random PICKUP_CODE_RANDOM = new Random();
+    private static final String DEFAULT_PAYMENT_METHOD = "CREDIT_CARD";
 
     @Autowired
     private BookingRepository bookingRepository;
@@ -56,7 +58,7 @@ public class BookingService {
     @Autowired
     private RentalOptionRepository rentalOptionRepository;
     @Autowired
-    private ConfirmationRepository confirmationRepository; // New Injection
+    private ConfirmationRepository confirmationRepository;
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -80,6 +82,9 @@ public class BookingService {
         User user = userRepository.findById(UUID.fromString(userId))
                 .orElseThrow(() -> new BusinessException("USER_NOT_FOUND", "User not found"));
         Booking saved = createBookingEntity(user, request);
+        log.info("requestId={} bookingCreated bookingId={} userId={} scooterId={} status={}",
+                RequestContext.getOrCreateRequestId(), saved.getId(), user.getUserId(),
+                saved.getScooter().getId(), saved.getStatus());
         return toCreateResponse(saved);
     }
 
@@ -88,6 +93,9 @@ public class BookingService {
         User user = userRepository.findById(Objects.requireNonNull(userId, "User ID must not be null"))
                 .orElseThrow(() -> new BusinessException("USER_NOT_FOUND", "User not found"));
         Booking saved = createBookingEntity(user, request);
+        log.info("requestId={} bookingCreatedForUser bookingId={} userId={} scooterId={} status={}",
+                RequestContext.getOrCreateRequestId(), saved.getId(), user.getUserId(),
+                saved.getScooter().getId(), saved.getStatus());
         return toCreateResponse(saved);
     }
 
@@ -97,7 +105,7 @@ public class BookingService {
         User user = userRepository.findById(booking.getUserId())
                 .orElseThrow(() -> new BusinessException("USER_NOT_FOUND", "User not found"));
 
-        String paymentMethod = request.getPaymentMethod() != null ? request.getPaymentMethod() : "CREDIT_CARD";
+        String paymentMethod = normalizePaymentMethod(request.getPaymentMethod());
         boolean shouldValidateCardToken = "CREDIT_CARD".equalsIgnoreCase(paymentMethod)
                 && (Boolean.TRUE.equals(user.getWalkInCustomer())
                         || (request.getCardToken() != null && !request.getCardToken().isBlank()));
@@ -139,12 +147,16 @@ public class BookingService {
         confirmation.setPickupCode(pickupCode);
         confirmation.setPickupCodeExpiresAt(pickupCodeExpiresAt);
 
-        return confirmationRepository.save(confirmation);
+        BookingConfirmation savedConfirmation = confirmationRepository.save(confirmation);
+        log.info("requestId={} bookingPaid bookingId={} fromStatus=PENDING_PAYMENT toStatus={} paymentMethod={} confirmationNumber={}",
+                RequestContext.getOrCreateRequestId(), booking.getId(), booking.getStatus(),
+                paymentMethod, savedConfirmation.getConfirmationNumber());
+        return savedConfirmation;
     }
 
     @Transactional
     public void cancelBooking(Long bookingId) {
-        Booking booking = bookingRepository.findById(Objects.requireNonNull(bookingId, "Booking ID must not be null"))
+        Booking booking = bookingRepository.findByIdForUpdate(Objects.requireNonNull(bookingId, "Booking ID must not be null"))
                 .orElseThrow(() -> new BusinessException("BOOKING_NOT_FOUND", "Booking not found"));
 
         if (booking.getStatus() != BookingStatus.PENDING_PAYMENT
@@ -152,12 +164,15 @@ public class BookingService {
             throw new BusinessException("BOOKING_CONFLICT", "Booking cannot be cancelled in current status");
         }
 
-        Scooter scooter = booking.getScooter();
+        Scooter scooter = getScooterForUpdate(booking.getScooter().getId());
+        BookingStatus previousStatus = booking.getStatus();
         scooter.setStatus(ScooterStatus.AVAILABLE);
         scooterRepository.save(scooter);
 
         booking.setStatus(BookingStatus.CANCELLED);
         bookingRepository.save(booking);
+        log.info("requestId={} bookingCancelled bookingId={} fromStatus={} toStatus={} scooterId={}",
+                RequestContext.getOrCreateRequestId(), booking.getId(), previousStatus, booking.getStatus(), scooter.getId());
     }
 
     @Transactional
@@ -168,14 +183,15 @@ public class BookingService {
     @Transactional
     public void completeBooking(Long bookingId, boolean damaged, String damageDescription, String damageImageUrl,
             DamageLevel damageLevel, String reportedByUserId) {
-        Booking booking = bookingRepository.findById(Objects.requireNonNull(bookingId, "Booking ID must not be null"))
+        Booking booking = bookingRepository.findByIdForUpdate(Objects.requireNonNull(bookingId, "Booking ID must not be null"))
                 .orElseThrow(() -> new BusinessException("BOOKING_NOT_FOUND", "Booking not found"));
 
         if (booking.getStatus() != BookingStatus.IN_PROGRESS) {
             throw new BusinessException("BOOKING_CONFLICT", "Only rentals in progress can be completed");
         }
 
-        Scooter scooter = booking.getScooter();
+        Scooter scooter = getScooterForUpdate(booking.getScooter().getId());
+        BookingStatus previousStatus = booking.getStatus();
         booking.setReturnBatteryLevel(normalizeBatteryLevel(scooter.getBatteryLevel()));
         scooter.setStatus(ScooterStatus.AVAILABLE);
         scooterRepository.save(scooter);
@@ -186,11 +202,14 @@ public class BookingService {
         applyBillingBreakdown(booking);
         bookingRepository.save(booking);
         syncPaymentAmount(booking);
+        log.info("requestId={} bookingCompleted bookingId={} fromStatus={} toStatus={} scooterId={} pickupBattery={} returnBattery={} totalFee={}",
+                RequestContext.getOrCreateRequestId(), booking.getId(), previousStatus, booking.getStatus(),
+                scooter.getId(), booking.getPickupBatteryLevel(), booking.getReturnBatteryLevel(), booking.getTotalPrice());
     }
 
     @Transactional
     public PickupVerificationResponse verifyPickupCode(Long bookingId, String pickupCode) {
-        Booking booking = bookingRepository.findById(Objects.requireNonNull(bookingId, "Booking ID must not be null"))
+        Booking booking = bookingRepository.findByIdForUpdate(Objects.requireNonNull(bookingId, "Booking ID must not be null"))
                 .orElseThrow(() -> new BusinessException("BOOKING_NOT_FOUND", "Booking not found"));
 
         activatePickup(booking, pickupCode, true);
@@ -205,7 +224,7 @@ public class BookingService {
 
     @Transactional
     public void activateWalkInPickup(Long bookingId) {
-        Booking booking = bookingRepository.findById(Objects.requireNonNull(bookingId, "Booking ID must not be null"))
+        Booking booking = bookingRepository.findByIdForUpdate(Objects.requireNonNull(bookingId, "Booking ID must not be null"))
                 .orElseThrow(() -> new BusinessException("BOOKING_NOT_FOUND", "Booking not found"));
         activatePickup(booking, null, false);
     }
@@ -214,7 +233,9 @@ public class BookingService {
         Long scooterId = Objects.requireNonNull(request.getScooterId(), "Scooter ID must not be null");
         Long rentalOptionId = Objects.requireNonNull(request.getRentalOptionId(), "Rental option ID must not be null");
 
-        Scooter scooter = scooterRepository.findById(scooterId)
+        validateBookingRequest(request);
+
+        Scooter scooter = scooterRepository.findByIdForUpdate(scooterId)
                 .orElseThrow(() -> new BusinessException("SCOOTER_NOT_FOUND", "Scooter not found"));
 
         if (scooter.getStatus() != ScooterStatus.AVAILABLE) {
@@ -275,10 +296,15 @@ public class BookingService {
         if (booking.getScooter() != null) {
             response.setScooterId(String.valueOf(booking.getScooter().getId()));
             response.setScooterName(booking.getScooter().getModel());
+            response.setScooterStatus(booking.getScooter().getStatus() != null
+                    ? booking.getScooter().getStatus().name()
+                    : null);
+            response.setScooterBatteryLevel(booking.getScooter().getBatteryLevel());
         }
 
         if (booking.getRentalOption() != null) {
             response.setHireType(booking.getRentalOption().getDurationLabel());
+            response.setDurationHours(booking.getRentalOption().getDurationHours());
         }
 
         if (booking.getStartTime() != null) {
@@ -293,6 +319,8 @@ public class BookingService {
             response.setStatus(mapBookingStatusToCamelCase(booking.getStatus()));
         }
 
+        response.setPickedUpAt(booking.getPickedUpAt() != null ? booking.getPickedUpAt().toString() : null);
+        response.setCompletedAt(booking.getCompletedAt() != null ? booking.getCompletedAt().toString() : null);
         response.setTotalCost(booking.getTotalPrice() != null ? booking.getTotalPrice().toString() : null);
         response.setOriginalCost(booking.getOriginalPrice() != null ? booking.getOriginalPrice().toString() : null);
         response.setDiscountAmount(booking.getDiscountAmount() != null ? booking.getDiscountAmount().toString() : null);
@@ -318,11 +346,17 @@ public class BookingService {
     }
 
     private LocalDateTime resolveStartTime(BookingRequest request) {
-        return request.getStartTime() != null ? request.getStartTime() : LocalDateTime.now();
+        if (request.getStartTime() == null) {
+            return LocalDateTime.now();
+        }
+        if (request.getStartTime().isBefore(LocalDateTime.now().minusDays(1))) {
+            throw new BusinessException("INVALID_REQUEST_PARAMETER", "Start time is too far in the past");
+        }
+        return request.getStartTime();
     }
 
     private Booking getPayableBooking(Long bookingId) {
-        Booking booking = bookingRepository.findById(Objects.requireNonNull(bookingId, "Booking ID must not be null"))
+        Booking booking = bookingRepository.findByIdForUpdate(Objects.requireNonNull(bookingId, "Booking ID must not be null"))
                 .orElseThrow(() -> new BusinessException("BOOKING_NOT_FOUND", "Booking not found"));
 
         if (booking.getStatus() != BookingStatus.PENDING_PAYMENT) {
@@ -352,14 +386,18 @@ public class BookingService {
             }
         }
 
+        Scooter scooter = getScooterForUpdate(booking.getScooter().getId());
+        BookingStatus previousStatus = booking.getStatus();
         booking.setStatus(BookingStatus.IN_PROGRESS);
         booking.setPickedUpAt(LocalDateTime.now());
-        booking.setPickupBatteryLevel(normalizeBatteryLevel(booking.getScooter().getBatteryLevel()));
+        booking.setPickupBatteryLevel(normalizeBatteryLevel(scooter.getBatteryLevel()));
         bookingRepository.save(booking);
 
-        Scooter scooter = booking.getScooter();
         scooter.setStatus(ScooterStatus.IN_USE);
         scooterRepository.save(scooter);
+        log.info("requestId={} bookingPickupActivated bookingId={} fromStatus={} toStatus={} scooterId={} pickupBattery={}",
+                RequestContext.getOrCreateRequestId(), booking.getId(), previousStatus, booking.getStatus(),
+                scooter.getId(), booking.getPickupBatteryLevel());
     }
 
     private BookingCreateResponse toCreateResponse(Booking saved) {
@@ -406,7 +444,9 @@ public class BookingService {
     }
 
     private String generatePickupCode() {
-        int value = PICKUP_CODE_RANDOM.nextInt(900000) + 100000;
+        int minValue = (int) Math.pow(10, PICKUP_CODE_LENGTH - 1);
+        int maxDelta = (int) Math.pow(10, PICKUP_CODE_LENGTH) - minValue;
+        int value = PICKUP_CODE_RANDOM.nextInt(maxDelta) + minValue;
         return String.valueOf(value);
     }
 
@@ -432,6 +472,35 @@ public class BookingService {
         return user.getCardToken();
     }
 
+    private void validateBookingRequest(BookingRequest request) {
+        if (request.getScooterId() != null && request.getScooterId() <= 0) {
+            throw new BusinessException("INVALID_REQUEST_PARAMETER", "Scooter ID must be a positive number");
+        }
+        if (request.getRentalOptionId() != null && request.getRentalOptionId() <= 0) {
+            throw new BusinessException("INVALID_REQUEST_PARAMETER", "Rental option ID must be a positive number");
+        }
+    }
+
+    private String normalizePaymentMethod(String paymentMethod) {
+        if (paymentMethod == null || paymentMethod.isBlank()) {
+            return DEFAULT_PAYMENT_METHOD;
+        }
+
+        String normalized = paymentMethod.trim().toUpperCase();
+        if (!normalized.equals("CREDIT_CARD")
+                && !normalized.equals("CARD_ON_FILE")
+                && !normalized.equals("WALLET")) {
+            throw new BusinessException("INVALID_REQUEST_PARAMETER",
+                    "Unsupported payment method. Expected CREDIT_CARD, CARD_ON_FILE, or WALLET");
+        }
+        return normalized;
+    }
+
+    private Scooter getScooterForUpdate(Long scooterId) {
+        return scooterRepository.findByIdForUpdate(scooterId)
+                .orElseThrow(() -> new BusinessException("SCOOTER_NOT_FOUND", "Scooter not found"));
+    }
+
     private void applyBillingBreakdown(Booking booking) {
         BookingBillingService.ChargeBreakdown breakdown = bookingBillingService.calculateBreakdown(booking);
         booking.setBaseRentalFee(breakdown.baseRentalFee());
@@ -443,11 +512,18 @@ public class BookingService {
         booking.setTotalPrice(breakdown.totalFee());
     }
 
-    private void applyDamageInfo(Booking booking, boolean damaged, String damageDescription, String damageImageUrl,
-            DamageLevel damageLevel, String reportedByUserId) {
+    private void applyDamageInfo(Booking booking, boolean damaged, String damageDescription,
+                                 String damageImageUrl, DamageLevel damageLevel, String reportedByUserId) {
         if (!damaged) {
             booking.setDamageReported(Boolean.FALSE);
             booking.setDamageFee(BigDecimal.ZERO.setScale(2));
+            return;
+        }
+
+        java.util.Optional<DamageEvent> existing = damageEventRepository.findByBookingId(booking.getId());
+        if (existing.isPresent()) {
+            booking.setDamageReported(Boolean.TRUE);
+            booking.setDamageFee(existing.get().getDamageFee());
             return;
         }
 
@@ -456,12 +532,11 @@ public class BookingService {
             throw new BusinessException("DAMAGE_DESCRIPTION_REQUIRED",
                     "Damage description is required when damage is reported");
         }
-
         BigDecimal damageFee = damageBillingService.calculateDamageFee(true, damageLevel);
         booking.setDamageReported(Boolean.TRUE);
         booking.setDamageFee(damageFee);
 
-        DamageEvent damageEvent = damageEventRepository.findByBookingId(booking.getId()).orElseGet(DamageEvent::new);
+        DamageEvent damageEvent = new DamageEvent();
         damageEvent.setBookingId(booking.getId());
         damageEvent.setScooterId(booking.getScooter().getId());
         damageEvent.setReportedByUserId(reportedByUserId);
@@ -487,8 +562,108 @@ public class BookingService {
         });
     }
 
-    public Booking getBookingById(Long bookingId) {
+    @Transactional(readOnly = true)
+    public BookingResponse getBookingById(Long bookingId) {
+        return convertToResponse(getBookingEntityById(bookingId));
+    }
+
+    @Transactional(readOnly = true)
+    public Booking getBookingEntityById(Long bookingId) {
         return bookingRepository.findById(Objects.requireNonNull(bookingId, "Booking ID must not be null"))
                 .orElseThrow(() -> new BusinessException("BOOKING_NOT_FOUND", "Booking not found"));
+    }
+
+    @Transactional
+    public BookingResponse processReturn(Long bookingId, ReturnRequest request) {
+        Booking booking = bookingRepository.findByIdForUpdate(bookingId)
+                .orElseThrow(() -> new BusinessException("BOOKING_NOT_FOUND", "Booking not found"));
+
+        if (booking.getStatus() != BookingStatus.IN_PROGRESS) {
+            throw new BusinessException("BOOKING_CONFLICT", "Only rentals in progress can be returned");
+        }
+
+        Scooter scooter = getScooterForUpdate(booking.getScooter().getId());
+        if (request.getBatteryLevelAtReturn() != null) {
+            booking.setReturnBatteryLevel(request.getBatteryLevelAtReturn());
+        } else {
+            booking.setReturnBatteryLevel(scooter.getBatteryLevel());
+        }
+
+        boolean isDamaged = damageEventRepository.findByBookingId(bookingId).isPresent();
+        if (isDamaged) {
+            booking.setDamageReported(true);
+        }
+
+        completeBooking(bookingId, isDamaged, null, null, null, null);
+
+        return convertToResponse(bookingRepository.findById(bookingId).get());
+    }
+
+    @Transactional
+    public void reportDamage(Long bookingId, DamageReportRequest request) {
+        Booking booking = bookingRepository.findByIdForUpdate(bookingId)
+                .orElseThrow(() -> new BusinessException("BOOKING_NOT_FOUND", "Booking not found"));
+
+        if (booking.getStatus() != BookingStatus.IN_PROGRESS) {
+            throw new BusinessException("BOOKING_CONFLICT", "Damage can only be reported during an active rental");
+        }
+
+        DamageEvent existing = damageEventRepository.findByBookingId(bookingId).orElse(null);
+        boolean updatedExisting = existing != null;
+        if (existing != null) {
+            existing.setDescription(request.getDescription().trim());
+            if (request.getEstimatedFeeInCents() != null) {
+                existing.setDamageFee(BigDecimal.valueOf(request.getEstimatedFeeInCents()).setScale(2));
+            }
+            damageEventRepository.save(existing);
+        } else {
+            DamageEvent event = new DamageEvent();
+            event.setBookingId(bookingId);
+            event.setScooterId(booking.getScooter().getId());
+            event.setReportedByUserId(booking.getUserId().toString());
+            event.setDamageLevel(DamageLevel.MEDIUM);
+            event.setDescription(request.getDescription().trim());
+            BigDecimal fee = request.getEstimatedFeeInCents() != null
+                    ? BigDecimal.valueOf(request.getEstimatedFeeInCents()).setScale(2)
+                    : damageBillingService.calculateDamageFee(true, DamageLevel.MEDIUM);
+            event.setDamageFee(fee);
+            damageEventRepository.save(event);
+        }
+        log.info("requestId={} damageReported bookingId={} damaged=true estimatedFee={} existingEvent={}",
+                RequestContext.getOrCreateRequestId(), bookingId, request.getEstimatedFeeInCents(), updatedExisting);
+    }
+
+    @Transactional(readOnly = true)
+    public SettlementResponse getSettlement(Long bookingId) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new BusinessException("BOOKING_NOT_FOUND", "Booking not found"));
+
+        BookingBillingService.ChargeBreakdown breakdown = bookingBillingService.calculateBreakdown(booking);
+
+        String damageStatus = "none";
+        if (Boolean.TRUE.equals(booking.getDamageReported())) {
+            damageStatus = "confirmed";
+        } else if (damageEventRepository.findByBookingId(bookingId).isPresent()) {
+            damageStatus = "reported";
+        }
+
+        return SettlementResponse.builder()
+                .bookingId(booking.getId().toString())
+                .batteryLevelAtCheckout(booking.getPickupBatteryLevel())
+                .batteryLevelAtReturn(booking.getReturnBatteryLevel())
+                .overtimeMinutes(breakdown.overtimeMinutes())
+                .damageStatus(damageStatus)
+                .fees(SettlementResponse.FeeBreakdown.builder()
+                        .baseFeeInCents(toStringCents(breakdown.baseRentalFee()))
+                        .overtimeFeeInCents(toStringCents(breakdown.overtimeFee()))
+                        .batteryDeltaFeeInCents(toStringCents(breakdown.batteryUsageFee()))
+                        .damageFeeInCents(toStringCents(breakdown.damageFee()))
+                        .totalInCents(toStringCents(breakdown.totalFee()))
+                        .build())
+                .build();
+    }
+
+    private String toStringCents(BigDecimal amount) {
+        return amount.multiply(BigDecimal.valueOf(100)).setScale(0).toPlainString(); // 转为分
     }
 }

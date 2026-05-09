@@ -6,24 +6,12 @@ public final class RoleUtils {
     }
 
     public static String normalizeRole(String rawRole) {
-        if (rawRole == null || rawRole.isBlank()) {
-            return "customer";
-        }
-
-        String normalizedRole = rawRole.trim().toLowerCase();
-        if ("administrator".equals(normalizedRole)) {
-            return "admin";
-        }
-        if ("admin".equals(normalizedRole)) {
-            return "admin";
-        }
-        if ("manager".equals(normalizedRole)) {
-            return "manager";
-        }
-        if ("staff".equals(normalizedRole) || "clerk".equals(normalizedRole)) {
-            return "staff";
-        }
-
+        if (rawRole == null || rawRole.isBlank()) return "customer";
+        String normalized = rawRole.trim().toLowerCase();
+        if ("administrator".equals(normalized)) return "admin";
+        if ("admin".equals(normalized)) return "admin";
+        if ("manager".equals(normalized)) return "manager";
+        if ("staff".equals(normalized) || "clerk".equals(normalized)) return "clerk";
         return "customer";
     }
 

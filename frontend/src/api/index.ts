@@ -4,8 +4,10 @@ import type {
   AdminScooterResponse,
   ApiResponse,
   Booking,
+  DamageEventResponse,
   Feedback,
   PageResponse,
+  PickupVerificationResponse,
   PricingRule,
   PricingRuleResponse,
   PricingRuleUpdateRequest,
@@ -13,6 +15,12 @@ import type {
   ScooterLocation,
   Settlement,
   User,
+  WalkInCustomerPayload,
+  WalkInCustomerResponse,
+  WalkInPickupPayload,
+  WalkInPickupResponse,
+  WalkInReturnPayload,
+  WalkInReturnResponse,
   WeeklyRevenueStatisticsResponse,
 } from '../types';
 
@@ -54,14 +62,8 @@ export interface DamageReportPayload {
   estimatedFeeInCents?: number;
 }
 
-export interface WalkInCustomerPayload {
-  customerName: string;
-  customerPhone: string;
-  cardToken: string;
-}
-
 export interface WalkInRentalPayload extends WalkInCustomerPayload {
-  scooterId: string;
+  scooterId: number;
   hireType: string;
   batteryLevelAtCheckout: number;
   liabilityConsent: boolean;
@@ -73,9 +75,6 @@ export const authApi = {
   },
   register: (data: RegisterPayload): Promise<ApiResponse<{ token: string; user: User }>> => {
     return apiClient.post('/auth/register', data);
-  },
-  getMe: (): Promise<ApiResponse<User>> => {
-    return apiClient.get('/users/me');
   },
 };
 
@@ -115,8 +114,8 @@ export const bookingsApi = {
   verifyPickup: (
     bookingId: string,
     data: PickupVerificationPayload,
-  ): Promise<ApiResponse<Booking>> => {
-    return apiClient.post(`/bookings/${bookingId}/pickup-verifications`, data);
+  ): Promise<ApiResponse<PickupVerificationResponse>> => {
+    return apiClient.post(`/bookings/${bookingId}/pickup-verification`, data);
   },
   createReturn: (bookingId: string, data: ReturnPayload): Promise<ApiResponse<Booking>> => {
     return apiClient.post(`/bookings/${bookingId}/returns`, data);
@@ -133,15 +132,23 @@ export const bookingsApi = {
 };
 
 export const walkInApi = {
-  createCustomer: (
-    data: WalkInCustomerPayload,
-  ): Promise<ApiResponse<{ customerId: string }>> => {
+  createCustomer: (data: WalkInCustomerPayload): Promise<ApiResponse<WalkInCustomerResponse>> => {
     return apiClient.post('/walk-in/customers', data);
   },
-  createRental: (
-    data: WalkInRentalPayload,
-  ): Promise<ApiResponse<{ bookingId: string; hireMode: string; status: string }>> => {
-    return apiClient.post('/walk-in/rentals', data);
+  pickup: (data: WalkInPickupPayload): Promise<ApiResponse<WalkInPickupResponse>> => {
+    return apiClient.post('/walk-in/pickup', data);
+  },
+  returnScooter: (data: WalkInReturnPayload): Promise<ApiResponse<WalkInReturnResponse>> => {
+    return apiClient.post('/walk-in/return', data);
+  },
+};
+
+export const damageEventsApi = {
+  getByBookingId: (bookingId: string): Promise<ApiResponse<DamageEventResponse>> => {
+    return apiClient.get(`/damage-events/booking/${bookingId}`);
+  },
+  getAll: (): Promise<ApiResponse<DamageEventResponse[]>> => {
+    return apiClient.get('/damage-events');
   },
 };
 

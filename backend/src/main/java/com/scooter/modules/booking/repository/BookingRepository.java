@@ -3,9 +3,14 @@ package com.scooter.modules.booking.repository;
 import com.scooter.modules.booking.entity.Booking;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import jakarta.persistence.LockModeType;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import com.scooter.modules.booking.entity.BookingStatus;
 
@@ -23,4 +28,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     long countByUserIdAndStatusIn(UUID userId, List<com.scooter.modules.booking.entity.BookingStatus> statuses);
 
     List<Booking> findByStatus(BookingStatus status);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select b from Booking b where b.id = :bookingId")
+    Optional<Booking> findByIdForUpdate(@Param("bookingId") Long bookingId);
 }

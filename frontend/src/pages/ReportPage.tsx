@@ -1,14 +1,23 @@
-// src/pages/ReportPage.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  PieChart, Pie, Cell
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Legend,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
 } from 'recharts';
-import { reportsApi } from '../api';
-import type { WeeklyRevenueStatisticsResponse, RevenueByHireTypeResponse } from '../types';
-import { StateWrapper } from '../components/StateWrapper';
 
-// --- 图表配色方案 ---
+import { reportsApi } from '../api';
+import { StateWrapper } from '../components/StateWrapper';
+import type { RevenueByHireTypeResponse, WeeklyRevenueStatisticsResponse } from '../types';
+import { formatPrice } from '../utils/format';
+
 const COLORS = ['#57c2c0', '#38bdf8', '#818cf8', '#fd4569', '#f59e0b'];
 
 const getCurrentWeekStart = (): string => {
@@ -21,7 +30,6 @@ const getCurrentWeekStart = (): string => {
 };
 
 export const ReportPage: React.FC = () => {
-  // 默认查询 2026-03-23 这一周（对应 Sprint 2 的 Mock 数据）
   const [weekStart, setWeekStart] = useState<string>(getCurrentWeekStart());
   const [report, setReport] = useState<WeeklyRevenueStatisticsResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -31,7 +39,6 @@ export const ReportPage: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      // 根据 weekStart 计算 startDate 和 endDate (周范围)
       const start = new Date(weekStart);
       const end = new Date(start);
       end.setDate(start.getDate() + 6);
@@ -42,8 +49,8 @@ export const ReportPage: React.FC = () => {
       const res = await reportsApi.getWeeklyRevenue(startDate, endDate, weekStart);
       setReport(res.data);
     } catch (err: unknown) {
-      const e = err as { message?: string };
-      setError(e.message || '获取报表数据失败，请重试');
+      const apiError = err as { message?: string };
+      setError(apiError.message || 'Failed to load report data. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -51,143 +58,149 @@ export const ReportPage: React.FC = () => {
 
   useEffect(() => {
     fetchReport();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [weekStart]);
 
-  // 从响应中提取当前选中周的收入数据（如果有 selectedWeek 则用，否则取第一个）
   const selectedWeekData = report?.selectedWeek ?? report?.weeklyRevenue?.[0];
 
-  // 构建图表数据：将 revenue 字符串转为数字（单位：元）
   const chartData: { name: string; income: number }[] =
-      selectedWeekData?.revenueByHireType?.map((item: RevenueByHireTypeResponse) => ({
-        name: `${item.hireType} 套餐`,
-        income: (parseFloat(item.revenue) || 0) / 100,
-      })) || [];
+    selectedWeekData?.revenueByHireType?.map((item: RevenueByHireTypeResponse) => ({
+      name: `${item.hireType} package`,
+      income: parseFloat(item.revenue) || 0,
+    })) || [];
 
-  // 图表自定义提示框
-  const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number }>; label?: string }) => {
+  const CustomTooltip = ({
+    active,
+    payload,
+    label,
+  }: {
+    active?: boolean;
+    payload?: Array<{ value: number }>;
+    label?: string;
+  }) => {
     if (active && payload && payload.length) {
       return (
-          <div style={styles.tooltipBox}>
-            <p style={styles.tooltipLabel}>{label}</p>
-            <p style={styles.tooltipValue}>
-              收入: <strong>{`¥ ${payload[0].value.toFixed(2)}`}</strong>
-            </p>
-          </div>
+        <div style={styles.tooltipBox}>
+          <p style={styles.tooltipLabel}>{label}</p>
+          <p style={styles.tooltipValue}>
+            Income: <strong>{formatPrice(payload[0].value)}</strong>
+          </p>
+        </div>
       );
     }
     return null;
   };
 
-  // 计算总收入（用于 KPI 卡片）
   const totalRevenue = report?.totalRevenue
-      ? (parseFloat(report.totalRevenue) || 0) / 100
-      : chartData.reduce((sum, item) => sum + item.income, 0);
+    ? (parseFloat(report.totalRevenue) || 0) / 100
+    : chartData.reduce((sum, item) => sum + item.income, 0);
 
   return (
-      <div style={styles.container}>
-        <header style={styles.header}>
-          <div>
-            <h1 style={{ color: 'var(--color-text-main)', fontSize: '1.8rem', marginBottom: '8px' }}>
-              📊 收入统计概览
-            </h1>
-            <p style={{ color: 'var(--color-text-muted)' }}>查看系统近期的运营收入与套餐分布</p>
-          </div>
+    <div style={styles.container}>
+      <header style={styles.header}>
+        <div>
+          <h1 style={{ color: 'var(--color-text-main)', fontSize: '1.8rem', marginBottom: '8px' }}>
+            Revenue Overview
+          </h1>
+          <p style={{ color: 'var(--color-text-muted)' }}>
+            Review recent operating revenue and package distribution.
+          </p>
+        </div>
 
-          {/* 日期筛选器 */}
-          <div style={styles.filterBox}>
-            <label style={{ fontSize: '0.9rem', fontWeight: 600 }}>选择周起始日：</label>
-            <input
-                type="date"
-                value={weekStart}
-                onChange={(e) => setWeekStart(e.target.value)}
-                style={styles.dateInput}
-            />
-          </div>
-        </header>
+        <div style={styles.filterBox}>
+          <label style={{ fontSize: '0.9rem', fontWeight: 600 }} htmlFor="week-start">
+            Select week start:
+          </label>
+          <input
+            id="week-start"
+            type="date"
+            value={weekStart}
+            onChange={(event) => setWeekStart(event.target.value)}
+            style={styles.dateInput}
+          />
+        </div>
+      </header>
 
-        <StateWrapper
-            loading={loading}
-            error={error}
-            empty={!report || report.empty || !selectedWeekData}
-            emptyMessage="该周暂无收入数据"
-            onRetry={fetchReport}
-        >
-          {report && selectedWeekData && (
-              <div style={styles.dashboard}>
-                {/* 顶部：核心指标卡片 (KPI) */}
-                <div style={styles.kpiRow}>
-                  <div style={styles.kpiCard}>
-                    <span style={styles.kpiLabel}>当前统计周期</span>
-                    <span style={styles.kpiValueText}>
-                  {selectedWeekData.weekStart} <br/>
-                  <span style={{fontSize:'1rem', color:'var(--color-text-muted)'}}>
-                    至 {selectedWeekData.weekEnd}
+      <StateWrapper
+        loading={loading}
+        error={error}
+        empty={!report || report.empty || !selectedWeekData}
+        emptyMessage="No revenue data is available for this week."
+        onRetry={fetchReport}
+      >
+        {report && selectedWeekData && (
+          <div style={styles.dashboard}>
+            <div style={styles.kpiRow}>
+              <div style={styles.kpiCard}>
+                <span style={styles.kpiLabel}>Reporting period</span>
+                <span style={styles.kpiValueText}>
+                  {selectedWeekData.weekStart}
+                  <br />
+                  <span style={{ fontSize: '1rem', color: 'var(--color-text-muted)' }}>
+                    to {selectedWeekData.weekEnd}
                   </span>
                 </span>
-                  </div>
-                  <div style={{...styles.kpiCard, backgroundColor: 'var(--color-primary)', color: '#fff'}}>
-                    <span style={{...styles.kpiLabel, color: '#e6f7f6'}}>周期总收入 (Gross Income)</span>
-                    <span style={{...styles.kpiValue, color: '#fff'}}>
-                  {`¥ ${totalRevenue.toFixed(2)}`}
+              </div>
+              <div style={{ ...styles.kpiCard, backgroundColor: 'var(--color-primary)', color: '#fff' }}>
+                <span style={{ ...styles.kpiLabel, color: '#e6f7f6' }}>Gross income</span>
+                <span style={{ ...styles.kpiValue, color: '#fff' }}>
+                  {formatPrice(totalRevenue)}
                 </span>
-                  </div>
-                </div>
+              </div>
+            </div>
 
-                {/* 下方：图表矩阵 */}
-                <div style={styles.chartsGrid}>
-
-                  {/* 左侧：柱状对比图 */}
-                  <div style={styles.chartCard}>
-                    <h3 style={styles.chartTitle}>各套餐收入对比</h3>
-                    <div style={styles.chartWrapper}>
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
-                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                          <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: 'var(--color-text-muted)'}} />
-                          <YAxis axisLine={false} tickLine={false} tick={{fill: 'var(--color-text-muted)'}} tickFormatter={(val) => `¥${val}`} />
-                          <Tooltip content={<CustomTooltip />} />
-                          <Bar dataKey="income" fill="var(--color-primary)" radius={[6, 6, 0, 0]} barSize={40} />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </div>
-
-                  {/* 右侧：收入占比饼图 */}
-                  <div style={styles.chartCard}>
-                    <h3 style={styles.chartTitle}>收入来源占比</h3>
-                    <div style={styles.chartWrapper}>
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie
-                              data={chartData}
-                              cx="50%"
-                              cy="50%"
-                              innerRadius={80}
-                              outerRadius={110}
-                              paddingAngle={5}
-                              dataKey="income"
-                          >
-                            {chartData.map((_, index) => (
-                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                            ))}
-                          </Pie>
-                          <Tooltip content={<CustomTooltip />} />
-                          <Legend verticalAlign="bottom" height={36} iconType="circle" />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </div>
-
+            <div style={styles.chartsGrid}>
+              <div style={styles.chartCard}>
+                <h3 style={styles.chartTitle}>Revenue by package</h3>
+                <div style={styles.chartWrapper}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'var(--color-text-muted)' }} />
+                      <YAxis
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fill: 'var(--color-text-muted)' }}
+                        tickFormatter={(value) => formatPrice(value)}
+                      />
+                      <Tooltip content={<CustomTooltip />} />
+                      <Bar dataKey="income" fill="var(--color-primary)" radius={[6, 6, 0, 0]} barSize={40} />
+                    </BarChart>
+                  </ResponsiveContainer>
                 </div>
               </div>
-          )}
-        </StateWrapper>
-      </div>
+
+              <div style={styles.chartCard}>
+                <h3 style={styles.chartTitle}>Revenue share</h3>
+                <div style={styles.chartWrapper}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={chartData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={80}
+                        outerRadius={110}
+                        paddingAngle={5}
+                        dataKey="income"
+                      >
+                        {chartData.map((_, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip content={<CustomTooltip />} />
+                      <Legend verticalAlign="bottom" height={36} iconType="circle" />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </StateWrapper>
+    </div>
   );
 };
 
-// --- 内联样式字典 (保持不变) ---
 const styles = {
   container: {
     padding: '24px',
@@ -294,5 +307,7 @@ const styles = {
   tooltipValue: {
     color: 'var(--color-primary)',
     fontSize: '1.1rem',
-  }
+  },
 };
+
+export default ReportPage;

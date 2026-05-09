@@ -156,6 +156,7 @@ public class ScooterService {
         ScooterResponse resp = new ScooterResponse();
         resp.setScooterId(scooter.getId().toString());
         resp.setCode(scooter.getModel());
+        resp.setModel(scooter.getModel());
         resp.setStatus(scooter.getStatus().name().toLowerCase());
         resp.setLocation(scooter.getCurrentLocation());
         resp.setBasePrice(getStartingPrice());

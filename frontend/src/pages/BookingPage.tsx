@@ -4,7 +4,13 @@ import { bookingsApi, scootersApi } from '../api';
 import { StateWrapper } from '../components/StateWrapper';
 import type { Booking, BookingStatus, PricingRule, Scooter, Settlement } from '../types';
 import { isClerk } from '../utils/auth';
-import { formatDateTime, formatPercent, formatPrice, getBatteryDelta } from '../utils/format';
+import {
+  formatDateTime,
+  formatPercent,
+  formatPrice,
+  formatPriceFromCents,
+  getBatteryDelta,
+} from '../utils/format';
 import { getScooterImage, getScooterSpecs } from '../utils/scooterVisual';
 
 type BookingTab = 'all' | 'pendingPickup' | 'active' | 'completed';
@@ -317,11 +323,11 @@ export const BookingPage: React.FC = () => {
 
                 {settlement && (
                   <div style={styles.billCard}>
-                    <InfoRow label="Base fee" value={formatPrice(settlement.fees.baseFeeInCents)} />
-                    <InfoRow label="Overtime fee" value={formatPrice(settlement.fees.overtimeFeeInCents)} />
-                    <InfoRow label="Battery delta fee" value={formatPrice(settlement.fees.batteryDeltaFeeInCents)} />
-                    <InfoRow label="Damage fee" value={formatPrice(settlement.fees.damageFeeInCents)} />
-                    <InfoRow label="Total" value={formatPrice(settlement.fees.totalInCents)} bold />
+                    <InfoRow label="Base fee" value={formatPriceFromCents(settlement.fees.baseFeeInCents)} />
+                    <InfoRow label="Overtime fee" value={formatPriceFromCents(settlement.fees.overtimeFeeInCents)} />
+                    <InfoRow label="Battery delta fee" value={formatPriceFromCents(settlement.fees.batteryDeltaFeeInCents)} />
+                    <InfoRow label="Damage fee" value={formatPriceFromCents(settlement.fees.damageFeeInCents)} />
+                    <InfoRow label="Total" value={formatPriceFromCents(settlement.fees.totalInCents)} bold />
                   </div>
                 )}
 

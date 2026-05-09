@@ -1,6 +1,7 @@
 package com.scooter.modules.walkin.dto;
 
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -13,9 +14,11 @@ public class WalkInPickupRequest {
     private UUID customerId;
 
     @NotNull(message = "Scooter ID is required")
+    @Positive(message = "Scooter ID must be a positive number")
     private Long scooterId;
 
     @NotNull(message = "Rental option ID is required")
+    @Positive(message = "Rental option ID must be a positive number")
     private Long rentalOptionId;
 
     private LocalDateTime startTime;

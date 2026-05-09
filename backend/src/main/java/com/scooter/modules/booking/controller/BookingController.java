@@ -2,12 +2,7 @@ package com.scooter.modules.booking.controller;
 
 import com.scooter.common.response.Result;
 import com.scooter.common.security.SecurityUtils;
-import com.scooter.modules.booking.dto.BookingCreateResponse;
-import com.scooter.modules.booking.dto.BookingRequest;
-import com.scooter.modules.booking.dto.BookingResponse;
-import com.scooter.modules.booking.dto.PickupVerificationRequest;
-import com.scooter.modules.booking.dto.PickupVerificationResponse;
-import com.scooter.modules.booking.entity.Booking;
+import com.scooter.modules.booking.dto.*;
 import com.scooter.modules.booking.service.BookingService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +24,7 @@ public class BookingController {
     }
 
     @GetMapping("/{bookingId}")
-    public Result<Booking> getDetails(@PathVariable Long bookingId) {
+    public Result<BookingResponse> getDetails(@PathVariable Long bookingId) {
         return Result.success(bookingService.getBookingById(bookingId));
     }
 
@@ -59,5 +54,23 @@ public class BookingController {
             @Valid @RequestBody PickupVerificationRequest request) {
         SecurityUtils.requireStaffOrAdminRole();
         return Result.success(bookingService.verifyPickupCode(bookingId, request.getPickupCode()));
+    }
+
+    @PostMapping("/{bookingId}/returns")
+    public Result<BookingResponse> returnScooter(@PathVariable Long bookingId,
+                                                 @Valid @RequestBody ReturnRequest request) {
+        return Result.success(bookingService.processReturn(bookingId, request));
+    }
+
+    @PostMapping("/{bookingId}/damage-reports")
+    public Result<Void> reportDamage(@PathVariable Long bookingId,
+                                     @Valid @RequestBody DamageReportRequest request) {
+        bookingService.reportDamage(bookingId, request);
+        return Result.success(null);
+    }
+
+    @GetMapping("/{bookingId}/settlement")
+    public Result<SettlementResponse> getSettlement(@PathVariable Long bookingId) {
+        return Result.success(bookingService.getSettlement(bookingId));
     }
 }
