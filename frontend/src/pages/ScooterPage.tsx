@@ -44,6 +44,7 @@ export const ScooterPage: React.FC = () => {
   const [bookingState, setBookingState] = useState<'idle' | 'booking' | 'paying' | 'success'>('idle');
   const [bookingError, setBookingError] = useState('');
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [changeNotice, setChangeNotice] = useState('');
 
   const fetchData = async () => {
     setLoading(true);
@@ -82,12 +83,37 @@ export const ScooterPage: React.FC = () => {
   const displayScooters = onlyAvailable ? availableScooters : scooters;
   const featuredScooter = selectedScooter || displayScooters[0] || null;
   const featuredSpecs = featuredScooter ? getScooterSpecs(featuredScooter) : null;
+  const selectedSpecs = selectedScooter ? getScooterSpecs(selectedScooter) : null;
+  const selectedModelRate = selectedScooter?.basePrice ?? 0;
+  const selectedPackagePrice = selectedRule?.price ?? 0;
 
   const handleOpenBooking = (scooter: Scooter) => {
     setSelectedScooterId(scooter.scooterId);
     setSelectedRuleId((current) => current || rules[0]?.ruleId || '');
     setBookingState('idle');
     setBookingError('');
+    setChangeNotice('');
+  };
+
+  const handleSwitchScooter = (nextScooter: Scooter) => {
+    if (!selectedScooter || selectedScooter.scooterId === nextScooter.scooterId) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Change model from ${selectedScooter.model || `#${selectedScooter.code}`} to ${nextScooter.model || `#${nextScooter.code}`}? `
+      + `The rental standard will refresh from ${formatPrice(selectedScooter.basePrice)} to ${formatPrice(nextScooter.basePrice)}.`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setSelectedScooterId(nextScooter.scooterId);
+    setChangeNotice(
+      `Model changed to ${nextScooter.model || `#${nextScooter.code}`}. `
+      + `Base rental standard is now ${formatPrice(nextScooter.basePrice)}.`,
+    );
   };
 
   const handleConfirmBooking = async () => {
@@ -157,6 +183,7 @@ export const ScooterPage: React.FC = () => {
               alt={featuredScooter.code}
               src={getScooterImage(featuredScooter)}
               style={styles.heroImage}
+              onClick={() => setPreviewImage(getScooterImage(featuredScooter))}
             />
             <div style={styles.heroOverlay}>
               <div>
@@ -312,6 +339,7 @@ export const ScooterPage: React.FC = () => {
                   alt={selectedScooter.code}
                   src={getScooterImage(selectedScooter)}
                   style={styles.modalImage}
+                  onClick={() => setPreviewImage(getScooterImage(selectedScooter))}
                 />
                 <button
                   style={{ ...styles.imageButton, marginTop: '12px' }}
@@ -322,6 +350,32 @@ export const ScooterPage: React.FC = () => {
               </div>
 
               <div style={styles.modalBody}>
+                {selectedSpecs && (
+                  <div style={styles.featurePanel}>
+                    <div style={styles.featureTop}>
+                      <div>
+                        <p style={styles.fieldLabel}>Selected model</p>
+                        <h4 style={styles.featureTitle}>
+                          {selectedScooter.model || `Scooter #${selectedScooter.code}`}
+                        </h4>
+                      </div>
+                      <button
+                        style={styles.inlinePreviewButton}
+                        onClick={() => setPreviewImage(getScooterImage(selectedScooter))}
+                      >
+                        Open image
+                      </button>
+                    </div>
+                    <p style={styles.featureNote}>{selectedSpecs.performanceNote}</p>
+                    <div style={styles.featureMetrics}>
+                      <Metric label="Battery" value={`${selectedSpecs.batteryLevel}%`} />
+                      <Metric label="Top speed" value={`${selectedSpecs.topSpeedKph} km/h`} />
+                      <Metric label="Range" value={`${selectedSpecs.rangeKm} km`} />
+                      <Metric label="Motor" value={`${selectedSpecs.motorPowerW} W`} />
+                    </div>
+                  </div>
+                )}
+
                 <div style={styles.modalBlock}>
                   <p style={styles.fieldLabel}>Selected scooter</p>
                   <div style={styles.optionGrid}>
@@ -329,17 +383,13 @@ export const ScooterPage: React.FC = () => {
                       <button
                         key={scooter.scooterId}
                         style={optionButton(selectedScooter.scooterId === scooter.scooterId)}
-                        onClick={() => {
-                          const confirmed = window.confirm(
-                            `Switch booking preview to scooter #${scooter.code}?`,
-                          );
-                          if (confirmed) {
-                            setSelectedScooterId(scooter.scooterId);
-                          }
-                        }}
+                        onClick={() => handleSwitchScooter(scooter)}
                       >
                         <strong>#{scooter.code}</strong>
                         <span>{scooter.model || 'Urban Ride'}</span>
+                        <span style={styles.optionMeta}>
+                          {formatPrice(scooter.basePrice)} · {getScooterSpecs(scooter).topSpeedKph} km/h
+                        </span>
                       </button>
                     ))}
                   </div>
@@ -364,6 +414,10 @@ export const ScooterPage: React.FC = () => {
                 <div style={styles.summaryBox}>
                   <p style={styles.fieldLabel}>Pricing preview</p>
                   <div style={styles.summaryRow}>
+                    <span>Model rental standard</span>
+                    <strong>{formatPrice(selectedModelRate)}</strong>
+                  </div>
+                  <div style={styles.summaryRow}>
                     <span>Model</span>
                     <strong>{selectedScooter.model || `Scooter #${selectedScooter.code}`}</strong>
                   </div>
@@ -372,11 +426,16 @@ export const ScooterPage: React.FC = () => {
                     <strong>{selectedRule.hireType}</strong>
                   </div>
                   <div style={styles.summaryRow}>
-                    <span>Estimated fare</span>
-                    <strong>{formatPrice(selectedRule.price)}</strong>
+                    <span>Package price</span>
+                    <strong>{formatPrice(selectedPackagePrice)}</strong>
+                  </div>
+                  <div style={styles.summaryRow}>
+                    <span>Performance note</span>
+                    <strong style={styles.summaryText}>{selectedSpecs?.performanceNote || '--'}</strong>
                   </div>
                 </div>
 
+                {changeNotice && <div style={styles.successPanel}>{changeNotice}</div>}
                 {bookingError && <div style={styles.errorBox}>{bookingError}</div>}
 
                 {bookingState === 'success' ? (
@@ -528,6 +587,7 @@ const styles = {
     aspectRatio: '16 / 10',
     objectFit: 'cover' as const,
     borderRadius: '22px',
+    cursor: 'zoom-in',
   },
   heroOverlay: {
     display: 'flex',
@@ -722,11 +782,46 @@ const styles = {
     borderRadius: '24px',
     aspectRatio: '16 / 10',
     objectFit: 'cover' as const,
+    cursor: 'zoom-in',
   },
   modalBody: {
     display: 'flex',
     flexDirection: 'column' as const,
     gap: '18px',
+  },
+  featurePanel: {
+    padding: '18px',
+    borderRadius: '22px',
+    backgroundColor: '#fcfcfb',
+    border: '1px solid var(--color-border)',
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: '14px',
+  },
+  featureTop: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    gap: '12px',
+    alignItems: 'flex-start',
+  },
+  featureTitle: {
+    fontSize: '1.3rem',
+  },
+  inlinePreviewButton: {
+    padding: '10px 14px',
+    borderRadius: '999px',
+    backgroundColor: '#eef2f7',
+    fontWeight: 700,
+  },
+  featureNote: {
+    color: 'var(--color-text-muted)',
+    fontSize: '0.94rem',
+    lineHeight: 1.5,
+  },
+  featureMetrics: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+    gap: '10px',
   },
   modalBlock: {
     display: 'flex',
@@ -745,6 +840,10 @@ const styles = {
     gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
     gap: '10px',
   },
+  optionMeta: {
+    color: 'var(--color-text-muted)',
+    fontSize: '0.82rem',
+  },
   summaryBox: {
     padding: '18px',
     borderRadius: '22px',
@@ -757,6 +856,10 @@ const styles = {
     display: 'flex',
     justifyContent: 'space-between',
     gap: '16px',
+  },
+  summaryText: {
+    maxWidth: '260px',
+    textAlign: 'right' as const,
   },
   errorBox: {
     padding: '14px 16px',

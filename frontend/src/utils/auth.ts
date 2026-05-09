@@ -13,7 +13,13 @@ export const hasManagerRole = (role?: string | null): boolean => {
 
 export const hasClerkRole = (role?: string | null): boolean => {
   if (!role) return false;
-  return role.trim().toLowerCase() === 'clerk';
+  const normalizedRole = role.trim().toLowerCase();
+  return (
+    normalizedRole === 'staff'
+    || normalizedRole === 'clerk'
+    || normalizedRole === 'manager'
+    || normalizedRole === 'admin'
+  );
 };
 
 export const getAuthUser = (): User | null => {

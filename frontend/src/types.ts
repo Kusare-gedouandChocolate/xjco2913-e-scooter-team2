@@ -66,12 +66,16 @@ export interface PricingRule {
 
 export type BookingStatus =
   | 'PENDING_PAYMENT'
-  | 'PAID'
-  | 'CANCELLED'
+  | 'AWAITING_PICKUP'
+  | 'IN_PROGRESS'
+  | 'pendingPayment'
+  | 'awaitingPickup'
+  | 'inProgress'
   | 'COMPLETED'
+  | 'CANCELLED'
+  | 'PAID'
   | 'ACTIVE'
   | 'PENDING_PICKUP'
-  | 'pendingPayment'
   | 'pendingPickup'
   | 'active'
   | 'completed'
@@ -98,11 +102,15 @@ export interface Booking {
   bookingId: string;
   scooterId: string;
   scooterName?: string;
-  scooter?: Partial<Scooter>;
+  scooterStatus?: string;
+  scooterBatteryLevel?: number;
   hireType: string;
+  durationHours?: number;
   hireMode?: HireMode;
   startTime: string;
   endTime?: string;
+  pickedUpAt?: string;
+  completedAt?: string;
   status: BookingStatus;
   pickupStatus?: PickupStatus;
   returnStatus?: ReturnStatus;
@@ -112,6 +120,17 @@ export interface Booking {
   discountAmount?: string | number;
   appliedDiscountType?: string;
   appliedDiscountRate?: string;
+  pickupCodeExpiresAt?: string;
+  pickupBatteryLevel?: number;
+  returnBatteryLevel?: number;
+  batteryLevelDelta?: number;
+  baseRentalFee?: string | number;
+  overtimeFee?: string | number;
+  batteryUsageFee?: string | number;
+  damageFee?: string | number;
+  overtimeMinutes?: number;
+  batteryUsagePercent?: number;
+  damageReported?: boolean;
   batteryLevelAtCheckout?: number;
   batteryLevelAtReturn?: number;
   settlement?: Settlement;
@@ -210,8 +229,8 @@ export interface PricingRuleUpdateRequest {
 
 export interface WalkInPickupPayload {
   customerId: string;
-  scooterId: string;
-  rentalOptionId: string;
+  scooterId: number;
+  rentalOptionId: number;
   startTime?: string;
   paymentMethod?: string;
   simulateSuccess?: boolean;
@@ -232,4 +251,55 @@ export interface WalkInPickupResponse {
   totalCost?: string;
   confirmationNumber?: string;
   paymentMethod?: string;
+}
+
+export interface WalkInCustomerPayload {
+  fullName: string;
+  phone: string;
+  cardToken: string;
+}
+
+export interface WalkInReturnPayload {
+  bookingId: number;
+  damaged?: boolean;
+  damageDescription?: string;
+  damageImageUrl?: string;
+  damageLevel?: 'LOW' | 'MEDIUM' | 'HIGH';
+}
+
+export interface WalkInReturnResponse {
+  bookingId: string;
+  bookingStatus: string;
+  scooterStatus: string;
+  totalCost: string;
+  baseRentalFee: string;
+  overtimeFee: string;
+  batteryUsageFee: string;
+  damageFee: string;
+  pickupBatteryLevel?: number;
+  returnBatteryLevel?: number;
+  batteryLevelDelta?: number;
+  overtimeMinutes?: number;
+  batteryUsagePercent?: number;
+  damageReported?: boolean;
+}
+
+export interface PickupVerificationResponse {
+  bookingId: string;
+  status: string;
+  scooterStatus: string;
+  pickedUpAt?: string;
+  pickupBatteryLevel?: number;
+}
+
+export interface DamageEventResponse {
+  damageEventId: string;
+  bookingId: string;
+  scooterId: string;
+  reportedByUserId: string;
+  damageLevel?: string;
+  description?: string;
+  imageUrl?: string;
+  damageFee?: string;
+  createdAt?: string;
 }

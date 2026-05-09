@@ -3,7 +3,6 @@ package com.scooter.modules.booking.controller;
 import com.scooter.common.response.Result;
 import com.scooter.common.security.SecurityUtils;
 import com.scooter.modules.booking.dto.*;
-import com.scooter.modules.booking.entity.Booking;
 import com.scooter.modules.booking.service.BookingService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +24,7 @@ public class BookingController {
     }
 
     @GetMapping("/{bookingId}")
-    public Result<Booking> getDetails(@PathVariable Long bookingId) {
+    public Result<BookingResponse> getDetails(@PathVariable Long bookingId) {
         return Result.success(bookingService.getBookingById(bookingId));
     }
 

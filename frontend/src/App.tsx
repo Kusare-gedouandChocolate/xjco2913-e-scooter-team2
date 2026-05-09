@@ -1,14 +1,6 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter, Link, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 
-import { AdminPage } from './pages/AdminPage';
-import { AuthPage } from './pages/AuthPage';
-import { BookingPage } from './pages/BookingPage';
-import { ClerkPage } from './pages/ClerkPage';
-import { FeedbackPage } from './pages/FeedbackPage';
-import { PickupVerificationPage } from './pages/PickupVerificationPage';
-import { ReportPage } from './pages/ReportPage';
-import { ScooterPage } from './pages/ScooterPage';
 import {
   clearSession,
   getAuthUser,
@@ -18,6 +10,29 @@ import {
   isClerk,
   isManager,
 } from './utils/auth';
+
+const AdminPage = lazy(() => import('./pages/AdminPage').then((m) => ({ default: m.AdminPage })));
+const AuthPage = lazy(() => import('./pages/AuthPage').then((m) => ({ default: m.AuthPage })));
+const BookingPage = lazy(() => import('./pages/BookingPage').then((m) => ({ default: m.BookingPage })));
+const ClerkPage = lazy(() => import('./pages/ClerkPage').then((m) => ({ default: m.ClerkPage })));
+const ClerkCustomerPage = lazy(() =>
+  import('./pages/ClerkCustomerPage').then((m) => ({ default: m.ClerkCustomerPage })),
+);
+const FeedbackPage = lazy(() => import('./pages/FeedbackPage').then((m) => ({ default: m.FeedbackPage })));
+const PickupOrderDetailPage = lazy(() =>
+  import('./pages/PickupOrderDetailPage').then((m) => ({ default: m.PickupOrderDetailPage })),
+);
+const PickupVerificationPage = lazy(() =>
+  import('./pages/PickupVerificationPage').then((m) => ({ default: m.PickupVerificationPage })),
+);
+const ReportPage = lazy(() => import('./pages/ReportPage').then((m) => ({ default: m.ReportPage })));
+const ScooterPage = lazy(() => import('./pages/ScooterPage').then((m) => ({ default: m.ScooterPage })));
+const WalkInPickupPage = lazy(() =>
+  import('./pages/WalkInPickupPage').then((m) => ({ default: m.WalkInPickupPage })),
+);
+const WalkInReturnPage = lazy(() =>
+  import('./pages/WalkInReturnPage').then((m) => ({ default: m.WalkInReturnPage })),
+);
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   if (!isAuthenticated()) {
@@ -46,6 +61,12 @@ const ClerkRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+const RouteLoader = () => (
+  <div style={styles.loaderWrap} role="status" aria-live="polite">
+    <div style={styles.loaderCard}>Loading page...</div>
+  </div>
+);
+
 const Navbar = () => {
   const navigate = useNavigate();
   const user = getAuthUser();
@@ -62,7 +83,7 @@ const Navbar = () => {
       <div style={styles.navShell}>
         <button style={styles.brand} onClick={() => navigate('/scooters')}>
           <span style={styles.brandMark}>RideFlow</span>
-          <span style={styles.brandSub}>e-scooter sprint3</span>
+          <span style={styles.brandSub}>e-scooter sprint4</span>
           {manager && <span style={styles.managerBadge}>Admin</span>}
           {clerk && <span style={styles.clerkBadge}>Clerk</span>}
         </button>
@@ -95,75 +116,109 @@ export const App: React.FC = () => {
     <BrowserRouter>
       <Navbar />
       <main style={styles.main}>
-        <Routes>
-          <Route path="/login" element={<AuthPage />} />
-          <Route path="/" element={<Navigate to="/scooters" replace />} />
-          <Route
-            path="/scooters"
-            element={
-              <ProtectedRoute>
-                <ScooterPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/bookings"
-            element={
-              <ProtectedRoute>
-                <BookingPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/feedback"
-            element={
-              <ProtectedRoute>
-                <FeedbackPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/clerk"
-            element={
-              <ClerkRoute>
-                <ClerkPage />
-              </ClerkRoute>
-            }
-          />
-          <Route
-            path="/pickup-verification"
-            element={
-              <ClerkRoute>
-                <PickupVerificationPage />
-              </ClerkRoute>
-            }
-          />
-          <Route
-            path="/reports"
-            element={
-              <ManagerRoute>
-                <ReportPage />
-              </ManagerRoute>
-            }
-          />
-          <Route
-            path="/admin"
-            element={
-              <ManagerRoute>
-                <AdminPage />
-              </ManagerRoute>
-            }
-          />
-          <Route
-            path="*"
-            element={
-              <div style={styles.notFound}>
-                <h2>Page not found</h2>
-                <Link to="/scooters" style={styles.backLink}>Return to fleet</Link>
-              </div>
-            }
-          />
-        </Routes>
+        <Suspense fallback={<RouteLoader />}>
+          <Routes>
+            <Route path="/login" element={<AuthPage />} />
+            <Route path="/" element={<Navigate to="/scooters" replace />} />
+            <Route
+              path="/scooters"
+              element={
+                <ProtectedRoute>
+                  <ScooterPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/bookings"
+              element={
+                <ProtectedRoute>
+                  <BookingPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/feedback"
+              element={
+                <ProtectedRoute>
+                  <FeedbackPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/clerk"
+              element={
+                <ClerkRoute>
+                  <ClerkPage />
+                </ClerkRoute>
+              }
+            />
+            <Route
+              path="/clerk/customers"
+              element={
+                <ClerkRoute>
+                  <ClerkCustomerPage />
+                </ClerkRoute>
+              }
+            />
+            <Route
+              path="/clerk/pickup"
+              element={
+                <ClerkRoute>
+                  <WalkInPickupPage />
+                </ClerkRoute>
+              }
+            />
+            <Route
+              path="/clerk/return"
+              element={
+                <ClerkRoute>
+                  <WalkInReturnPage />
+                </ClerkRoute>
+              }
+            />
+            <Route
+              path="/pickup-verification"
+              element={
+                <ClerkRoute>
+                  <PickupVerificationPage />
+                </ClerkRoute>
+              }
+            />
+            <Route
+              path="/pickup-verification/orders/:bookingId"
+              element={
+                <ClerkRoute>
+                  <PickupOrderDetailPage />
+                </ClerkRoute>
+              }
+            />
+            <Route
+              path="/reports"
+              element={
+                <ManagerRoute>
+                  <ReportPage />
+                </ManagerRoute>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <ManagerRoute>
+                  <AdminPage />
+                </ManagerRoute>
+              }
+            />
+            <Route
+              path="*"
+              element={
+                <div style={styles.notFound}>
+                  <h2>Page not found</h2>
+                  <Link to="/scooters" style={styles.backLink}>Return to fleet</Link>
+                </div>
+              }
+            />
+          </Routes>
+        </Suspense>
       </main>
     </BrowserRouter>
   );
@@ -253,6 +308,18 @@ const styles = {
   main: {
     minHeight: 'calc(100vh - 96px)',
     padding: '20px',
+  },
+  loaderWrap: {
+    maxWidth: '1240px',
+    margin: '0 auto',
+  },
+  loaderCard: {
+    padding: '24px',
+    borderRadius: '24px',
+    backgroundColor: 'var(--color-surface-strong)',
+    boxShadow: 'var(--shadow-sm)',
+    color: 'var(--color-text-muted)',
+    fontWeight: 700,
   },
   notFound: {
     maxWidth: '680px',

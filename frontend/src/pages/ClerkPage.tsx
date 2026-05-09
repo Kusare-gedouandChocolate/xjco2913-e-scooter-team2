@@ -1,219 +1,108 @@
-import React, {useEffect, useState} from 'react';
+import React from 'react';
+import { Link } from 'react-router-dom';
 
-import {bookingsApi, scootersApi, walkInApi} from '../api';
-import {StateWrapper} from '../components/StateWrapper';
-import type {Booking, PricingRule, Scooter} from '../types';
-import {getAuthUser} from '../utils/auth';
-import {formatDateTime, formatPrice} from '../utils/format';
+import { getAuthUser } from '../utils/auth';
+
+const deskCards = [
+  {
+    title: 'Customer Intake',
+    path: '/clerk/customers',
+    eyebrow: 'Step 1',
+    description: 'Capture the minimum customer profile and bind a card token before a walk-in rental.',
+    cta: 'Open intake form',
+  },
+  {
+    title: 'Walk-In Pickup',
+    path: '/clerk/pickup',
+    eyebrow: 'Step 2',
+    description: 'Assign an available scooter, select a package, and create the in-store rental order.',
+    cta: 'Start pickup',
+  },
+  {
+    title: 'Walk-In Return',
+    path: '/clerk/return',
+    eyebrow: 'Step 3',
+    description: 'Close the rental, report any damage, and review the final billing breakdown.',
+    cta: 'Process return',
+  },
+  {
+    title: 'Remote Pickup Verify',
+    path: '/pickup-verification',
+    eyebrow: 'Remote flow',
+    description: 'Validate pickup codes for web or app orders collected at the store.',
+    cta: 'Verify code',
+  },
+];
 
 export const ClerkPage: React.FC = () => {
   const user = getAuthUser();
-  const [scooters, setScooters] = useState<Scooter[]>([]);
-  const [rules, setRules] = useState<PricingRule[]>([]);
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [message, setMessage] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-
-  const [customerName, setCustomerName] = useState('');
-  const [customerPhone, setCustomerPhone] = useState('');
-  const [cardToken, setCardToken] = useState('tok_walkin_demo');
-  const [selectedScooterId, setSelectedScooterId] = useState('');
-  const [selectedHireType, setSelectedHireType] = useState('');
-
-  const fetchData = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const [scooterRes, ruleRes, bookingRes] = await Promise.all([
-        scootersApi.getScooters(),
-        scootersApi.getPricingRules(),
-        bookingsApi.getMyBookings(),
-      ]);
-      setScooters(scooterRes.data || []);
-      setRules(ruleRes.data || []);
-      setBookings(bookingRes.data || []);
-      setSelectedScooterId((current) => current || scooterRes.data?.[0]?.scooterId || '');
-      setSelectedHireType((current) => current || ruleRes.data?.[0]?.hireType || '');
-    } catch (err) {
-      const apiError = err as { message?: string };
-      setError(apiError.message || 'Failed to load clerk workspace.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const activeBookings = bookings.filter((item) => String(item.status).toLowerCase() === 'active');
-  const pendingPickups = bookings.filter((item) => String(item.status).toLowerCase() === 'pendingpickup');
-  const selectedRule = rules.find((item) => item.hireType === selectedHireType);
-
-  const handleCreateWalkIn = async () => {
-    if (!customerName.trim() || !customerPhone.trim() || !selectedScooterId || !selectedHireType) {
-      setMessage('Please complete all required walk-in fields.');
-      return;
-    }
-
-    const rule = selectedRule;
-    if (!rule) {
-      setMessage('Please select a hire type.');
-      return;
-    }
-
-    setSubmitting(true);
-    setMessage('');
-    try {
-      const customerRes = await walkInApi.createCustomer({
-        customerName: customerName.trim(),
-        customerPhone: customerPhone.trim(),
-        cardToken: cardToken.trim(),
-      });
-      const userId = customerRes.data.userId;
-
-      const response = await walkInApi.pickup({
-        customerId: userId,
-        scooterId: selectedScooterId,
-        rentalOptionId: rule.ruleId,
-        startTime: new Date().toISOString(),
-        paymentMethod: 'CREDIT_CARD',
-        simulateSuccess: true,
-      });
-
-      setMessage(`Walk-in rental created: ${response.data.bookingId}`);
-      await fetchData();
-    } catch (err) {
-      const apiError = err as { message?: string };
-      setMessage(apiError.message || 'Unable to create the walk-in rental.');
-    } finally {
-      setSubmitting(false);
-    }
-  };
 
   return (
     <div style={styles.page}>
       <section style={styles.hero}>
         <div>
-          <p style={styles.kicker}>Clerk only</p>
-          <h1 style={styles.title}>Store desk for walk-in rentals, pickup handover, and returns.</h1>
+          <p style={styles.kicker}>Store Operations</p>
+          <h1 style={styles.title}>Desk workspace for intake, pickup, return, and remote handover.</h1>
           <p style={styles.subtitle}>
-            This workspace is visible only for clerk accounts, matching the sprint requirement
-            for role-based access to in-store operations.
+            Access is restricted to clerk, staff, manager, and admin accounts. Use the steps below
+            to complete the full in-store flow without customer self-registration.
           </p>
         </div>
-        <div style={styles.heroBadge}>
-          <span style={styles.badgeLabel}>Signed in as</span>
-          <strong>{user?.email || 'clerk account'}</strong>
+
+        <div style={styles.accountCard}>
+          <span style={styles.accountLabel}>Signed in</span>
+          <strong>{user?.fullName || user?.email || 'Store staff'}</strong>
+          <span style={styles.accountMeta}>{user?.role || 'staff'}</span>
         </div>
       </section>
 
-      <StateWrapper loading={loading} error={error} onRetry={fetchData}>
-        <div style={styles.grid}>
-          <section style={styles.panel}>
-            <p style={styles.sectionEyebrow}>Walk-in create</p>
-            <h2 style={styles.sectionTitle}>Customer intake and card binding</h2>
-            <div style={styles.formGrid}>
-              <label style={styles.field}>
-                <span>Name</span>
-                <input style={styles.input} value={customerName} onChange={(event) => setCustomerName(event.target.value)} />
-              </label>
-              <label style={styles.field}>
-                <span>Phone</span>
-                <input style={styles.input} value={customerPhone} onChange={(event) => setCustomerPhone(event.target.value)} />
-              </label>
-              <label style={styles.field}>
-                <span>Card token</span>
-                <input style={styles.input} value={cardToken} onChange={(event) => setCardToken(event.target.value)} />
-              </label>
-              <label style={styles.field}>
-                <span>Scooter</span>
-                <select style={styles.input} value={selectedScooterId} onChange={(event) => setSelectedScooterId(event.target.value)}>
-                  {scooters.map((scooter) => (
-                    <option key={scooter.scooterId} value={scooter.scooterId}>
-                      #{scooter.code} {scooter.model || ''}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label style={styles.field}>
-                <span>Hire type</span>
-                <select style={styles.input} value={selectedHireType} onChange={(event) => setSelectedHireType(event.target.value)}>
-                  {rules.map((rule) => (
-                    <option key={rule.ruleId} value={rule.hireType}>
-                      {rule.hireType} - {formatPrice(rule.price)}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
-            <div style={styles.summaryCard}>
-              <span>Charge preview</span>
-              <strong>{formatPrice(selectedRule?.price || 0)}</strong>
-            </div>
-            {message && <div style={styles.message}>{message}</div>}
-            <button style={styles.primaryButton} onClick={handleCreateWalkIn} disabled={submitting}>
-              {submitting ? 'Submitting...' : 'Create walk-in rental'}
-            </button>
-          </section>
+      <section style={styles.grid}>
+        {deskCards.map((card) => (
+          <article key={card.path} style={styles.card}>
+            <p style={styles.cardEyebrow}>{card.eyebrow}</p>
+            <h2 style={styles.cardTitle}>{card.title}</h2>
+            <p style={styles.cardDescription}>{card.description}</p>
+            <Link to={card.path} style={styles.cardLink}>
+              {card.cta}
+            </Link>
+          </article>
+        ))}
+      </section>
 
-          <section style={styles.panel}>
-            <p style={styles.sectionEyebrow}>Pickup queue</p>
-            <h2 style={styles.sectionTitle}>Remote orders waiting at store</h2>
-            <div style={styles.list}>
-              {pendingPickups.length === 0 ? (
-                <div style={styles.empty}>No pending pickup orders.</div>
-              ) : (
-                pendingPickups.map((booking) => (
-                  <article key={booking.bookingId} style={styles.listCard}>
-                    <strong>{booking.bookingId}</strong>
-                    <span>{booking.hireType}</span>
-                    <span>{formatDateTime(booking.startTime)}</span>
-                  </article>
-                ))
-              )}
-            </div>
-          </section>
-
-          <section style={styles.panel}>
-            <p style={styles.sectionEyebrow}>Return queue</p>
-            <h2 style={styles.sectionTitle}>Active rides ready for settlement</h2>
-            <div style={styles.list}>
-              {activeBookings.length === 0 ? (
-                <div style={styles.empty}>No active rides right now.</div>
-              ) : (
-                activeBookings.map((booking) => (
-                  <article key={booking.bookingId} style={styles.listCard}>
-                    <strong>{booking.bookingId}</strong>
-                    <span>{booking.hireType}</span>
-                    <span>{formatDateTime(booking.startTime)}</span>
-                  </article>
-                ))
-              )}
-            </div>
-          </section>
+      <section style={styles.notesCard}>
+        <h2 style={styles.notesTitle}>Operating Notes</h2>
+        <div style={styles.notesGrid}>
+          <div style={styles.noteBlock}>
+            <strong>Card token rule</strong>
+            <p style={styles.noteText}>Use `tok_` followed by 12 to 64 letters or digits.</p>
+          </div>
+          <div style={styles.noteBlock}>
+            <strong>Recommended flow</strong>
+            <p style={styles.noteText}>Create customer, complete pickup, then close the order in the return page.</p>
+          </div>
+          <div style={styles.noteBlock}>
+            <strong>Remote orders</strong>
+            <p style={styles.noteText}>Keep pickup verification separate so the status trail stays easy to demo.</p>
+          </div>
         </div>
-      </StateWrapper>
+      </section>
     </div>
   );
 };
 
 const styles = {
   page: {
-    maxWidth: '1240px',
+    maxWidth: '1180px',
     margin: '0 auto',
     display: 'flex',
     flexDirection: 'column' as const,
     gap: '22px',
   },
   hero: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    gap: '24px',
-    alignItems: 'flex-start',
-    flexWrap: 'wrap' as const,
+    display: 'grid',
+    gridTemplateColumns: 'minmax(0, 1.2fr) minmax(260px, 0.8fr)',
+    gap: '22px',
+    alignItems: 'stretch',
   },
   kicker: {
     color: 'var(--color-accent)',
@@ -224,40 +113,77 @@ const styles = {
     marginBottom: '10px',
   },
   title: {
-    fontSize: 'clamp(2rem, 3vw, 3.2rem)',
-    lineHeight: 1.05,
+    fontSize: 'clamp(2rem, 3vw, 3.5rem)',
+    lineHeight: 1.04,
     letterSpacing: '-0.04em',
     marginBottom: '12px',
-    maxWidth: '800px',
   },
   subtitle: {
     color: 'var(--color-text-muted)',
-    maxWidth: '720px',
+    maxWidth: '760px',
   },
-  heroBadge: {
-    padding: '20px',
-    borderRadius: '24px',
+  accountCard: {
+    padding: '22px',
+    borderRadius: '28px',
     backgroundColor: 'var(--color-surface-strong)',
     boxShadow: 'var(--shadow-sm)',
-    minWidth: '220px',
     display: 'flex',
     flexDirection: 'column' as const,
-    gap: '6px',
+    gap: '8px',
+    justifyContent: 'center',
   },
-  badgeLabel: {
+  accountLabel: {
     color: 'var(--color-text-muted)',
-    textTransform: 'uppercase' as const,
-    letterSpacing: '0.08em',
     fontSize: '0.78rem',
     fontWeight: 800,
+    letterSpacing: '0.1em',
+    textTransform: 'uppercase' as const,
+  },
+  accountMeta: {
+    color: 'var(--color-primary)',
+    fontWeight: 700,
   },
   grid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-    gap: '18px',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+    gap: '16px',
   },
-  panel: {
+  card: {
     padding: '22px',
+    borderRadius: '28px',
+    backgroundColor: 'var(--color-surface-strong)',
+    boxShadow: 'var(--shadow-sm)',
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: '14px',
+  },
+  cardEyebrow: {
+    color: 'var(--color-accent)',
+    fontSize: '0.78rem',
+    fontWeight: 800,
+    letterSpacing: '0.12em',
+    textTransform: 'uppercase' as const,
+  },
+  cardTitle: {
+    fontSize: '1.35rem',
+  },
+  cardDescription: {
+    color: 'var(--color-text-muted)',
+    flex: 1,
+  },
+  cardLink: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '12px 16px',
+    borderRadius: '14px',
+    backgroundColor: 'var(--color-primary)',
+    color: '#ffffff',
+    fontWeight: 700,
+    textDecoration: 'none',
+  },
+  notesCard: {
+    padding: '24px',
     borderRadius: '28px',
     backgroundColor: 'var(--color-surface-strong)',
     boxShadow: 'var(--shadow-sm)',
@@ -265,69 +191,25 @@ const styles = {
     flexDirection: 'column' as const,
     gap: '16px',
   },
-  sectionEyebrow: {
-    color: 'var(--color-accent)',
-    fontSize: '0.78rem',
-    fontWeight: 800,
-    letterSpacing: '0.12em',
-    textTransform: 'uppercase' as const,
+  notesTitle: {
+    fontSize: '1.3rem',
   },
-  sectionTitle: {
-    fontSize: '1.35rem',
-  },
-  formGrid: {
+  notesGrid: {
     display: 'grid',
-    gap: '12px',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+    gap: '14px',
   },
-  field: {
+  noteBlock: {
+    padding: '16px',
+    borderRadius: '20px',
+    backgroundColor: '#f8fafc',
     display: 'flex',
     flexDirection: 'column' as const,
     gap: '8px',
-    fontWeight: 700,
   },
-  input: {
-    padding: '12px 14px',
-    borderRadius: '14px',
-    border: '1px solid var(--color-border)',
-    backgroundColor: '#ffffff',
-  },
-  summaryCard: {
-    padding: '16px',
-    borderRadius: '18px',
-    backgroundColor: '#f7f4eb',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  message: {
-    padding: '14px 16px',
-    borderRadius: '16px',
-    backgroundColor: '#effcf8',
-    color: 'var(--color-primary)',
-    fontWeight: 700,
-  },
-  primaryButton: {
-    padding: '12px 18px',
-    borderRadius: '14px',
-    backgroundColor: 'var(--color-primary)',
-    color: '#ffffff',
-    fontWeight: 700,
-  },
-  list: {
-    display: 'grid',
-    gap: '10px',
-  },
-  listCard: {
-    padding: '14px 16px',
-    borderRadius: '18px',
-    backgroundColor: '#f8fafc',
-    display: 'grid',
-    gap: '6px',
-  },
-  empty: {
-    padding: '20px',
-    borderRadius: '18px',
-    backgroundColor: '#f8fafc',
+  noteText: {
     color: 'var(--color-text-muted)',
   },
 };
+
+export default ClerkPage;

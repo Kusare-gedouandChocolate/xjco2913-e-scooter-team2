@@ -2,12 +2,14 @@ package com.scooter.modules.walkin.dto;
 
 import com.scooter.modules.damage.entity.DamageLevel;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
 @Data
 public class WalkInReturnRequest {
 
     @NotNull(message = "Booking ID is required")
+    @Positive(message = "Booking ID must be a positive number")
     private Long bookingId;
 
     private Boolean damaged;

@@ -2,19 +2,19 @@ package com.scooter.modules.booking.dto;
 
 import lombok.Data;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
-
 @Data
 public class BookingResponse {
     private String bookingId;
     private String scooterId;
     private String scooterName;
+    private String scooterStatus;
+    private Integer scooterBatteryLevel;
     private String hireType;
+    private Integer durationHours;
     private String startTime;
     private String endTime;
+    private String pickedUpAt;
+    private String completedAt;
     private String status;
     private String totalCost;
     private String originalCost;
