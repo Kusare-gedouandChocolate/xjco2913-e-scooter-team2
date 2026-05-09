@@ -1,0 +1,67 @@
+@import 'leaflet/dist/leaflet.css';
+
+:root {
+  --color-primary: #0f766e;
+  --color-primary-hover: #115e59;
+  --color-primary-soft: #d7f3ee;
+  --color-accent: #e85d04;
+  --color-accent-hover: #c2410c;
+  --color-bg: #f6f4ee;
+  --color-bg-strong: #ebe6d7;
+  --color-surface: rgba(255, 255, 255, 0.9);
+  --color-surface-strong: #ffffff;
+  --color-text-main: #1f2937;
+  --color-text-muted: #5b6473;
+  --color-border: #e2e8f0;
+  --shadow-sm: 0 10px 30px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 18px 60px rgba(15, 23, 42, 0.1);
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  font-family: 'Bahnschrift', 'Trebuchet MS', 'Segoe UI', sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-text-main);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  background-image:
+    radial-gradient(circle at top left, rgba(15, 118, 110, 0.12), transparent 32%),
+    radial-gradient(circle at bottom right, rgba(232, 93, 4, 0.12), transparent 28%);
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+  border: none;
+  outline: none;
+}
+
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.16) !important;
+}
